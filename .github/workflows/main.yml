@@ -3,13 +3,12 @@ name: Build & Publish
 on:
   push:
     branches:
-      - "main"             # all branches
+      - "**"             # all branches
       - "!dependabot/**"      # exclude dependbot branches
   workflow_dispatch:      # Manually run the workflow
 
 jobs:
   next-build:
-    if: ${{ github.event_name == 'workflow_dispatch' }}       # Run only if triggered manually
     runs-on: ubuntu-latest
     container: node:lts          # Use node LTS container version, same as Dockerfile base image
     steps:
@@ -17,22 +16,9 @@ jobs:
         uses: actions/checkout@v2       # Checkout the code
       - run: npm ci            #install dependencies
       - run: npm run build
-        env:
-          NEXT_PUBLIC_FIREBASE_API_KEY: ${{secrets.NEXT_PUBLIC_FIREBASE_API_KEY}}
-          NEXT_PUBLIC_FIREBASE_APP_ID: ${{secrets.NEXT_PUBLIC_FIREBASE_APP_ID}}
-          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}}
-          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID}}
-          NEXT_PUBLIC_SENTRY_DSN: ${{secrets.NEXT_PUBLIC_SENTRY_DSN}}
-      - name: Upload Next build          # Upload the artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: build
-          path: |
-            .next
-            public
-          retention-days: 7         # artifact retention duration, can be upto 30 days
           
-  build_and_push:
+  build_and_push: #in making
+    if: ${{ github.event_name == 'workflow_dispatch' }}       # Run only if triggered manually
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo 
