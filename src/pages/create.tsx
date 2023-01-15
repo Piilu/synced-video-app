@@ -5,7 +5,6 @@ import { api } from "../utils/api";
 
 const Create: NextPage = () => {
     //const test = api.room.hello.useQuery({ text: "from tRPC" });
-
     const [name, setName] = useState<string>("");
     const handelRoomChange = () => {
         alert("Your name is " + name)
@@ -19,6 +18,11 @@ const Create: NextPage = () => {
             <Button onClick={() => { handelRoomChange() }}>Create</Button>
         </Container>
     )
+
+
+
 }
+
+
 
 export default Create
