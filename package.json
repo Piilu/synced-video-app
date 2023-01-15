@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "dev:ws": "tsx watch src/server/wsServer.ts --tsconfig tsconfig.server.json --respawn --transpile-only" ,
+    "dev:next": "next dev",
+    "dev": "run-p dev:*",
     "build": "next build",
-    "dev": "next dev",
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start"
@@ -26,15 +28,19 @@
     "@trpc/server": "^10.8.1",
     "next": "13.1.1",
     "next-auth": "^4.18.7",
+    "npm-run-all": "^4.1.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "superjson": "1.9.1",
+    "tsx": "^3.12.2",
+    "ws": "^8.12.0",
     "zod": "^3.20.2"
   },
   "devDependencies": {
     "@types/node": "^18.11.18",
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.10",
+    "@types/ws": "^8.5.4",
     "@typescript-eslint/eslint-plugin": "^5.47.1",
     "@typescript-eslint/parser": "^5.47.1",
     "eslint": "^8.30.0",

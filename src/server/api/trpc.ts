@@ -21,6 +21,7 @@ import { type Session } from "next-auth";
 
 import { getServerAuthSession } from "../auth";
 import { prisma } from "../db";
+import ws from "ws"
 
 type CreateContextOptions = {
   session: Session | null;
@@ -47,7 +48,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  * process every request that goes through your tRPC endpoint
  * @link https://trpc.io/docs/context
  */
-export const createTRPCContext = async (opts: CreateNextContextOptions) => {
+export const createTRPCContext = async (opts: CreateNextContextOptions | NodeHTTPCreateContextFnOptions<IncomingMessage, ws>,) => {
   const { req, res } = opts;
 
   // Get the session from the server using the unstable_getServerSession wrapper function
@@ -66,6 +67,8 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
  */
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
+import { IncomingMessage } from "http";
+import { NodeHTTPCreateContextFnOptions } from "@trpc/server/dist/adapters/node-http";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,

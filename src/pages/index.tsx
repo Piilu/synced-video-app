@@ -1,10 +1,8 @@
 import { type NextPage } from "next";
-import { api } from "../utils/api";
 import { Text, Container, Title, Anchor, Paper, Box, TextInput, Button } from "@mantine/core";
 import { useForm } from "@mantine/form";
 
 const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
   const form = useForm({
     initialValues: {
       email: '',
