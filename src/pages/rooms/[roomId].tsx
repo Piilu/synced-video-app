@@ -2,14 +2,17 @@ import { Button, Grid } from '@mantine/core';
 import { AspectRatio, MediaQuery, TextInput } from '@mantine/core';
 import { useRouter } from 'next/router'
 import { NextPage } from 'next/types';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Chat from '../../components/room/Chat';
+import { SendMessage, SendMessageTest } from '../../constants/schema';
 import { api } from '../../utils/api';
 
 
 const Room: NextPage = () => {
     const router = useRouter();
     const roomId = router.query.roomId as string;
+    const [messages, setMessages] = useState<SendMessageTest>();
+
     //#region TRPC queries
     const joinRoomWs = api.room.joinRoom.useMutation();
     //#endregion
@@ -21,14 +24,17 @@ const Room: NextPage = () => {
             console.log(data);
         },
         onError(err) {
-            console.log("smth went wrong", err)
+            console.log("smth went wrong", err) //maybe add logger or smth
         }
     })
     //#endregion
 
-    const sendData = () => {
-        joinRoomWs.mutate({ roomId: roomId, message: "Testing" })
+    //#region View functions
+    const sendMessage = () => {
+
     }
+    //#endregion    
+
     return (
         <Grid m={1} columns={18}>
             <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
@@ -36,7 +42,6 @@ const Room: NextPage = () => {
                     <AspectRatio ratio={16 / 9}>
                         <video width="100%" height="100%" controls />
                     </AspectRatio>
-                    <Button onClick={() => { sendData() }}></Button>
                 </Grid.Col>
             </MediaQuery>
             <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
@@ -48,7 +53,7 @@ const Room: NextPage = () => {
             </MediaQuery>
             <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
                 <Grid.Col pos="fixed" style={{ right: "0", width: "100%", height: "100%" }} span={4}>
-                    <Chat message='TestMessage' user='TestUser' />
+                    <Chat messages={[{message:"test",user:"Rainer"}]} />
                 </Grid.Col>
             </MediaQuery>
 

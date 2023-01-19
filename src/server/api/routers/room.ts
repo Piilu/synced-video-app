@@ -7,18 +7,19 @@ import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 
 export const roomRouter = createTRPCRouter({
   onJoinRoom: publicProcedure.input(z.object({ roomId: z.string().optional() })).subscription(({ input, ctx }) => {
-    console.log("Testing:" + ctx)
-    console.log(input)
     return observable<SendMessage>((emit) => {
-      const onAdd = (data: SendMessage) => {
-        if (input.roomId === data.roomId) {
+      //When user joins room (chat message)
+      const onJoinRoom = (data: SendMessage) => {
+        if (input.roomId === data.roomId) { //Send only in the current room
+          data.message = `User (name) joined`
           emit.next(data);
         }
       }
 
-      ctx.ee.on(Events.JOIN_ROOM, onAdd);
+      ctx.ee.on(Events.JOIN_ROOM, onJoinRoom);
       return () => {
-        ctx.ee.off(Events.JOIN_ROOM, onAdd)
+        ctx.ee.off(Events.JOIN_ROOM, onJoinRoom)
+        //Here I can add logic for leaving room
       }
     })
   }),

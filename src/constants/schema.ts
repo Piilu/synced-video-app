@@ -5,6 +5,11 @@ const sendMessageSchema = z.object({
     message: z.string(),
 });
 
+const sendMessageSchemaTest = z.object({
+    user: z.string(),
+    message: z.string(),
+});
+
 const messageSchema = z.object({
     id: z.string(),
     message: z.string(),
@@ -17,6 +22,7 @@ const messageSchema = z.object({
 
 export type Message = z.TypeOf<typeof messageSchema>;
 export type SendMessage = z.TypeOf<typeof sendMessageSchema>;
+export type SendMessageTest = z.TypeOf<typeof sendMessageSchemaTest>;
 
 
 export const messageSubSchema = z.object({
