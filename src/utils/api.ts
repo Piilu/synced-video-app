@@ -18,21 +18,21 @@ const getBaseUrl = () => {
   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
 
-const getEndingLink = () => {
-  if (typeof window == "undefined") {
-    return httpBatchLink({
-      url: `${getBaseUrl()}/api/trpc`,
-    });
-  }
+// const getEndingLink = () => {
+//   if (typeof window == "undefined") {
+//     return httpBatchLink({
+//       url: `${getBaseUrl()}/api/trpc`,
+//     });
+//   }
 
-  const client = createWSClient({
-    url: process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:3001",
-  });
+//   const client = createWSClient({
+//     url: process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:3001",
+//   });
 
-  return wsLink({
-    client
-  })
-}
+//   return wsLink({
+//     client
+//   })
+// }
 
 /**
  * A set of typesafe react-query hooks for your tRPC API
@@ -56,7 +56,7 @@ export const api = createTRPCNext<AppRouter>({
             process.env.NODE_ENV === "development" ||
             (opts.direction === "down" && opts.result instanceof Error),
         }),
-        getEndingLink(),
+        // getEndingLink(),
       ],
       headers() {
         if (ctx?.req) {
