@@ -8,7 +8,7 @@ import { SendMessage, SendMessageTest, Color } from '../../constants/schema';
 import { api } from '../../utils/api';
 import { IconCheck, IconLink, IconMessage, IconMessageCircle, IconSettings } from '@tabler/icons'
 import { slideLeft } from '../../styles/transitions';
-import io, { Socket, SocketOptions } from 'Socket.IO-client'
+import io, { Socket, SocketOptions } from 'socket.io-client'
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 import { Events } from '../../constants/events';
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
