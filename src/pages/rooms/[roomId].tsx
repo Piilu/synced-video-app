@@ -16,20 +16,12 @@ let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 const Room: NextPage = () => {
     const router = useRouter();
     const roomId = router.query.roomId as string;
-    // const [messages, setMessages] = useState<[SendMessageTest]>();
     const [chatOpen, setChatOpen] = useState<string>("flex");
-    // const [bgColor, setBgColor] = useState<Color>("#000000");
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
 
     useEffect(() => {
-        void socketInitializer()
-    }, [])
-
-
-    const socketInitializer = async () => {
-        await fetch('/api/socket/socket')
+        void fetch('/api/socket/socket')
         socket = io()
-
         socket.on('connect', () => {
             console.log('connected')
         })
@@ -37,7 +29,11 @@ const Room: NextPage = () => {
         socket.on(Events.SEND_MESSAGE_UPDATE, msg => {
             console.log(msg);
         })
-    }
+        return () => {
+            socket.off(Events.SEND_MESSAGE_UPDATE);
+            socket.off('pong');
+        };
+    }, [])
 
     const sendMessageWs = (message: SendMessageTest) => {
         socket.emit(Events.SEND_MESSAGE, message)
