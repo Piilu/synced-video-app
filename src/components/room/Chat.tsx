@@ -21,8 +21,8 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
     const [message, setMessage] = useState<string>("");
     const [name, setName] = useState<string>("");
     const { colorScheme, toggleColorScheme } = useMantineColorScheme();
-    const inputRef = useRef<HTMLTextAreaElement>(null)
     const dark = colorScheme === 'dark';
+
     const sendMessage = () => {
         if (message.trim() == "") return;
         if (name.trim() == "") {
@@ -34,23 +34,17 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
             })
             return;
         }
-        // const prevMessages = messages;
-        // prevMessages?.unshift({ message: message, user: "Rainer", roomId: roomId })
-        // setMessages(prevMessages != null ? prevMessages : [{ message: message, user: "Rainer", roomId: roomId }])
         sendMessageWs({ message: message, user: name, roomId })
         setMessage("");
     }
 
-    //#region handeling textarea keyboard 
-    useWindowEvent('keydown', (event) => {
+    const keyboardSend = (event: React.KeyboardEvent) => {
         if (event.code == "Enter" && (event.shiftKey) || event.code == "NumpadEnter" && (event.shiftKey)) return;
         if (event.code === 'Enter' || event.code == "NumpadEnter") {
             event.preventDefault();
             sendMessage();
         }
-    });
-    //#endregion
-
+    }
 
     return (
         <Paper style={{ ...styles, maxWidth: "25em", minWidth: "25em", height: "100%", margin: 0, gap: "", flexDirection: "column", alignItems: "flex-start" }} shadow="xs" mt={5} radius="xs" withBorder>
@@ -61,7 +55,7 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
                         <IconArrowBarRight size={29} />
                     </ActionIcon>
                 </Tooltip>
-                <div style={{ marginLeft: "auto",marginRight:"1em" }}>
+                <div style={{ marginLeft: "auto", marginRight: "1em" }}>
                     <TextInput value={name} onChange={e => setName(e.target.value)} placeholder='Placeholder name ...' />
                 </div>
                 <ActionIcon
@@ -91,7 +85,7 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
             </Flex>
 
             <Box style={{ width: "100%", marginTop: "auto", padding: "0 1em 1em" }}>
-                <Flex align="center" direction="row">
+                <Flex gap={8} direction="column">
                     <Textarea
                         value={message}
                         onChange={e => setMessage(e.currentTarget.value)}
@@ -103,8 +97,12 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
                         size="md"
                         minRows={2}
                         maxRows={2}
-                        ref={inputRef}
+                        onKeyDown={(event) => { keyboardSend(event) }}
                     />
+                    <Flex direction="row">
+                        {/* <div>Possible things here</div> */}
+                        <Button onClick={sendMessage} size='xs' style={{ marginLeft: "auto" }}>Send</Button>
+                    </Flex>
                 </Flex>
             </Box>
 
