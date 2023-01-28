@@ -1,10 +1,10 @@
 import { Events } from "../../constants/events";
-import { SendMessage } from "../../constants/schema";
+import type { SendMessageTest } from "../../constants/schema";
 
-export default (io: any, socket:any) => {
-    const sendMessage = (msg: SendMessage) => {
-        socket.broadcast.emit(Events.ON_SOCKET_TEST, msg)
+export default (io: any, socket: any) => {
+    const sendMessage = (msg: SendMessageTest) => {
+        socket.broadcast.emit(Events.SEND_MESSAGE_UPDATE, msg)
     };
-    socket.on(Events.SOCKET_TEST, sendMessage)
+    socket.on(Events.SEND_MESSAGE, sendMessage)
 };
 

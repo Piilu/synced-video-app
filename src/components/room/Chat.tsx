@@ -1,19 +1,22 @@
-import React, { FunctionComponent, useState, useRef } from 'react'
-import { Paper, Text, Box, Textarea, Flex, ScrollArea, Divider, Button, ActionIcon, Tooltip } from '@mantine/core'
+import type { FunctionComponent } from 'react';
+import React, { useState, useRef } from 'react'
+import { Paper, Box, Textarea, Flex, Divider, Button, ActionIcon, Tooltip } from '@mantine/core'
 import { IconArrowBarRight } from '@tabler/icons'
-import { SendMessage, SendMessageTest } from '../../constants/schema';
+import type { SendMessageTest } from '../../constants/schema';
 import MessageChip from './MessageChip';
 import { useWindowEvent } from '@mantine/hooks';
+
 type ChatProps = {
     messages: [SendMessageTest];
     chatOpen: string;
     styles: React.CSSProperties;
     setChatOpen: React.Dispatch<React.SetStateAction<string>>;
+    sendMessageWs: (message: SendMessageTest) => void
 }
 
 const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
-    const { styles, chatOpen, setChatOpen } = props;
-    const [messages, setMessages] = useState<[SendMessageTest]>([{ message: "", user: "" }]);
+    const { styles, chatOpen, setChatOpen, sendMessageWs } = props;
+    const [messages, setMessages] = useState<[SendMessageTest] | null>(null);
     const [message, setMessage] = useState<string>("");
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -22,7 +25,8 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
 
         const prevMessages = messages;
         prevMessages?.unshift({ message: message, user: "Rainer" })
-        setMessages(prevMessages)
+        setMessages(prevMessages != null ? prevMessages : [{ message: message, user: "Rainer" }])
+        sendMessageWs({message:message,user:"Rainer"})
         setMessage("");
     }
 
@@ -56,24 +60,6 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
                         <MessageChip key={Math.floor(Math.random() * 100000)} user={message.user} message={message.message} />
                     );
                 })}
-                {/* <MessageChip user='Rainer' message='testing1' />
-                <MessageChip user='Rainer' message='testing' />
-                <MessageChip user='Rainer' message='testing' />
-                <MessageChip user='Rainer' message='testing' />
-                <MessageChip user='Rainer' message='testing' />
-                <MessageChip user='Rainer' message='testing' />
-                <MessageChip user='Rainer' message='testing' />
-                <MessageChip user='Rainer' message='testing' />
-                <MessageChip user='Rainer' message='testing' />
-                <MessageChip user='Rainer' message='testing' />
-                <MessageChip user='Rainer' message='testing' />
-                <MessageChip user='Rainer' message='testing' />
-                <MessageChip user='Rainer' message='testing' />
-                <MessageChip user='Rainer' message='testing' />
-                <MessageChip user='Rainer' message='testing' />
-                <MessageChip user='Rainer' message='testingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtesting' />
-                <MessageChip user='Rainer' message='testingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtesting' />
-                <MessageChip user='Rainer' message='testingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtestingtesting' /> */}
             </Flex>
 
             <Box style={{ width: "100%", marginTop: "auto", padding: "0 1em 1em" }}>

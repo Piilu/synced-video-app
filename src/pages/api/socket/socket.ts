@@ -1,5 +1,4 @@
 import { Server } from "socket.io"
-import { Events } from '../../../constants/events'
 import messageHandler from '../../../utils/sockets/messageHandler'
 
 const SocketHandler = (req: any, res: any) => {
