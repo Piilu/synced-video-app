@@ -18,27 +18,57 @@ const Room: NextPage = () => {
     const roomId = router.query.roomId as string;
     const [chatOpen, setChatOpen] = useState<string>("flex");
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
+    const [messages, setMessages] = useState<[SendMessageTest] | []>([]);
 
     useEffect(() => {
         void fetch('/api/socket/socket')
         socket = io()
-        socket.on('connect', () => {
-            console.log('connected')
+
+        socket.on(Events.JOIN_ROOM_UPDATE, data => {
+            console.log('connected ' + data.roomId)
         })
 
         socket.on(Events.SEND_MESSAGE_UPDATE, msg => {
             console.log(msg);
+            sendMessage(msg)
         })
+
+        socket.on(Events.LEAVE_ROOM, msg => {
+            console.log(msg);
+        })
+     
         return () => {
             socket.off(Events.SEND_MESSAGE_UPDATE);
-            socket.off('pong');
+            socket.off(Events.JOIN_ROOM_UPDATE);
+            socket.off(Events.LEAVE_ROOM_UPDATE);
         };
     }, [])
 
+    useEffect(() => {
+        let data: SendMessageTest;
+        if (roomId !== undefined) {
+            data = { message: "Test", user: "Rainer", roomId: roomId }
+            socket.emit(Events.JOIN_ROOM, data)
+        }
+      
+    }, [roomId])
+
     const sendMessageWs = (message: SendMessageTest) => {
         socket.emit(Events.SEND_MESSAGE, message)
+        sendMessage(message);
     }
 
+    const sendMessage = (message: SendMessageTest) => {
+        if (message.message.trim() == "") return;
+
+        // const prevMessages = messages;
+        // prevMessages?.unshift({ message: message.message, user: "Rainer", roomId: roomId })
+        setMessages((currentMsg) => [
+            { user: message.user, message: message.message, roomId: roomId }, ...currentMsg
+        ]); // find a way to fix the type safety
+
+        // sendMessageWs({ message: message, user: "Rainer", roomId })
+    }
     //#region TRPC queries
     //#endregion
 
@@ -98,7 +128,7 @@ const Room: NextPage = () => {
                     : null}
                 <Transition mounted={chatOpen === "flex"} transition={slideLeft} duration={200} timingFunction="ease">
                     {(styles) => (
-                        <Chat styles={styles} chatOpen={chatOpen} sendMessageWs={sendMessageWs} setChatOpen={setChatOpen} messages={[{ message: "test", user: "Rainer" }]} />
+                        <Chat roomId={roomId} styles={styles} chatOpen={chatOpen} sendMessageWs={sendMessageWs} setChatOpen={setChatOpen} messages={messages} />
                     )}
                 </Transition>
             </Flex >

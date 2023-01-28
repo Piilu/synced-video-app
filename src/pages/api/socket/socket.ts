@@ -1,5 +1,6 @@
 import { Server } from "socket.io"
 import messageHandler from '../../../utils/sockets/messageHandler'
+import roomHandler from "../../../utils/sockets/roomHandler"
 
 const SocketHandler = (req: any, res: any) => {
     if (res.socket.server.io) {
@@ -10,7 +11,8 @@ const SocketHandler = (req: any, res: any) => {
         const io = new Server(res.socket.server)
         res.socket.server.io = io
         const onConnection = (socket: any) => {
-            messageHandler(io, socket);
+            // messageHandler(io, socket);
+            roomHandler(io, socket);
         };
 
         io.on('connection', onConnection)

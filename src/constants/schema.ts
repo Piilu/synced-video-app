@@ -6,6 +6,7 @@ const sendMessageSchema = z.object({
 });
 
 const sendMessageSchemaTest = z.object({
+    roomId:z.string(),
     user: z.string(),
     message: z.string(),
 });

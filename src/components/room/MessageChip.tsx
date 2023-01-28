@@ -24,8 +24,8 @@ const MessageChip: FunctionComponent<MessageChip> = (props) => {
         >
             <Flex direction="row">
                 <div style={{minWidth:"3em", maxHeight:"3em"}}>
-                    <Tooltip position='left' label="Rainer Piil">
-                        <Avatar radius="xl" size="md">RP</Avatar>
+                    <Tooltip position='left' label={user}>
+                        <Avatar radius="xl" size="md">{user.charAt(0)}</Avatar>
                     </Tooltip>
                 </div>
                 <div style={{marginTop:"auto",marginBottom:"auto"}}>{message}</div>

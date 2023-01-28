@@ -1,32 +1,43 @@
-import type { FunctionComponent } from 'react';
+import { FunctionComponent, useEffect } from 'react';
 import React, { useState, useRef } from 'react'
-import { Paper, Box, Textarea, Flex, Divider, Button, ActionIcon, Tooltip } from '@mantine/core'
-import { IconArrowBarRight } from '@tabler/icons'
+import { Paper, Box, Textarea, Flex, Divider, Button, ActionIcon, Tooltip, TextInput, useMantineColorScheme } from '@mantine/core'
+import { IconArrowBarRight, IconMoonStars, IconSearch, IconSun, IconX } from '@tabler/icons'
 import type { SendMessageTest } from '../../constants/schema';
 import MessageChip from './MessageChip';
 import { useWindowEvent } from '@mantine/hooks';
-
+import { showNotification } from '@mantine/notifications';
 type ChatProps = {
-    messages: [SendMessageTest];
+    messages: [SendMessageTest] | [];
     chatOpen: string;
     styles: React.CSSProperties;
+    roomId: string;
     setChatOpen: React.Dispatch<React.SetStateAction<string>>;
     sendMessageWs: (message: SendMessageTest) => void
 }
 
 const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
-    const { styles, chatOpen, setChatOpen, sendMessageWs } = props;
-    const [messages, setMessages] = useState<[SendMessageTest] | null>(null);
+    const { styles, chatOpen, setChatOpen, sendMessageWs, roomId, messages } = props;
+    // const [messages, setMessages] = useState<[SendMessageTest] | null>(null);
     const [message, setMessage] = useState<string>("");
+    const [name, setName] = useState<string>("");
+    const { colorScheme, toggleColorScheme } = useMantineColorScheme();
     const inputRef = useRef<HTMLTextAreaElement>(null)
-
+    const dark = colorScheme === 'dark';
     const sendMessage = () => {
         if (message.trim() == "") return;
-
-        const prevMessages = messages;
-        prevMessages?.unshift({ message: message, user: "Rainer" })
-        setMessages(prevMessages != null ? prevMessages : [{ message: message, user: "Rainer" }])
-        sendMessageWs({message:message,user:"Rainer"})
+        if (name.trim() == "") {
+            showNotification({
+                title: 'Name is required',
+                message: "Hey there, your don't have a name! 🤥",
+                icon: <IconX />,
+                color: "red",
+            })
+            return;
+        }
+        // const prevMessages = messages;
+        // prevMessages?.unshift({ message: message, user: "Rainer", roomId: roomId })
+        // setMessages(prevMessages != null ? prevMessages : [{ message: message, user: "Rainer", roomId: roomId }])
+        sendMessageWs({ message: message, user: name, roomId })
         setMessage("");
     }
 
@@ -43,23 +54,40 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
 
     return (
         <Paper style={{ ...styles, maxWidth: "25em", minWidth: "25em", height: "100%", margin: 0, gap: "", flexDirection: "column", alignItems: "flex-start" }} shadow="xs" mt={5} radius="xs" withBorder>
-            <div style={{ padding: "0.5em" }}>
+            {/* <p>{messages2!=null?messages2[0].message:"NULL"}</p> */}
+            <div style={{ padding: "0.5em", display: "flex", alignItems: "center", width: "100%" }}>
                 <Tooltip position='left' label="Close chat">
                     <ActionIcon size="md" radius="md" onClick={() => { chatOpen == "flex" ? setChatOpen("none") : setChatOpen("flex"); }}>
                         <IconArrowBarRight size={29} />
                     </ActionIcon>
                 </Tooltip>
+                <div style={{ marginLeft: "auto",marginRight:"1em" }}>
+                    <TextInput value={name} onChange={e => setName(e.target.value)} placeholder='Placeholder name ...' />
+                </div>
+                <ActionIcon
+                    variant="outline"
+                    color={dark ? 'yellow' : 'blue'}
+                    onClick={() => toggleColorScheme()}
+                    title="Toggle color scheme"
+                >
+                    {dark ? <IconSun size={18} /> : <IconMoonStars size={18} />}
+                </ActionIcon>
             </div>
             <Divider style={{ width: "100%", paddingBottom: "0" }} />
             <Flex style={{ height: "100%", width: "100%", overflow: "auto", padding: "1em" }}
                 align="flex"
                 direction="column-reverse"
                 wrap="nowrap">
-                {messages?.map(message => {
+                {messages.length !== 0 ? messages?.map(message => {
                     return (
                         <MessageChip key={Math.floor(Math.random() * 100000)} user={message.user} message={message.message} />
                     );
-                })}
+                }) :
+                    <div style={{ marginBottom: "auto", marginTop: "auto", textAlign: "center", opacity: 0.5 }}>
+                        <h4>No recent chat messages</h4>
+                        <IconSearch size={32} />
+                    </div>
+                }
             </Flex>
 
             <Box style={{ width: "100%", marginTop: "auto", padding: "0 1em 1em" }}>
@@ -77,7 +105,6 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
                         maxRows={2}
                         ref={inputRef}
                     />
-                    <Button size="md" radius="md" style={{ height: "4.5em" }}>Send</Button>
                 </Flex>
             </Box>
 
