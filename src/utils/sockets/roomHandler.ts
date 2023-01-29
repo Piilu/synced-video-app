@@ -1,5 +1,5 @@
 import { Events } from "../../constants/events";
-import type { SendMessageTest } from "../../constants/schema";
+import type { SendMessageTest, VideoAction } from "../../constants/schema";
 
 export default (io: any, socket: any) => {
     const joinRoom = (data: SendMessageTest) => {
@@ -18,10 +18,25 @@ export default (io: any, socket: any) => {
         socket.to(data.roomId).emit(Events.SEND_MESSAGE_UPDATE, data)
     };
 
+    const roomStartPlaying = (data: VideoAction) => {
+        socket.to(data.roomId).emit(Events.VIDEO_PLAY_UPDATE, data)
+    };
+
+    const roomStopPlaying = (data: VideoAction) => {
+        socket.to(data.roomId).emit(Events.VIDEO_PAUSE_UPDATE, data)
+    };
+
+    const roomSeek = (data: VideoAction) => {
+        socket.to(data.roomId).emit(Events.VIDEO_SEEK_UPDATE, data)
+    };
+
     socket.on(Events.SEND_MESSAGE, roomSendMessage)
 
     socket.on(Events.JOIN_ROOM, joinRoom)
     socket.on(Events.DISSCONNECT, leaveRoom)
     socket.on(Events.LEAVE_ROOM, leaveRoom)
+    socket.on(Events.VIDEO_PLAY, roomStartPlaying)
+    socket.on(Events.VIDEO_PAUSE, roomStopPlaying)
+    socket.on(Events.VIDEO_SEEK, roomSeek)
 };
 

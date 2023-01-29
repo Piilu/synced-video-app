@@ -1,14 +1,20 @@
-import z from "zod";
+import z from "zod"; //really don't need use this
 
-const sendMessageSchema = z.object({
+const sendMessageSchema = z.object({    
     roomId: z.string(),
     message: z.string(),
 });
 
 const sendMessageSchemaTest = z.object({
-    roomId:z.string(),
+    roomId: z.string(),
     user: z.string(),
     message: z.string(),
+});
+
+const videoAction = z.object({
+    time: z.number(),
+    roomId: z.string(),
+    type: z.string(),
 });
 
 const messageSchema = z.object({
@@ -24,6 +30,7 @@ const messageSchema = z.object({
 export type Message = z.TypeOf<typeof messageSchema>;
 export type SendMessage = z.TypeOf<typeof sendMessageSchema>;
 export type SendMessageTest = z.TypeOf<typeof sendMessageSchemaTest>;
+export type VideoAction = z.TypeOf<typeof videoAction>;
 
 //#region Types 
 type RGB = `rgb(${number}, ${number}, ${number})`;

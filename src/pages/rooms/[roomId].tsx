@@ -1,9 +1,9 @@
 import { ActionIcon, Button, Center, CopyButton, Drawer, Flex, Grid, Paper, Tooltip, Transition, useMantineColorScheme } from '@mantine/core';
 import { useRouter } from 'next/router'
 import type { NextPage } from 'next/types';
-import { SyntheticEvent, useEffect, useState } from 'react';
+import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import Chat from '../../components/room/Chat';
-import type { SendMessage, SendMessageTest } from '../../constants/schema';
+import type { SendMessage, SendMessageTest, VideoAction } from '../../constants/schema';
 // import { api } from '../../utils/api';
 import { IconCheck, IconLink, IconMessageCircle, IconSettings } from '@tabler/icons'
 import { slideLeft } from '../../styles/transitions';
@@ -19,8 +19,10 @@ const Room: NextPage = () => {
     const [chatOpen, setChatOpen] = useState<string>("flex");
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
     const [messages, setMessages] = useState<[SendMessageTest] | []>([]);
+    const [socketSend, setSocketSend] = useState<boolean>(true);
     const { colorScheme, toggleColorScheme } = useMantineColorScheme();
     const dark = colorScheme === 'dark';
+    const videoTag = useRef<HTMLVideoElement>(null)
 
     //#region TRPC queries
     //#endregion
@@ -40,14 +42,41 @@ const Room: NextPage = () => {
             sendMessage(msg)
         })
 
-        socket.on(Events.LEAVE_ROOM, msg => {
+        socket.on(Events.LEAVE_ROOM_UPDATE, msg => {
             console.log(msg);
+        })
+
+        socket.on(Events.VIDEO_PLAY_UPDATE, msg => {
+            console.log(msg);
+            setSocketSend(false)
+            videoTag.current?.play()
+            setSocketSend(false)
+            // @ts-ignore
+            videoTag.current.currentTime = msg.time
+        })
+        socket.on(Events.VIDEO_PAUSE_UPDATE, msg => {
+            console.log(msg);
+            setSocketSend(false)
+            videoTag.current?.pause()
+            setSocketSend(false)
+             // @ts-ignore
+             videoTag.current.currentTime = msg.time
+        })
+
+        socket.on(Events.VIDEO_SEEK_UPDATE, msg => {
+            console.log(msg);
+            setSocketSend(false)
+            // @ts-ignore
+            videoTag.current.currentTime = msg.time
         })
 
         return () => {
             socket.off(Events.SEND_MESSAGE_UPDATE);
             socket.off(Events.JOIN_ROOM_UPDATE);
             socket.off(Events.LEAVE_ROOM_UPDATE);
+            socket.off(Events.VIDEO_PLAY_UPDATE);
+            socket.off(Events.VIDEO_PAUSE_UPDATE);
+            socket.off(Events.VIDEO_SEEK_UPDATE);
         };
     }, [])
     //#endregion
@@ -78,18 +107,35 @@ const Room: NextPage = () => {
 
     //#region For video actions
 
-    //!!!!!!!!!!!!Possible loop when user triggers onPlay... for all useres!!!!!!!!!
-    const videoPlay = (event:SyntheticEvent<HTMLVideoElement, Event>) => {
-        console.log("play")
-        console.log(event)
+    //!!!!!!!!!!!!Possible loop when user triggers onPlay... for all useres!!!!!!!!! <== Fixed??? maybe :) 
+    const videoPlay = (event: SyntheticEvent<HTMLVideoElement, Event>, send: Boolean) => {
+        const videoData: VideoAction = { roomId: roomId, time: event.currentTarget.currentTime, type: event.type }
+        console.log("TESTING SEND PLAY")
+        if (socketSend) {
+            console.log("SEND PLAY")
+            socket.emit(Events.VIDEO_PLAY, videoData)
+        }
+        setSocketSend(true)
     }
 
-    const videoPause = (event:SyntheticEvent<HTMLVideoElement, Event>) => {
-        console.log("pause")
+    const videoPause = (event: SyntheticEvent<HTMLVideoElement, Event>, send: Boolean) => {
+        const videoData: VideoAction = { roomId: roomId, time: event.currentTarget.currentTime, type: event.type }
+        console.log("TESTING SEND PAUSE")
+        if (socketSend) {
+            console.log("SEND PAUSE")
+            socket.emit(Events.VIDEO_PAUSE, videoData)
+        }
+        setSocketSend(true)
     }
 
-    const videoSeek = (event: SyntheticEvent<HTMLVideoElement, Event>) => { //maybe seeking??
-        console.log("seek")
+    const videoSeek = (event: SyntheticEvent<HTMLVideoElement, Event>, send: Boolean) => { //maybe seeking??
+        const videoData: VideoAction = { roomId: roomId, time: event.currentTarget.currentTime, type: event.type }
+        console.log("TESTING SEND SEEK")
+        if (socketSend) {
+            console.log("SEND SEEK")
+            socket.emit(Events.VIDEO_SEEK, videoData)
+        }
+        setSocketSend(true)
     }
 
     //#endregion
@@ -109,7 +155,7 @@ const Room: NextPage = () => {
 
             <Flex style={{ backgroundColor: "black", width: "100%", height: "100%" }} direction="row" justify={"flex-end"}>
                 <Center style={{ width: "100%", height: "100%" }}>
-                    <video onPlay={(event)=>{videoPlay(event)}} onSeeking={(event) => { videoSeek(event) }} src='http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4' width="100%" height="100%" controls />
+                    <video muted={true} ref={videoTag} onPause={event => { videoPause(event, socketSend) }} onPlay={(event) => { videoPlay(event, socketSend) }} onSeeked={(event) => { videoSeek(event, socketSend) }} src='http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4' width="100%" height="100%" controls />
                 </Center>
 
                 {chatOpen != "flex" ?
