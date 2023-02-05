@@ -1,12 +1,8 @@
-import { observable } from "@trpc/server/observable";
-import { EventEmitter } from "events";
 import { z } from "zod";
-import { Events } from "../../../constants/events";
-import { SendMessage } from "../../../constants/schema";
+
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 
-export const roomRouter = createTRPCRouter({
-  //T3 example 
+export const exampleRouter = createTRPCRouter({
   hello: publicProcedure
     .input(z.object({ text: z.string() }))
     .query(({ input }) => {
@@ -19,7 +15,7 @@ export const roomRouter = createTRPCRouter({
     return ctx.prisma.example.findMany();
   }),
 
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
+  getSecretMessage: protectedProcedure.query(({ctx}) => {
+    return "you can now see this secret message!"+ctx.session.user.name;
   }),
-})
+});
