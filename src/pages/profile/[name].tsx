@@ -1,6 +1,7 @@
 import { ActionIcon, Avatar, Container, Flex, Group, Paper, Tabs, useMantineColorScheme } from '@mantine/core';
 import { User } from '@prisma/client';
 import { IconMessageCircle, IconMoonStars, IconPhoto, IconSettings, IconSun } from '@tabler/icons';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react'
 import ProfileCard from '../../components/profile/ProfileCard';
@@ -26,7 +27,7 @@ type profileType = {
     profileUser: User
 }
 
-const Profile = (props: profileType) => {
+const Profile: NextPage<profileType> = (props: profileType) => {
     const { profileUser } = props
     return (
         <>
