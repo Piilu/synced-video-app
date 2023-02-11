@@ -6,19 +6,22 @@ import type { SendMessageTest } from '../../constants/schema';
 import MessageChip from './MessageChip';
 import { useWindowEvent } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
+import { User } from '@prisma/client';
+import ToggleTheme from '../custom/ToggleTheme';
 type ChatProps = {
     messages: SendMessageTest[] | [];
     chatOpen: string;
     styles: React.CSSProperties;
     roomId: string;
+    user: User | undefined;
     setChatOpen: React.Dispatch<React.SetStateAction<string>>;
     sendMessageWs: (message: SendMessageTest) => void
 }
 
 const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
-    const { styles, chatOpen, setChatOpen, sendMessageWs, roomId, messages } = props;
+    const { styles, chatOpen, setChatOpen, sendMessageWs, roomId, messages, user } = props;
     const [message, setMessage] = useState<string>("");
-    const [name, setName] = useState<string>("");
+    const [name, setName] = useState<string>(user !== undefined ? user.name as string : "");
     const { colorScheme, toggleColorScheme } = useMantineColorScheme();
     const dark = colorScheme === 'dark';
 
@@ -57,14 +60,7 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
                 <div style={{ marginLeft: "auto", marginRight: "1em" }}>
                     <TextInput value={name} onChange={e => setName(e.target.value)} placeholder='Placeholder name ...' />
                 </div>
-                <ActionIcon
-                    variant="outline"
-                    color={dark ? 'yellow' : 'blue'}
-                    onClick={() => toggleColorScheme()}
-                    title="Toggle color scheme"
-                >
-                    {dark ? <IconSun size={18} /> : <IconMoonStars size={18} />}
-                </ActionIcon>
+                <ToggleTheme />
             </div>
             <Divider style={{ width: "100%", paddingBottom: "0" }} />
             <Flex style={{ height: "100%", width: "100%", overflow: "auto", padding: "1em" }}
