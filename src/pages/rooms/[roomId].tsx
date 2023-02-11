@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Center, CopyButton, Drawer, Flex, Grid, Paper, Tooltip, Transition, useMantineColorScheme } from '@mantine/core';
+import { ActionIcon, Button, Center, CopyButton, Drawer, Flex, Tooltip, Transition, useMantineColorScheme } from '@mantine/core';
 import { useRouter } from 'next/router'
 import type { NextPage } from 'next/types';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
@@ -18,7 +18,7 @@ const Room: NextPage = () => {
     const roomId = router.query.roomId as string;
     const [chatOpen, setChatOpen] = useState<string>("flex");
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
-    const [messages, setMessages] = useState<[SendMessageTest] | []>([]);
+    const [messages, setMessages] = useState<SendMessageTest[] | []>([]);
     const [socketSend, setSocketSend] = useState<boolean>(true);
     const { colorScheme, toggleColorScheme } = useMantineColorScheme();
     const dark = colorScheme === 'dark';
@@ -59,8 +59,8 @@ const Room: NextPage = () => {
             setSocketSend(false)
             videoTag.current?.pause()
             setSocketSend(false)
-             // @ts-ignore
-             videoTag.current.currentTime = msg.time
+            // @ts-ignore
+            videoTag.current.currentTime = msg.time
         })
 
         socket.on(Events.VIDEO_SEEK_UPDATE, msg => {
@@ -98,10 +98,10 @@ const Room: NextPage = () => {
 
     const sendMessage = (message: SendMessageTest) => {
         if (message.message.trim() == "") return;
-        // @ts-ignore // Ignore it for now idk if it fixes the build
+
         setMessages((currentMsg) => [
             { user: message.user, message: message.message, roomId: roomId }, ...currentMsg
-        ]); // find a way to fix the type safety 
+        ]);
     }
     //#endregion
 

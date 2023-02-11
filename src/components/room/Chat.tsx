@@ -7,7 +7,7 @@ import MessageChip from './MessageChip';
 import { useWindowEvent } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
 type ChatProps = {
-    messages: [SendMessageTest] | [];
+    messages: SendMessageTest[] | [];
     chatOpen: string;
     styles: React.CSSProperties;
     roomId: string;
@@ -17,7 +17,6 @@ type ChatProps = {
 
 const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
     const { styles, chatOpen, setChatOpen, sendMessageWs, roomId, messages } = props;
-    // const [messages, setMessages] = useState<[SendMessageTest] | null>(null);
     const [message, setMessage] = useState<string>("");
     const [name, setName] = useState<string>("");
     const { colorScheme, toggleColorScheme } = useMantineColorScheme();
@@ -100,7 +99,6 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
                         onKeyDown={(event) => { keyboardSend(event) }}
                     />
                     <Flex direction="row">
-                        {/* <div>Possible things here</div> */}
                         <Button onClick={sendMessage} size='xs' style={{ marginLeft: "auto" }}>Send</Button>
                     </Flex>
                 </Flex>
