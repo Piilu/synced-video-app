@@ -14,7 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2       # Checkout the code
       - run: npm ci            #install dependencies
-      - run: npm run build
+      - run: npm run build --debug
       - name: Cache
         uses: actions/cache@v3
         with:
