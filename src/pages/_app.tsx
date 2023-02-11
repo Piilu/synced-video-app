@@ -4,10 +4,7 @@ import { SessionProvider } from "next-auth/react";
 import { ColorSchemeProvider, MantineProvider } from '@mantine/core';
 import type { ColorScheme } from '@mantine/core';
 import { NotificationsProvider } from '@mantine/notifications';
-import { api } from "../utils/api";
-import { useEffect } from 'react';
 import "../styles/globals.css";
-import { useState } from "react";
 import { useLocalStorage, useMediaQuery } from "@mantine/hooks";
 
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -34,4 +31,4 @@ const MyApp: AppType<{ session: Session | null }> = ({
   );
 };
 
-export default api.withTRPC(MyApp);
+export default MyApp;
