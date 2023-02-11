@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Center, CopyButton, Drawer, Flex, Tooltip, Transition, useMantineColorScheme } from '@mantine/core';
+import { ActionIcon, Button, Center, Container, CopyButton, Drawer, Flex, Group, Tooltip, Transition, useMantineColorScheme } from '@mantine/core';
 import { useRouter } from 'next/router'
 import type { GetServerSideProps, NextPage } from 'next/types';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
@@ -9,18 +9,28 @@ import { slideLeft } from '../../styles/transitions';
 import type { Socket } from 'socket.io-client';
 import io from 'socket.io-client'
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
-import { Events } from '../../constants/events';
+import { Events, QueryParams } from '../../constants/events';
 import { getServerAuthSession } from '../../server/common/get-server-auth-session';
 import { useSession } from 'next-auth/react';
+import { useLocalStorage } from '@mantine/hooks';
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const session = await getServerAuthSession(ctx);
-    return {
-        props: { session },
-    };
-};
+    if (session) {
 
+        return {
+            props: { session },
+        };
+    }
+    return {
+
+        redirect: {
+            permanent: false,
+            destination: `/rooms/guest?${QueryParams.RETURN_URL}=${ctx.resolvedUrl}`,
+        },
+    }
+};
 
 const Room: NextPage = () => {
     const { data: session } = useSession();
@@ -30,12 +40,8 @@ const Room: NextPage = () => {
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
     const [messages, setMessages] = useState<SendMessageTest[] | []>([]);
     const [socketSend, setSocketSend] = useState<boolean>(true);
-    const { colorScheme, toggleColorScheme } = useMantineColorScheme();
-    const dark = colorScheme === 'dark';
+    const [guest, setGuest] = useLocalStorage({ key: 'guest', defaultValue: null });
     const videoTag = useRef<HTMLVideoElement>(null)
-    //#region TRPC queries
-    //#endregion
-
 
     //#region  SOCKET ON
     useEffect(() => {
@@ -96,8 +102,8 @@ const Room: NextPage = () => {
             data = { message: "Test", user: session.user.name as string, roomId: roomId }
             socket.emit(Events.JOIN_ROOM, data)
         }
-        else if (roomId !== undefined && session?.user === undefined) {
-            data = { message: "Test", user: "Guest", roomId: roomId }
+        else if (roomId !== undefined && session?.user === undefined && guest !== null) {
+            data = { message: "Test", user: guest, roomId: roomId }
             socket.emit(Events.JOIN_ROOM, data)
         }
     }, [roomId])
