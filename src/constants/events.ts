@@ -1,4 +1,4 @@
-export enum Events {
+enum Events {
   JOIN_ROOM = "JOIN_ROOM",
   JOIN_ROOM_UPDATE = "JOIN_ROOM_UPDATE",
   LEAVE_ROOM = "LEAVE_ROOM",
@@ -13,3 +13,8 @@ export enum Events {
   VIDEO_PAUSE = "VIDEO_PAUSE",
   VIDEO_PAUSE_UPDATE = "VIDEO_PAUSE_UPDATE",
 }
+
+enum QueryParams {
+  RETURN_URL = "returnUrl",
+}
+export { Events, QueryParams }

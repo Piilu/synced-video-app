@@ -20,7 +20,7 @@ const Home: NextPage = () => {
     console.log(form.values)
   }
   return (
-    <main style={{ display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "100vh" }}>
+    <main style={{ display: "flex", flexDirection: "column", justifyContent: "center", height:"100%"}}>
       <Container >
         <Paper style={{ padding: "2em"}} withBorder shadow="md" p={30} mt={30} radius="md">
           <div style={{ marginBottom: "1em" }}>
