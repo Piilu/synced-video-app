@@ -12,7 +12,7 @@ jobs:
     container: node:lts          # Use node LTS container version, same as Dockerfile base image
     steps:
       - name: Checkout
-        uses: actions/checkout@v2       # Checkout the code
+        uses: actions/checkout@v3       # Checkout the code
       - run: npm ci            #install dependencies
       - name: Cache
         uses: actions/cache@v3
