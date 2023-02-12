@@ -19,10 +19,11 @@ const ProfileCard: FunctionComponent<profileCardProps> = (props: profileCardProp
                 <ToggleTheme />
             </Group>
             <Group position='center' p="lg">
-                <Flex align="center" direction={"column"}>
-                    <Avatar radius="xl" size="xl" src={profileUser.image} />
+                <Flex gap={3} align="center" direction={"column"}>
+                    <Avatar radius="xl"  size="xl" src={profileUser.image} />
                     <h4 style={{ margin: 0 }}>{profileUser.name}</h4>
                     <small>{profileUser.email}</small>
+                    <small style={{ width: "50%", textAlign: "center" }}>Minim Lorem fugiat ad non excepteur elit enim voluptate exercitation proident cupidatat dolor.</small>
                 </Flex>
             </Group>
         </Paper>

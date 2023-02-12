@@ -15,10 +15,16 @@ a {
 * {
   box-sizing: border-box;
 }
-#__next{
+
+#__next {
   height: 100%;
 }
 
-.border{
+.border {
   border: solid 1px red;
+}
+
+/* Hoping this doesn't brake/change in the future :) */
+.mantine-AppShell-body {
+  height: 100%;
 }

@@ -1,9 +1,7 @@
-import { ActionIcon, Avatar, Container, Flex, Group, Paper, Tabs, useMantineColorScheme } from '@mantine/core';
+import { AppShell, Container, Flex, Header, Navbar, Paper, Tabs } from '@mantine/core';
 import { User } from '@prisma/client';
-import { IconMessageCircle, IconMoonStars, IconPhoto, IconSettings, IconSun } from '@tabler/icons';
+import { IconMessageCircle, IconPhoto, IconSettings } from '@tabler/icons';
 import { NextPage } from 'next';
-import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react'
 import ProfileCard from '../../components/profile/ProfileCard';
 import { prisma } from "../../server/db/client"
 
@@ -34,7 +32,6 @@ const Profile: NextPage<profileType> = (props: profileType) => {
             <Container>
                 <Flex direction="column">
                     <ProfileCard profileUser={profileUser} />
-
                     <Paper shadow="sm" radius="lg" mt="lg" p="sm" >
                         <Tabs defaultValue="gallery">
                             <Tabs.List grow={true}>
@@ -61,10 +58,6 @@ const Profile: NextPage<profileType> = (props: profileType) => {
             </Container>
         </>
     )
-
-    //#region Not logged in
-
-    //#endregion
 }
 
 export default Profile

@@ -24,7 +24,7 @@ const Signup: NextPage = () => {
         console.log(form.values)
     }
     return (
-        <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "100vh" }}>
+        <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", height: "100%" }}>
             <Container>
 
                 <Paper withBorder shadow="md" p={30} mt={30} radius="md">

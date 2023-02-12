@@ -13,6 +13,7 @@ import { Events, QueryParams } from '../../constants/events';
 import { getServerAuthSession } from '../../server/common/get-server-auth-session';
 import { useSession } from 'next-auth/react';
 import { useLocalStorage } from '@mantine/hooks';
+import FloatingButtons from '../../components/room/FloatingButtons';
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -36,7 +37,7 @@ const Room: NextPage = () => {
     const { data: session } = useSession();
     const router = useRouter();
     const roomId = router.query.roomId as string;
-    const [chatOpen, setChatOpen] = useState<string>("flex");
+    const [chatOpen, setChatOpen] = useState<"flex" | "none">("flex");
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
     const [messages, setMessages] = useState<SendMessageTest[] | []>([]);
     const [socketSend, setSocketSend] = useState<boolean>(true);
@@ -172,40 +173,10 @@ const Room: NextPage = () => {
             </Drawer>
 
             <Flex style={{ backgroundColor: "black", width: "100%", height: "100%" }} direction="row" justify={"flex-end"}>
-                <Center style={{ width: "100%", height: "100%" }}>
+                <Center style={{ width: "100%", height: "100%", position: "relative" }}>
                     <video muted={true} ref={videoTag} onPause={event => { videoPause(event, socketSend) }} onPlay={(event) => { videoPlay(event, socketSend) }} onSeeked={(event) => { videoSeek(event, socketSend) }} src='http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4' width="100%" height="100%" controls />
+                    <FloatingButtons setSettingsOpen={setSettingsOpen} settingsOpen={settingsOpen} chatOpen={chatOpen} setChatOpen={setChatOpen} />
                 </Center>
-
-                {chatOpen != "flex" ?
-
-                    //Maybe make function that adds buttons based on json (different component)
-                    <Button.Group orientation="vertical" style={{ position: "absolute", right: 40, top: 40, gap: 2 }}>
-
-                        <Tooltip position='left' label="Open chat">
-                            <ActionIcon color="light" size="xl" radius="md" onClick={() => {
-                                chatOpen == "flex" ? setChatOpen("none") : setChatOpen("flex"); //function??
-                            }}>
-                                <IconMessageCircle size={29} />
-                            </ActionIcon>
-                        </Tooltip>
-                        <CopyButton value={window.location.href}>
-                            {({ copied, copy }) => (
-                                <Tooltip position='left' label={copied ? "Copied" : "Copy room link"}>
-                                    <ActionIcon color="light" size="xl" radius="md" onClick={copy}>
-                                        {copied ? <IconCheck size={29} /> : <IconLink size={29} />}
-                                    </ActionIcon>
-                                </Tooltip>
-                            )}
-                        </CopyButton>
-
-                        <Tooltip position='left' label="Settings">
-                            <ActionIcon color="light" size="xl" radius="md" onClick={() => { setSettingsOpen(true) }} >
-                                <IconSettings size={29} />
-                            </ActionIcon>
-                        </Tooltip>
-
-                    </Button.Group>
-                    : null}
                 <Transition mounted={chatOpen === "flex"} transition={slideLeft} duration={200} timingFunction="ease">
                     {(styles) => (
                         //@ts-ignore
