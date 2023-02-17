@@ -17,4 +17,9 @@ enum Events {
 enum QueryParams {
   RETURN_URL = "returnUrl",
 }
-export { Events, QueryParams }
+enum Brands {
+  DISCORD = "Discord",
+  GOOGLE = "Google",
+
+}
+export { Events, QueryParams, Brands }
