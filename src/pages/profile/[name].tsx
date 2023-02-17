@@ -5,7 +5,6 @@ import { NextPage } from 'next';
 import ProfileCard from '../../components/profile/ProfileCard';
 import { prisma } from "../../server/db/client"
 
-//@ts-ignore
 export const getServerSideProps = async (context) => { //fix type
     const getProfileName = context.params.name;
     const profileUser = await prisma.user.findFirst({
