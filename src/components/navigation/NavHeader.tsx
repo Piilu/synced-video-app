@@ -1,5 +1,6 @@
-import { Burger, Header, MediaQuery } from '@mantine/core'
+import { Burger, Group, Header, MediaQuery } from '@mantine/core'
 import React, { Dispatch, FunctionComponent, SetStateAction } from 'react'
+import ToggleTheme from '../custom/ToggleTheme';
 
 type NavHeaderProps = {
     opened: boolean;
@@ -21,6 +22,9 @@ const NavHeader: FunctionComponent<NavHeaderProps> = (props) => {
                 </MediaQuery>
 
                 <p>Application header</p>
+                <div style={{marginLeft:"auto"}}>
+                    <ToggleTheme />
+                </div>
             </div>
         </Header>
     )

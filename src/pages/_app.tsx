@@ -13,6 +13,7 @@ import AppSideNav from "../components/navigation/AppSideNav";
 import NavHeader from "../components/navigation/NavHeader";
 import { useEffect } from "react"
 import { useRouter } from "next/router";
+import { ModalsProvider } from "@mantine/modals";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -39,34 +40,35 @@ const MyApp: AppType<{ session: Session | null }> = ({
 
     <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
       <MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>
-        <NotificationsProvider position="bottom-left">
-          <SessionProvider session={session}>
-            <>
-              {/* Find A system to turn navbar off and on in every page  */}
-              <AppShell hidden={hideNav} style={{ height: "100%" }}
-                navbarOffsetBreakpoint="sm"
-                asideOffsetBreakpoint="sm"
-                navbar={
-                  <AppSideNav opened={opened} setOpened={setOpened} />
-                }
-                // aside={
-                //   <NavSideBar />
-                // }
-                // footer={
-                //   <NavFooter />
-                // }
-                header={
-                  <NavHeader opened={opened} setOpened={setOpened} />
-                }
-              >
-                {/* App content */}
-                <Component {...pageProps} />
-              </AppShell>
+        <SessionProvider session={session}>
+          <NotificationsProvider position="bottom-left">
+            <ModalsProvider>
+              <>
+                {/* Find A system to turn navbar off and on in every page  */}
+                <AppShell hidden={hideNav} style={{ height: "100%" }}
+                  navbarOffsetBreakpoint="sm"
+                  asideOffsetBreakpoint="sm"
+                  navbar={
+                    <AppSideNav opened={opened} setOpened={setOpened} />
+                  }
+                  // aside={
+                  //   <NavSideBar />
+                  // }
+                  // footer={
+                  //   <NavFooter />
+                  // }
+                  header={
+                    <NavHeader opened={opened} setOpened={setOpened} />
+                  }
+                >
+                  {/* App content */}
+                  <Component {...pageProps} />
+                </AppShell>
 
-            </>
-
-          </SessionProvider>
-        </NotificationsProvider>
+              </>
+            </ModalsProvider>
+          </NotificationsProvider>
+        </SessionProvider>
       </MantineProvider>
     </ColorSchemeProvider>
   );

@@ -67,7 +67,6 @@ const Room: NextPage = () => {
             setSocketSend(false)
             videoTag.current?.play()
             setSocketSend(false)
-            // @ts-ignore
             videoTag.current.currentTime = msg.time
         })
         socket.on(Events.VIDEO_PAUSE_UPDATE, msg => {
@@ -75,14 +74,12 @@ const Room: NextPage = () => {
             setSocketSend(false)
             videoTag.current?.pause()
             setSocketSend(false)
-            // @ts-ignore
             videoTag.current.currentTime = msg.time
         })
 
         socket.on(Events.VIDEO_SEEK_UPDATE, msg => {
             console.log(msg);
             setSocketSend(false)
-            // @ts-ignore
             videoTag.current.currentTime = msg.time
         })
 
