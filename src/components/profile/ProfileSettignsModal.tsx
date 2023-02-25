@@ -20,8 +20,9 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
 {
     const { profileUser, editProfile, setEditProfile } = props
     const { data: session } = useSession();
+    const [loading, setLoading] = useState<boolean>(false)
 
-    const profileFormData = useForm({
+    const form = useForm({
         initialValues: {
             email: profileUser.email as string,
             name: profileUser.name as string,
@@ -38,11 +39,11 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
     const handleProfileUpdate = async (): Promise<void> =>
     {
         let data: UserReqBody = {
-            name: profileFormData.values.name,
-            comment: profileFormData.values.comment,
+            name: form.values.name,
+            comment: form.values.comment,
             userId: session?.user?.id as string,
         }
-
+        setLoading(true);
         await axios.put(`${window.origin}${EndPoints.USER}`, data).then(res =>
         {
             let data: UserResBody = res.data;
@@ -54,12 +55,11 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
                     icon: <IconCheck />,
                     color: "green",
                 })
-                setEditProfile(false)
             }
             else
             {
                 showNotification({
-                    message: "Something went wrong when saveing(User)",
+                    message: data.errormsg,
                     icon: <IconX />,
                     color: "red",
                 })
@@ -72,25 +72,30 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
                 icon: <IconX />,
                 color: "red",
             })
+        }).finally(() =>
+        {
+            console.log("FINALLLY")
+            setLoading(false)
+            setEditProfile(false)
         })
 
     }
     return (
-        <Modal title="Profile settings" opened={editProfile} onClose={() => { setEditProfile(false); profileFormData.reset() }}>
-            <form onSubmit={profileFormData.onSubmit((values) => { handleProfileUpdate() })}>
+        <Modal title="Profile settings" opened={editProfile} onClose={() => { setEditProfile(false); form.reset() }}>
+            <form onSubmit={form.onSubmit((values) => { handleProfileUpdate() })}>
                 <Flex direction="column" gap={20}>
                     <Group grow>
-                        <TextInput title="Email cant't be changed" withAsterisk label="Email:" readOnly defaultValue={profileUser?.email as string} placeholder="Your email" {...profileFormData.getInputProps("email")} />
-                        <TextInput defaultValue={profileUser.name as string} withAsterisk label="Username:" placeholder="Your name" {...profileFormData.getInputProps("name")} />
+                        <TextInput title="Email cant't be changed" withAsterisk label="Email:" readOnly defaultValue={profileUser?.email as string} placeholder="Your email" {...form.getInputProps("email")} />
+                        <TextInput defaultValue={profileUser.name as string} withAsterisk label="Username:" placeholder="Your name" {...form.getInputProps("name")} />
                     </Group>
                     <Textarea
                         defaultValue={profileUser.bio as string}
                         placeholder="Your comment"
                         label="Your comment"
-                        {...profileFormData.getInputProps("comment")}
+                        {...form.getInputProps("comment")}
                     />
                 </Flex>
-                <Button type='submit' fullWidth mt="md">
+                <Button loading={loading} type='submit' fullWidth mt="md">
                     Save
                 </Button>
             </form>

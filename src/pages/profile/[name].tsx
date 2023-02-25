@@ -1,7 +1,7 @@
 import { ActionIcon, Avatar, Button, Center, Container, FileInput, Flex, Grid, Group, Modal, NativeSelect, Paper, SimpleGrid, Tabs, Text, Textarea, TextInput } from '@mantine/core';
 import { closeAllModals, openConfirmModal, openModal } from '@mantine/modals';
 import { Session, User } from '@prisma/client';
-import { IconCheck, IconEdit, IconMessageCircle, IconPhoto, IconSettings, IconUpload, IconX } from '@tabler/icons';
+import { IconCheck, IconDoor, IconEdit, IconMessageCircle, IconPhoto, IconSettings, IconUpload, IconX } from '@tabler/icons';
 import { GetServerSideProps, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import { ReactElement, RefAttributes, useRef, useState } from 'react';
@@ -18,6 +18,7 @@ import { profile } from 'console';
 import { UserReqBody, UserResBody } from '../api/profile/user';
 import { useRouter } from 'next/router';
 import ProfileSettignsModal from '../../components/profile/ProfileSettignsModal';
+import UploadVideoModal from '../../components/profile/UploadVideoModal';
 
 export const getServerSideProps: GetServerSideProps = async (ctx) =>
 {
@@ -52,6 +53,7 @@ const Profile: NextPage<profileType> = (props) =>
     const { profileUser, isUsersProfile } = props
     const [name, setName] = useState<string>();
     const [editProfile, setEditProfile] = useState<boolean>(false);
+    const [uploadVideo, setUploadVideo] = useState<boolean>(false);
     const router = useRouter();
 
     let testData =
@@ -98,35 +100,10 @@ const Profile: NextPage<profileType> = (props) =>
             },
         ]
 
-    const handleUploadVideo = () =>
-    {
-        openModal({
-            title: "Upload video",
-            centered: true,
-            size: "xl",
-            children: (
-                <>
-                    <Flex direction="column" rowGap={10}>
-                        <Group grow>
-                            <TextInput withAsterisk label="Video title" placeholder='Awesome movie' />
-                            <NativeSelect data={['Public', 'Private']} withAsterisk label="Visibility" />
-
-                        </Group>
-                        <FileInput label="Video" placeholder="Your video" icon={<IconUpload size={14} />} />
-                    </Flex>
-                    <Button fullWidth mt="md">
-                        Upload
-                    </Button>
-                </>
-            )
-        })
-    }
-
-
-    //Note: States not working in modalmanger
     return (
         <>
             <ProfileSettignsModal profileUser={profileUser} editProfile={editProfile} setEditProfile={setEditProfile} />
+            <UploadVideoModal profileUser={profileUser} uploadVideo={uploadVideo} setUploadVideo={setUploadVideo} />
             <Container>
                 <Flex direction="column">
 
@@ -161,7 +138,7 @@ const Profile: NextPage<profileType> = (props) =>
                         <Tabs.Panel value="videos" pt="xs">
                             {isUsersProfile ?
                                 <Group position='right' my={10}>
-                                    <Button color="teal" onClick={handleUploadVideo} size='xs' radius="md" leftIcon={<IconUpload size={18} />}>Upload video</Button>
+                                    <Button color="teal" onClick={() => { setUploadVideo(true) }} size='xs' radius="md" leftIcon={<IconUpload size={18} />}>Upload video</Button>
                                 </Group>
                                 : null}
                             <Flex direction="column" gap={20} mb={35}>
@@ -174,8 +151,11 @@ const Profile: NextPage<profileType> = (props) =>
                         </Tabs.Panel>
 
                         <Tabs.Panel value="rooms" pt="xs">
-                            {/*  */}
-
+                            {isUsersProfile ?
+                                <Group position='right' my={10}>
+                                    <Button color="teal" onClick={() => console.log("Testing")} size='xs' radius="md" leftIcon={<IconDoor size={18} />}>Create a new room</Button>
+                                </Group>
+                                : null}
                             <Grid gutter="md">
                                 {testData.length != 0 ? testData.map(room =>
                                 {

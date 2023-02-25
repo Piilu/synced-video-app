@@ -24,7 +24,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const method = req.method;
     const { name, comment, userId } = req.body as UserReqBody;
     const session = await getSession({ req });
-    //hopefully try/catch gets prisma errors as well :)
+    //#region Authorize
+    if (session?.user?.id != userId)
+    {
+        //Idk if it has to be here 
+        response.errormsg = "Not allowed"
+        response.success = false;
+        res.status(400).json(response);
+        return;
+    }
+
+    if (session == null)
+    {
+        response.errormsg = "Unauthorized"
+        response.success = false;
+        res.status(401).json(response)
+        return;
+    }
+    //#endregion
     try 
     {
         if (method == "PUT")
@@ -45,7 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return;
         }
     }
-    catch (err)
+    catch (err: any)
     {
         console.log(err)
         response.success = false;
