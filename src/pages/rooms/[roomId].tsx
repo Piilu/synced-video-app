@@ -9,7 +9,7 @@ import { slideLeft } from '../../styles/transitions';
 import type { Socket } from 'socket.io-client';
 import io from 'socket.io-client'
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
-import { Events, QueryParams } from '../../constants/events';
+import { Events, QueryParams } from '../../constants/GlobalTypes';
 import { getServerAuthSession } from '../../server/common/get-server-auth-session';
 import { useSession } from 'next-auth/react';
 import { useLocalStorage } from '@mantine/hooks';
@@ -176,9 +176,7 @@ const Room: NextPage = () => {
                 </Center>
                 <Transition mounted={chatOpen === "flex"} transition={slideLeft} duration={200} timingFunction="ease">
                     {(styles) => (
-                        //@ts-ignore
                         <Chat user={session?.user} roomId={roomId} styles={styles} chatOpen={chatOpen} sendMessageWs={sendMessageWs} setChatOpen={setChatOpen} messages={messages} />
-                        //Fix user type :)
                     )}
                 </Transition>
             </Flex >

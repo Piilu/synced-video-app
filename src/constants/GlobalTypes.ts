@@ -1,4 +1,5 @@
-enum Events {
+enum Events
+{
   JOIN_ROOM = "JOIN_ROOM",
   JOIN_ROOM_UPDATE = "JOIN_ROOM_UPDATE",
   LEAVE_ROOM = "LEAVE_ROOM",
@@ -14,12 +15,18 @@ enum Events {
   VIDEO_PAUSE_UPDATE = "VIDEO_PAUSE_UPDATE",
 }
 
-enum QueryParams {
+enum QueryParams
+{
   RETURN_URL = "returnUrl",
 }
-enum Brands {
+enum Brands
+{
   DISCORD = "Discord",
   GOOGLE = "Google",
 
 }
-export { Events, QueryParams, Brands }
+enum EndPoints
+{
+  USER = "/api/profile/user"
+}
+export { Events, QueryParams, Brands, EndPoints }

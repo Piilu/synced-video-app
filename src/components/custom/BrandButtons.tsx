@@ -1,7 +1,7 @@
 import { Button } from '@mantine/core'
 import { IconBrandDiscord } from '@tabler/icons'
 import React, { FunctionComponent } from 'react'
-import { Brands } from '../../constants/events'
+import { Brands } from '../../constants/GlobalTypes'
 
 type BrandButtonsProps = {
     brand: string;
@@ -24,9 +24,6 @@ const BrandButtons: FunctionComponent<BrandButtonsProps> = (props) => {
                         '&:hover': {
                             backgroundColor: theme.fn.darken('#00acee', 0.05),
                         },
-                    },
-                    leftIcon: {
-                        marginRight: 15,
                     },
                 })}
             >

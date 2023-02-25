@@ -1,7 +1,7 @@
 import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
-import { AppShell, Aside, Burger, ColorSchemeProvider, Footer, Header, MantineProvider, MediaQuery, Navbar } from '@mantine/core';
+import { AppShell, Aside, Burger, Center, ColorSchemeProvider, Footer, Group, Header, Loader, LoadingOverlay, MantineProvider, MediaQuery, Navbar } from '@mantine/core';
 import type { ColorScheme } from '@mantine/core';
 import { NotificationsProvider } from '@mantine/notifications';
 import "../styles/globals.css";
@@ -25,16 +25,20 @@ const MyApp: AppType<{ session: Session | null }> = ({
     setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
   const [opened, setOpened] = useState(false);
   const [hideNav, setHideNav] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
   //definitely temporary
   useEffect(() => {
-    if (router.pathname === "/signup" || router.pathname === "/") {
+    console.log(router.asPath)
+    if (router.asPath != "") setLoading(false)
+    if (router.pathname === "/") {
       setHideNav(true)
     }
     console.log(router.pathname)
   }, [])
 
+  if (loading) return null;
 
   return (
 

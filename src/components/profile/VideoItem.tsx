@@ -1,4 +1,4 @@
-import { ActionIcon, Box, Card, CardSection, Group, MediaQuery, Menu, Paper } from '@mantine/core'
+import { ActionIcon, Badge, Box, Card, CardSection, Chip, Group, MediaQuery, Menu, Paper } from '@mantine/core'
 import { IconDots, IconDownload, IconEye, IconEyeOff, IconFileZip, IconTrash, IconVideo } from '@tabler/icons'
 import React, { FunctionComponent } from 'react'
 
@@ -38,18 +38,16 @@ const VideoItem: FunctionComponent<VideoItemProps> = (props) => {
             <Card.Section py="xs" inheritPadding withBorder>
                 <MediaQuery largerThan="sm" styles={{ display: "none" }}>
                     <Group position='center'>
-                        <small><strong>Video lenght:</strong> 100min</small>
-                        <small><strong>Video lenght:</strong> 100min</small>
-                        <small><strong>Video lenght:</strong> 100min</small>
-                        <small><strong>Video lenght:</strong> 100min</small>
+                        <Badge><strong>Video lenght:</strong> 100min</Badge>
+                        <Badge><strong>Video lenght:</strong> 100min</Badge>
+                        <Badge><strong>Video lenght:</strong> 100min</Badge>
                     </Group>
                 </MediaQuery>
                 <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
                     <Group position='left'>
-                        <small><strong>Video lenght:</strong> 100min</small>
-                        <small><strong>Video lenght:</strong> 100min</small>
-                        <small><strong>Video lenght:</strong> 100min</small>
-                        <small><strong>Video lenght:</strong> 100min</small>
+                        <Badge><strong>Video lenght:</strong> 100min</Badge>
+                        <Badge><strong>Video lenght:</strong> 100min</Badge>
+                        <Badge><strong>Video lenght:</strong> 100min</Badge>
                     </Group>
                 </MediaQuery>
             </Card.Section>
