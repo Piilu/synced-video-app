@@ -18,7 +18,8 @@ import { ModalsProvider } from "@mantine/modals";
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
-}) => {
+}) =>
+{
   const deviceDefaultTheme = useMediaQuery('(prefers-color-scheme:dark)');
   const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>({ key: "color-scheme", defaultValue: "light" });
   const toggleColorScheme = (value?: ColorScheme) =>
@@ -29,10 +30,12 @@ const MyApp: AppType<{ session: Session | null }> = ({
   const router = useRouter();
 
   //definitely temporary
-  useEffect(() => {
+  useEffect(() =>
+  {
     console.log(router.asPath)
     if (router.asPath != "") setLoading(false)
-    if (router.pathname === "/") {
+    if (!session)
+    {
       setHideNav(true)
     }
     console.log(router.pathname)

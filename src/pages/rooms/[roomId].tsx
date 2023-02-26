@@ -9,7 +9,7 @@ import { slideLeft } from '../../styles/transitions';
 import type { Socket } from 'socket.io-client';
 import io from 'socket.io-client'
 import type { DefaultEventsMap } from '@socket.io/component-emitter';
-import { Events, QueryParams } from '../../constants/GlobalTypes';
+import { Events, QueryParams } from '../../constants/GlobalEnums';
 import { getServerAuthSession } from '../../server/common/get-server-auth-session';
 import { useSession } from 'next-auth/react';
 import { useLocalStorage } from '@mantine/hooks';

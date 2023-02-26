@@ -1,11 +1,14 @@
 import { createStyles } from '@mantine/core';
 import { User } from '@prisma/client'
 import { IconLogout } from '@tabler/icons';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import React, { FunctionComponent } from 'react'
+import Link from 'next/link'
+import { LinkTypes } from '../../../constants/GlobalEnums';
+import { LinkItemData } from '../../../constants/schema';
 
-
-const useStyles = createStyles((theme, _params, getRef) => {
+const useStyles = createStyles((theme, _params, getRef) =>
+{
     const icon = getRef('icon');
     return {
         header: {
@@ -61,35 +64,38 @@ const useStyles = createStyles((theme, _params, getRef) => {
 });
 
 type NavDefaultItemProps = {
-    user?: User | undefined,
-    item: any,
+    item: LinkItemData,
     path: string,
 }
-const NavDefaultItem: FunctionComponent<NavDefaultItemProps> = (props) => {
+const NavDefaultItem: FunctionComponent<NavDefaultItemProps> = (props) =>
+{
     const { item, path } = props;
     const { classes, cx } = useStyles();
+    const { data: session } = useSession();
+    const link = item.linkType != LinkTypes.PROFILE ? item.link : item.link.replace("{0}", session?.user?.name as string)
 
     return (
-        <a
-            className={cx(classes.link, { [classes.linkActive]: item.link === path })}
-            href={item.link}
+        <Link
+            className={cx(classes.link, { [classes.linkActive]: item.linkType === LinkTypes.DEFAULT ? link === path : link === path && link.includes(session?.user?.name as string) })}
+            href={link}
             key={item.label}
         >
             <item.icon className={classes.linkIcon} stroke={1.5} />
             <span>{item.label}</span>
-        </a>
+        </Link>
     )
 }
 
 
-const LogoutButton: FunctionComponent = (props) => {
+const LogoutButton: FunctionComponent = (props) =>
+{
     const { classes, cx } = useStyles();
 
     return (
-        <a href="#" className={classes.link} onClick={(event) => signOut({ callbackUrl: `${window.location.origin}` })}>
+        <Link href="#" className={classes.link} onClick={(event) => signOut({ callbackUrl: `${window.location.origin}` })}>
             <IconLogout className={classes.linkIcon} stroke={1.5} />
             <span>Logout</span>
-        </a>
+        </Link>
     )
 }
 

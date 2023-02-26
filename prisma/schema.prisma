@@ -54,6 +54,8 @@ model User {
     emailVerified DateTime?
     image         String?
     bio           String?
+    videos        Video[]
+    rooms         Room[]
     accounts      Account[]
     sessions      Session[]
 }
@@ -64,4 +66,26 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model Video {
+    id       Int     @id @default(autoincrement())
+    name     String  @db.VarChar(50)
+    isPublic Boolean
+    size     Bytes
+    location String  @db.VarChar(255)
+    room     Room[]
+    userId   String
+    user     User    @relation(fields: [userId], references: [id])
+}
+
+model Room {
+    id         Int     @id @default(autoincrement())
+    name       String  @db.VarChar(50)
+    isPublic   Boolean
+    coverImage String? @db.VarChar(255)
+    videoId    Int?
+    video      Video?  @relation(fields: [videoId], references: [id])
+    userId     String
+    user       User?   @relation(fields: [userId], references: [id])
 }

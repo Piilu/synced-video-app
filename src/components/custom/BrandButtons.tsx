@@ -1,7 +1,7 @@
 import { Button } from '@mantine/core'
 import { IconBrandDiscord } from '@tabler/icons'
 import React, { FunctionComponent } from 'react'
-import { Brands } from '../../constants/GlobalTypes'
+import { Brands } from '../../constants/GlobalEnums'
 
 type BrandButtonsProps = {
     brand: string;

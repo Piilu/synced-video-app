@@ -1,3 +1,5 @@
+import { TablerIcon } from "@tabler/icons"
+
 enum Events
 {
   JOIN_ROOM = "JOIN_ROOM",
@@ -19,14 +21,22 @@ enum QueryParams
 {
   RETURN_URL = "returnUrl",
 }
+
 enum Brands
 {
   DISCORD = "Discord",
   GOOGLE = "Google",
-
 }
+
+enum LinkTypes
+{
+  PROFILE = "PROFILE",
+  DEFAULT = "DEFAULT",
+}
+
 enum EndPoints
 {
-  USER = "/api/profile/user"
+  USER = "/api/profile/user",
+  ROOM = "/api/room"
 }
-export { Events, QueryParams, Brands, EndPoints }
+export { Events, QueryParams, Brands, EndPoints, LinkTypes }

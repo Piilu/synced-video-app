@@ -1,6 +1,8 @@
+import { TablerIcon } from "@tabler/icons";
 import z from "zod"; //really don't need use this
+import { LinkTypes } from "./GlobalEnums";
 
-const sendMessageSchema = z.object({    
+const sendMessageSchema = z.object({
     roomId: z.string(),
     message: z.string(),
 });
@@ -31,7 +33,12 @@ export type Message = z.TypeOf<typeof messageSchema>;
 export type SendMessage = z.TypeOf<typeof sendMessageSchema>;
 export type SendMessageTest = z.TypeOf<typeof sendMessageSchemaTest>;
 export type VideoAction = z.TypeOf<typeof videoAction>;
-
+export type LinkItemData = {
+    link: string,
+    label: string,
+    icon: TablerIcon,
+    linkType: LinkTypes,
+}
 //#region Types 
 type RGB = `rgb(${number}, ${number}, ${number})`;
 type RGBA = `rgba(${number}, ${number}, ${number}, ${number})`;

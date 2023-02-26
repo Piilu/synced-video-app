@@ -6,14 +6,14 @@ type Data = {
 
 export type UserResBody = {
     success: boolean,
-    name: string,
-    comment: string,
+    name: string | null | undefined,
+    comment: string | null | undefined,
     errormsg?: string,
 }
 
 export type UserReqBody = {
-    name: string,
-    comment: string,
+    name: string | null | undefined,
+    comment: string | null | undefined,
     userId: string,
 }
 
@@ -46,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     {
         if (method == "PUT")
         {
-            let result = await prisma?.user.updateMany({
+            const user = await prisma?.user.update({
                 where: {
                     id: userId,
                 },
@@ -55,8 +55,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     bio: comment,
                 }
             })
-            response.name = name;
-            response.comment = comment;
+            response.name = user?.name;
+            response.comment = user?.bio;
             response.success = true;
             res.status(200).json(response)
             return;

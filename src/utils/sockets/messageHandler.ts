@@ -1,4 +1,4 @@
-import { Events } from "../../constants/GlobalTypes";
+import { Events } from "../../constants/GlobalEnums";
 import type { SendMessageTest } from "../../constants/schema";
 
 export default (io: any, socket: any) => {

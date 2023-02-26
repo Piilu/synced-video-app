@@ -1,16 +1,108 @@
-import { ActionIcon, Button, Card, Group, Image, Menu } from '@mantine/core'
-import { IconDots, IconDownload, IconEyeOff, IconTrash } from '@tabler/icons'
-import React from 'react'
+import { ActionIcon, Button, Card, Group, Image, Menu, Text } from '@mantine/core'
+import { closeAllModals, openConfirmModal } from '@mantine/modals'
+import { showNotification } from '@mantine/notifications'
+import { Room } from '@prisma/client'
+import { IconCheck, IconDots, IconDownload, IconEyeOff, IconTrash, IconX } from '@tabler/icons'
+import axios from 'axios'
+import { useRouter } from 'next/router'
+import React, { useState, FunctionComponent } from 'react'
+import { EndPoints } from '../../constants/GlobalEnums'
+import { RoomPostReq, RoomPostRes } from '../../pages/api/room'
 
-const RoomItem = () => {
+type RoomItemProps = {
+    room: Room,
+    createdTime: string,
+    isUsersProfile: boolean,
+}
+
+
+
+const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
+{
+    const { room, createdTime, isUsersProfile } = props
+    const router = useRouter();
+    const confirmDelete = () =>
+    {
+        openConfirmModal({
+            title: `Delete room '${room.name}'`,
+            centered: true,
+            children: (
+                <Text size="sm">
+                    Are you sure you want to delete this room?
+                </Text>
+            ),
+            labels: { confirm: 'Delete', cancel: "No don't delete it" },
+            confirmProps: { color: 'red' },
+            onCancel: () => { return; },
+            onConfirm: () => handleRoomDelete(),
+        });
+    }
+    const handleRoomDelete = async () =>
+    {
+        //only needs one 
+        let data: RoomPostReq =
+        {
+            id: room.id,
+            isPublic: room.isPublic,
+            name: room.name,
+        }
+        await axios.delete(`${window.origin}${EndPoints.ROOM}`, { data: data }).then(res =>
+        {
+            let newData = res.data as RoomPostRes;
+            if (newData.success)
+            {
+                router.push({
+                    pathname: router.asPath,
+                }, undefined, { scroll: false })
+                showNotification({
+                    message: `Room '${newData.name}' Deleted`,
+                    icon: <IconCheck />,
+                    color: "green",
+                })
+            }
+            else
+            {
+                showNotification({
+                    message: newData.errorMessage,
+                    icon: <IconX />,
+                    color: "red",
+                })
+            }
+        }).catch(err =>
+        {
+            showNotification({
+                message: err.message,
+                icon: <IconX />,
+                color: "red",
+            })
+        })
+    }
+
     return (
         <Card shadow="sm" radius="md">
             <Card.Section withBorder inheritPadding>
                 <Group position="apart" py="xs">
                     <div>
-                        <p style={{ margin: 0 }}>Room name</p>
-                        <small>Date time</small>
+                        <p style={{ margin: 0 }}>{room.name}</p>
+                        <small>{createdTime}</small>
                     </div>
+                    {isUsersProfile ?
+                        <Menu withinPortal position="bottom-end" shadow="sm">
+                            <Menu.Target>
+                                <ActionIcon>
+                                    <IconDots size={16} />
+                                </ActionIcon>
+                            </Menu.Target>
+
+                            <Menu.Dropdown>
+                                <Menu.Item icon={<IconDownload size={14} />}>Download</Menu.Item>
+                                <Menu.Item icon={<IconEyeOff size={14} />}>Mark as private</Menu.Item>
+                                <Menu.Item onClick={confirmDelete} icon={<IconTrash size={14} />} color="red">
+                                    Delete
+                                </Menu.Item>
+                            </Menu.Dropdown>
+                        </Menu>
+                        : null}
                 </Group>
             </Card.Section>
             <Card.Section>

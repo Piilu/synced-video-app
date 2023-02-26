@@ -1,6 +1,6 @@
 import { Button, FileInput, Flex, Group, Modal, NativeSelect, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { User } from '@prisma/client';
+import { Room, User, Video } from '@prisma/client';
 import { IconUpload } from '@tabler/icons';
 import { useSession } from 'next-auth/react';
 import React, { useState, FunctionComponent, SetStateAction, Dispatch } from 'react'
@@ -8,7 +8,10 @@ import React, { useState, FunctionComponent, SetStateAction, Dispatch } from 're
 type UploadVideoModalProps = {
     uploadVideo: boolean,
     setUploadVideo: Dispatch<SetStateAction<boolean>>
-    profileUser: User,
+    profileUser: (User & {
+        videos: Video[];
+        rooms: Room[];
+    }) | null;
 }
 const UploadVideoModal: FunctionComponent<UploadVideoModalProps> = (props) =>
 {
@@ -38,7 +41,7 @@ const UploadVideoModal: FunctionComponent<UploadVideoModalProps> = (props) =>
         console.log("VALIDATE HERE")
         return true;
     }
-    
+
     return (
         <Modal title="Upload settings" opened={uploadVideo} onClose={() => { setUploadVideo(false); form.reset() }}>
             <form onSubmit={form.onSubmit((values) => { handleUploadVideo() })}>
