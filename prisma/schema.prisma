@@ -14,12 +14,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Example {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-}
-
 // Necessary for Next auth
 model Account {
     id                String  @id @default(cuid())
@@ -54,6 +48,8 @@ model User {
     emailVerified DateTime?
     image         String?
     bio           String?
+    createdAt     DateTime  @default(now()) @map(name: "created_at")
+    updatedAt     DateTime  @updatedAt @map(name: "updated_at")
     videos        Video[]
     rooms         Room[]
     accounts      Account[]
@@ -69,23 +65,27 @@ model VerificationToken {
 }
 
 model Video {
-    id       Int     @id @default(autoincrement())
-    name     String  @db.VarChar(50)
-    isPublic Boolean
-    size     Bytes
-    location String  @db.VarChar(255)
-    room     Room[]
-    userId   String
-    user     User    @relation(fields: [userId], references: [id])
+    id        Int      @id @default(autoincrement())
+    name      String   @db.VarChar(50)
+    isPublic  Boolean
+    size      Bytes
+    location  String   @db.VarChar(255)
+    room      Room[]
+    userId    String
+    user      User     @relation(fields: [userId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model Room {
-    id         Int     @id @default(autoincrement())
-    name       String  @db.VarChar(50)
+    id         Int      @id @default(autoincrement())
+    name       String   @db.VarChar(50)
     isPublic   Boolean
-    coverImage String? @db.VarChar(255)
+    coverImage String?  @db.VarChar(255)
     videoId    Int?
-    video      Video?  @relation(fields: [videoId], references: [id])
+    video      Video?   @relation(fields: [videoId], references: [id])
     userId     String
-    user       User?   @relation(fields: [userId], references: [id])
+    user       User?    @relation(fields: [userId], references: [id])
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
 }
