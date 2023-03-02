@@ -2,7 +2,7 @@ import { ActionIcon, Button, Card, Group, Image, Menu, Text } from '@mantine/cor
 import { closeAllModals, openConfirmModal } from '@mantine/modals'
 import { showNotification } from '@mantine/notifications'
 import { Room } from '@prisma/client'
-import { IconCheck, IconDots, IconDownload, IconEyeOff, IconTrash, IconX } from '@tabler/icons'
+import { IconCheck, IconDots, IconDownload, IconEye, IconEyeOff, IconTrash, IconX } from '@tabler/icons'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import React, { useState, FunctionComponent } from 'react'
@@ -77,13 +77,13 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
             })
         })
     }
-
+    { room.videoId }
     return (
         <Card shadow="sm" radius="md">
             <Card.Section withBorder inheritPadding>
                 <Group position="apart" py="xs">
                     <div>
-                        <p style={{ margin: 0 }}>{room.name}</p>
+                        <p style={{ margin: 0 }}>{room.name}{room.isPublic}</p>
                         <small>{createdTime}</small>
                     </div>
                     {isUsersProfile ?
@@ -95,14 +95,15 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
                             </Menu.Target>
 
                             <Menu.Dropdown>
-                                <Menu.Item icon={<IconDownload size={14} />}>Download</Menu.Item>
-                                <Menu.Item icon={<IconEyeOff size={14} />}>Mark as private</Menu.Item>
+                                {room.videoId != null ? <Menu.Item icon={<IconDownload size={14} />}>Download</Menu.Item> : null}
+                                <Menu.Item icon={room.isPublic ? <IconEyeOff size={14} /> : <IconEye size={14} />}>{room.isPublic ? "Mark as private" : "Mark as public"}</Menu.Item>
                                 <Menu.Item onClick={confirmDelete} icon={<IconTrash size={14} />} color="red">
                                     Delete
                                 </Menu.Item>
                             </Menu.Dropdown>
                         </Menu>
                         : null}
+
                 </Group>
             </Card.Section>
             <Card.Section>

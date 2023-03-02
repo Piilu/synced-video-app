@@ -1,4 +1,4 @@
-import { Button, FileInput, Flex, Group, Modal, NativeSelect, TextInput } from '@mantine/core'
+import { Button, FileInput, Flex, Group, Modal, NativeSelect, Select, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
 import { IconCheck, IconUpload, IconX } from '@tabler/icons'
@@ -22,6 +22,7 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
     const form = useForm({
         initialValues: {
             title: '',
+            visibility: '1',
         },
         validate:
         {
@@ -39,7 +40,7 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
         let data: RoomPostReq =
         {
             name: form.values.title,
-            isPublic: false,
+            isPublic: form.values.visibility == "1" ? true : false,
         };
         setLoading(true);
         await axios.post(`${window.origin}${EndPoints.ROOM}`, data).then(res =>
@@ -86,7 +87,11 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
                 <Flex direction="column" rowGap={10}>
                     <Group grow>
                         <TextInput withAsterisk label="Room title" placeholder='Awesome movie' {...form.getInputProps("title")} />
-                        <NativeSelect data={['Public', 'Private']} label="Visibility" />
+                        <Select
+                            label="Visibility"
+                            data={selectData}
+                            {...form.getInputProps("visibility")}
+                        />
 
                     </Group>
                     {/* <FileInput value={file} onChange={setFile} label="Video" placeholder="Your video" icon={<IconUpload size={14} />} /> */}
@@ -98,5 +103,10 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
         </Modal>
     )
 }
+
+const selectData = [
+    { value: "1", label: "Public" },
+    { value: "2", label: "Private" },
+];
 
 export default CreateRoomModal

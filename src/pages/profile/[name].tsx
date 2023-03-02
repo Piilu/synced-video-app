@@ -1,4 +1,4 @@
-import { ActionIcon, Avatar, Button, Center, Container, FileInput, Flex, Grid, Group, Modal, NativeSelect, Paper, SimpleGrid, Tabs, Text, Textarea, TextInput } from '@mantine/core';
+import { ActionIcon, Avatar, Button, Center, Container, FileInput, Flex, Grid, Group, Modal, NativeSelect, Paper, Progress, SimpleGrid, Tabs, Text, Textarea, TextInput } from '@mantine/core';
 import { closeAllModals, openConfirmModal, openModal } from '@mantine/modals';
 import { Room, Session, User, Video } from '@prisma/client';
 import { IconCheck, IconDoor, IconEdit, IconMessageCircle, IconPhoto, IconSettings, IconUpload, IconX } from '@tabler/icons';
@@ -15,6 +15,7 @@ import ProfileSettignsModal from '../../components/profile/ProfileSettignsModal'
 import UploadVideoModal from '../../components/profile/UploadVideoModal';
 import CreateRoomModal from '../../components/profile/CreateRoomModal';
 import { useAutoAnimate } from "@formkit/auto-animate/react"
+import ProgressBar from '../../components/custom/ProgressBar';
 export const getServerSideProps: GetServerSideProps = async (ctx) =>
 {
     const getProfileName = ctx.params?.name;
@@ -58,17 +59,22 @@ const Profile: NextPage<ProfileProps> = (props) =>
     const [editProfile, setEditProfile] = useState<boolean>(false);
     const [uploadVideo, setUploadVideo] = useState<boolean>(false);
     const [createRoom, setCreateRoom] = useState<boolean>(false);
+    const [progress, setProgress] = useState<number>(0);
     const [animationParent] = useAutoAnimate()
     const router = useRouter();
+    const handleUploadVideo = async () =>
+    {
+        setUploadVideo(false);
 
+        console.log("UPLOADING")
+    }
     return (
         <>
             <ProfileSettignsModal profileUser={profileUser} editProfile={editProfile} setEditProfile={setEditProfile} />
-            <UploadVideoModal profileUser={profileUser} uploadVideo={uploadVideo} setUploadVideo={setUploadVideo} />
+            <UploadVideoModal handleUploadVideo={handleUploadVideo} profileUser={profileUser} uploadVideo={uploadVideo} setUploadVideo={setUploadVideo} />
             <CreateRoomModal createRoom={createRoom} setCreateRoom={setCreateRoom} />
             <Container>
                 <Flex direction="column">
-
                     <Paper shadow="sm" radius="lg" mt="lg" p="sm" >
                         <Group position="right">
                             {isUsersProfile ?
@@ -87,7 +93,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
                         </Group>
                     </Paper>
 
-                    <Tabs defaultValue="rooms">
+                    <Tabs defaultValue="videos">
                         <Paper shadow="sm" radius="lg" mt="lg" p="sm" >
                             <Tabs.List grow={true}>
                                 <Tabs.Tab value="videos" icon={<IconPhoto size={14} />}>Videos</Tabs.Tab>
@@ -96,8 +102,8 @@ const Profile: NextPage<ProfileProps> = (props) =>
                             </Tabs.List>
                         </Paper>
 
-
                         <Tabs.Panel value="videos" pt="xs">
+                            <ProgressBar progress={progress} setProgress={setProgress} />
                             {isUsersProfile ?
                                 <Group position='right' my={10}>
                                     <Button color="teal" onClick={() => { setUploadVideo(true) }} size='xs' radius="md" leftIcon={<IconUpload size={18} />}>Upload video</Button>
@@ -125,7 +131,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                 {
                                     return (
                                         <Grid.Col key={room.id} md={6} lg={4}>
-                                            <RoomItem key={room.id} isUsersProfile={isUsersProfile} createdTime={new Date("01/12/2021").toDateString()} room={room} />
+                                            <RoomItem key={room.id} isUsersProfile={isUsersProfile} createdTime={room.createdAt.toDateString()} room={room} />
                                         </Grid.Col>
                                     )
                                 }) : <Grid.Col><NoItems text={`${isUsersProfile ? "You have no rooms" : `${profileUser?.name} have no rooms`}`} /></Grid.Col>}

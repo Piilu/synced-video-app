@@ -1,5 +1,7 @@
 import { Code, createStyles, Group, Navbar } from '@mantine/core'
 import { IconSwitchHorizontal, IconLogout, IconBrandYoutube, Icon24Hours, IconFingerprint, IconKey, IconDatabase, Icon2fa, IconSettings, IconUser, TablerIcon } from '@tabler/icons';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { Dispatch, FunctionComponent, SetStateAction, useState } from 'react'
 import { LinkTypes } from '../../constants/GlobalEnums';
@@ -35,7 +37,7 @@ type AppSideNavProps = {
 const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
 {
     const { opened, setOpened } = props;
-
+    const {data:session} = useSession();
     const { classes, cx } = useStyles();
 
     const router = useRouter();
@@ -48,7 +50,7 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
 
             <Navbar.Section grow>
                 <Group className={classes.header} position="apart">
-                    <h2 style={{ margin: 0 }}>Title</h2>
+                    <Link  href={`/profile/${session?.user?.name}`} style={{ margin: 0,fontSize:"1.5em"}}>App?</Link>
                 </Group>
                 {links}
             </Navbar.Section>
