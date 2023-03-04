@@ -1,10 +1,12 @@
 import { Avatar, Box, Flex, Grid, Tooltip } from '@mantine/core';
 import { useHover } from '@mantine/hooks';
+import { User } from '@prisma/client';
+import { Session } from 'next-auth';
 import React, { FunctionComponent, useState } from 'react'
 import ReactLinkify from 'react-linkify';
 
 type MessageChip = {
-    user: string;
+    user: User | undefined;
     message: string;
 }
 //Maybe make it look better later :) 
@@ -36,8 +38,8 @@ const MessageChip: FunctionComponent<MessageChip> = (props) => {
         >
             <Flex direction="row">
                 <div style={{ minWidth: "3em", maxHeight: "3em" }}>
-                    <Tooltip position='left' label={user}>
-                        <Avatar radius="xl" size="md">{user.charAt(0)}</Avatar>
+                    <Tooltip position='left' label={user?.name}>
+                        <Avatar radius="xl" size="md">{user?.name?.charAt(0)}</Avatar>
                     </Tooltip>
                 </div>
                 <ReactLinkify componentDecorator={(decoratedHref, decoratedText, key) => (

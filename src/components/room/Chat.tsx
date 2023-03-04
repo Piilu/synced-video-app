@@ -2,20 +2,21 @@ import { FunctionComponent, useEffect } from 'react';
 import React, { useState, useRef } from 'react'
 import { Paper, Box, Textarea, Flex, Divider, Button, ActionIcon, Tooltip, TextInput, useMantineColorScheme } from '@mantine/core'
 import { IconArrowBarRight, IconMoonStars, IconSearch, IconSun, IconX } from '@tabler/icons'
-import type { SendMessageTest } from '../../constants/schema';
 import MessageChip from './MessageChip';
 import { useWindowEvent } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
 import { User } from '@prisma/client';
 import ToggleTheme from '../custom/ToggleTheme';
+import { RoomMessage } from '../../constants/schema';
+import { useSession } from 'next-auth/react';
 type ChatProps = {
-    messages: SendMessageTest[] | [];
+    messages: RoomMessage[] | [];
     chatOpen: string;
     styles: React.CSSProperties;
-    roomId: string;
+    roomId: number | undefined;
     user: User | undefined;
-    setChatOpen: React.Dispatch<React.SetStateAction<string>>;
-    sendMessageWs: (message: SendMessageTest) => void
+    setChatOpen: React.Dispatch<React.SetStateAction<"flex" | "none">>;
+    sendMessageWs: (message: RoomMessage) => void
 }
 
 const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
@@ -36,7 +37,7 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
             })
             return;
         }
-        sendMessageWs({ message: message, user: name, roomId })
+        sendMessageWs({ message: message, user: user, roomId })
         setMessage("");
     }
 
