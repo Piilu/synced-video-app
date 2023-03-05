@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import type { GetServerSideProps, NextPage } from 'next/types';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import Chat from '../../components/room/Chat';
-import { IconCheck, IconLink, IconMessageCircle, IconSettings } from '@tabler/icons'
+import { IconCheck, IconLink, IconMessageCircle, IconRefresh, IconSettings } from '@tabler/icons'
 import { slideLeft } from '../../styles/transitions';
 import type { Socket } from 'socket.io-client';
 import io from 'socket.io-client'
@@ -13,16 +13,19 @@ import { getServerAuthSession } from '../../server/common/get-server-auth-sessio
 import { useSession } from 'next-auth/react';
 import { useLocalStorage } from '@mantine/hooks';
 import FloatingButtons from '../../components/room/FloatingButtons';
-import { RoomMessage, VideoAction } from '../../constants/schema';
+import { RoomData, RoomMessage, VideoAction } from '../../constants/schema';
 import { Prisma, ConnectedRooms, User, Video, Room } from '@prisma/client';
+import Link from 'next/link';
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const session = await getServerAuthSession(ctx);
     const roomId = ctx.query.roomId as string;
     const roomIdNumber = parseInt(roomId);
-    //If roomId is string
-    const roomData = await prisma?.room.findFirst({
+    if (isNaN(roomIdNumber)) {
+        return { props: { notFound: true } }
+    }
+    const roomInitialData = await prisma?.room.findFirst({
         where: {
             id: roomIdNumber,
         },
@@ -32,14 +35,27 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             video: true,
         },
     })
+
     const user = await prisma?.user.findUnique({
         where: {
             id: session?.user?.id
         }
     })
+
+    console.log("---------------------------------------")
+    console.log(roomInitialData);
+    console.log("---------------------------------------")
+    if (roomInitialData === null || roomInitialData === undefined) {
+        return { props: { notFound: true } }
+    }
+
+    if (roomInitialData?.ConnectedRooms.filter(connection => { return connection.userId == user?.id && connection.roomId == roomIdNumber }).length != 0) {
+        return { props: { multipleUsers: true } }
+    }
+
     if (session) {
         return {
-            props: { session, roomData, user },
+            props: { session, roomInitialData: roomInitialData, user },
         };
     }
     return {
@@ -52,33 +68,61 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 };
 
 type RoomProps = {
-    roomData: (Room & {
-        ConnectedRooms: ConnectedRooms[];
-        user: User;
-        video: Video | null;
-    }) | null | undefined;
+    roomInitialData: RoomData,
     user: User,
+    multipleUsers?: boolean,
+    notFound?: boolean,
 }
 
 const RoomTest: NextPage<RoomProps> = (props) => {
-    const { roomData, user } = props;
+    const { roomInitialData, user, multipleUsers, notFound } = props;
     const { data: session } = useSession();
     const router = useRouter();
     const [chatOpen, setChatOpen] = useState<"flex" | "none">("flex");
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
     const [messages, setMessages] = useState<RoomMessage[] | []>([]);
     const [socketSend, setSocketSend] = useState<boolean>(true);
+    const [roomData, setRoomData] = useState<RoomData>();
     const [guest, setGuest] = useLocalStorage({ key: 'guest', defaultValue: null });
     const videoTag = useRef<HTMLVideoElement>(null)
 
     //#region  SOCKET ON
+    if (notFound) {
+        return (
+
+            <Center style={{ height: "100%" }}>
+                <Flex direction="column" align="center">
+                    <Group>
+                        <h2>Room '{router.query.roomId}' doesn't exist</h2>
+                    </Group>
+                    <Group>
+                        <Link href={`/profile/${session?.user?.name}`} > Go to profile</Link>
+                    </Group>
+                </Flex>
+            </Center>
+        )
+    }
+    if (multipleUsers) {
+        return (
+            <Center style={{ height: "100%" }}>
+                <Flex direction="column" align="center">
+                    <Group>
+                        <h2>User already exists</h2>
+                    </Group>
+                    <Group>
+                        <Button leftIcon={<IconRefresh />} onClick={() => router.reload()}>Click here to refresh</Button>
+                    </Group>
+                </Flex>
+            </Center>
+        )
+    }
     useEffect(() => {
         void fetch('/api/socket/socket')
         socket = io()
 
-        socket.on("connect", () => {
-            console.log("Connect test 123")
-        })
+        // socket.on("connect", () => {
+        //     console.log("Connect test 123")
+        // })
         socket.on(Events.JOIN_ROOM_UPDATE, (data: RoomMessage) => {
             console.log('connected ' + data.user?.name + " " + data.roomId)
         })
@@ -117,6 +161,13 @@ const RoomTest: NextPage<RoomProps> = (props) => {
             videoTag.current.currentTime = data.time
         })
 
+        socket.on(Events.GET_ROOM_DATA_UPDATE, (data: RoomData) => {
+            console.log("______________________________");
+            console.log("GET ROOM DATA UPDATE");
+            console.log(data);
+            setRoomData(data);
+        })
+
         return () => {
             socket.off(Events.SEND_MESSAGE_UPDATE);
             socket.off(Events.JOIN_ROOM_UPDATE);
@@ -124,24 +175,21 @@ const RoomTest: NextPage<RoomProps> = (props) => {
             socket.off(Events.VIDEO_PLAY_UPDATE);
             socket.off(Events.VIDEO_PAUSE_UPDATE);
             socket.off(Events.VIDEO_SEEK_UPDATE);
+            socket.off(Events.GET_ROOM_DATA_UPDATE);
         };
     }, [])
     //#endregion
 
     useEffect(() => {
-        let data: RoomMessage;
-        if (roomData?.id !== null && session?.user !== undefined) {
-            data = { message: "Test", user: user, roomId: roomData?.id }
-            socket.emit(Events.JOIN_ROOM, data)
-        }
-        else if (roomData?.id !== undefined && session?.user === undefined && guest !== null) {
+        joinRoom();
 
-            alert("For testing it's not working");
-        }
-        return () => {
-            socket.off(Events.JOIN_ROOM)
-        }
     }, [])
+
+    const joinRoom = () => {
+        let data: RoomMessage;
+        data = { message: "Test", user: user, roomId: roomInitialData?.id }
+        socket.emit(Events.JOIN_ROOM, data)
+    }
 
     //#region Sending message
     const sendMessageWs = (message: RoomMessage) => {
@@ -157,7 +205,7 @@ const RoomTest: NextPage<RoomProps> = (props) => {
             { roomId: message.roomId, user: message.user, message: message.message }, ...prevMessages
         ])
         // setMessages((currentMsg) => [
-        //     { roomId: roomData?.id, user: session, message: message }, ...currentMsg
+        //     { roomId: roomInitialData?.id, user: session, message: message }, ...currentMsg
         // ]);
     }
     //#endregion
@@ -166,7 +214,7 @@ const RoomTest: NextPage<RoomProps> = (props) => {
 
     //!!!!!!!!!!!!Possible loop when user triggers onPlay... for all useres!!!!!!!!! <== Fixed??? maybe :) 
     const videoPlay = (event: SyntheticEvent<HTMLVideoElement, Event>, send: Boolean) => {
-        const videoData: VideoAction = { roomId: roomData?.id, time: event.currentTarget.currentTime, type: event.type }
+        const videoData: VideoAction = { roomId: roomInitialData?.id, time: event.currentTarget.currentTime, type: event.type }
         console.log("TESTING SEND PLAY")
         if (socketSend) {
             console.log("SEND PLAY")
@@ -176,7 +224,7 @@ const RoomTest: NextPage<RoomProps> = (props) => {
     }
 
     const videoPause = (event: SyntheticEvent<HTMLVideoElement, Event>, send: Boolean) => {
-        const videoData: VideoAction = { roomId: roomData?.id, time: event.currentTarget.currentTime, type: event.type }
+        const videoData: VideoAction = { roomId: roomInitialData?.id, time: event.currentTarget.currentTime, type: event.type }
         console.log("TESTING SEND PAUSE")
         if (socketSend) {
             console.log("SEND PAUSE")
@@ -186,7 +234,7 @@ const RoomTest: NextPage<RoomProps> = (props) => {
     }
 
     const videoSeek = (event: SyntheticEvent<HTMLVideoElement, Event>, send: Boolean) => { //maybe seeking??
-        const videoData: VideoAction = { roomId: roomData?.id, time: event.currentTarget.currentTime, type: event.type }
+        const videoData: VideoAction = { roomId: roomInitialData?.id, time: event.currentTarget.currentTime, type: event.type }
         console.log("TESTING SEND SEEK")
         if (socketSend) {
             console.log("SEND SEEK")
@@ -207,7 +255,7 @@ const RoomTest: NextPage<RoomProps> = (props) => {
                 padding="xl"
                 size="xl"
             >
-                <h4>Conetn in here {roomData?.ConnectedRooms.length}</h4>
+                <h4>Conetn in here {roomInitialData?.ConnectedRooms.length}</h4>
             </Drawer>
 
             <Flex style={{ backgroundColor: "black", width: "100%", height: "100%" }} direction="row" justify={"flex-end"}>
@@ -217,7 +265,7 @@ const RoomTest: NextPage<RoomProps> = (props) => {
                 </Center>
                 <Transition mounted={chatOpen === "flex"} transition={slideLeft} duration={200} timingFunction="ease">
                     {(styles) => (
-                        <Chat user={user} roomId={roomData?.id} styles={styles} chatOpen={chatOpen} sendMessageWs={sendMessageWs} setChatOpen={setChatOpen} messages={messages} />
+                        <Chat roomData={roomData} user={user} roomId={roomInitialData?.id} styles={styles} chatOpen={chatOpen} sendMessageWs={sendMessageWs} setChatOpen={setChatOpen} messages={messages} />
                     )}
                 </Transition>
             </Flex >

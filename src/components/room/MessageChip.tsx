@@ -2,6 +2,7 @@ import { Avatar, Box, Flex, Grid, Tooltip } from '@mantine/core';
 import { useHover } from '@mantine/hooks';
 import { User } from '@prisma/client';
 import { Session } from 'next-auth';
+import { useSession } from 'next-auth/react';
 import React, { FunctionComponent, useState } from 'react'
 import ReactLinkify from 'react-linkify';
 
@@ -13,7 +14,7 @@ type MessageChip = {
 const MessageChip: FunctionComponent<MessageChip> = (props) => {
     const { user, message } = props;
     const { hovered, ref } = useHover();
-
+    const { data: session } = useSession();
     const externalinkWarning = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
         if (e.currentTarget.href.includes(window.location.hostname)) return;
         e.preventDefault();
@@ -24,7 +25,7 @@ const MessageChip: FunctionComponent<MessageChip> = (props) => {
 
     return (
         <Box
-            style={{ wordBreak: "break-all", padding: "0.5em", margin: "0.2em" }}
+            style={{ wordBreak: "break-all", padding: "0.5em", margin: "0.2em", border: session?.user?.id === user?.id ? "solid 1px rgba(228, 255, 54, 0.17)" : "none" }}
             sx={(theme) => ({
                 textAlign: 'left',
                 padding: theme.spacing.xl,
@@ -38,7 +39,7 @@ const MessageChip: FunctionComponent<MessageChip> = (props) => {
         >
             <Flex direction="row">
                 <div style={{ minWidth: "3em", maxHeight: "3em" }}>
-                    <Tooltip position='left' label={user?.name}>
+                    <Tooltip position='left' label={session?.user?.id === user?.id ? `${user?.name} (You)` : user?.name}>
                         <Avatar radius="xl" size="md">{user?.name?.charAt(0)}</Avatar>
                     </Tooltip>
                 </div>
@@ -52,7 +53,7 @@ const MessageChip: FunctionComponent<MessageChip> = (props) => {
                     <div style={{ marginTop: "auto", marginBottom: "auto" }}>{message}</div>
                 </ReactLinkify>
             </Flex>
-        </Box>
+        </Box >
 
     )
 }

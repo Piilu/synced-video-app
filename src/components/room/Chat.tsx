@@ -1,30 +1,29 @@
 import { FunctionComponent, useEffect } from 'react';
 import React, { useState, useRef } from 'react'
-import { Paper, Box, Textarea, Flex, Divider, Button, ActionIcon, Tooltip, TextInput, useMantineColorScheme } from '@mantine/core'
-import { IconArrowBarRight, IconMoonStars, IconSearch, IconSun, IconX } from '@tabler/icons'
+import { Paper, Box, Textarea, Flex, Divider, Button, ActionIcon, Tooltip, TextInput, useMantineColorScheme, Group, Text, Loader } from '@mantine/core'
+import { IconArrowBarRight, IconMoonStars, IconPlayerRecord, IconSearch, IconSun, IconUsers, IconViewfinder, IconX } from '@tabler/icons'
 import MessageChip from './MessageChip';
 import { useWindowEvent } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
 import { User } from '@prisma/client';
 import ToggleTheme from '../custom/ToggleTheme';
-import { RoomMessage } from '../../constants/schema';
+import { RoomData, RoomMessage } from '../../constants/schema';
 import { useSession } from 'next-auth/react';
 type ChatProps = {
-    messages: RoomMessage[] | [];
-    chatOpen: string;
-    styles: React.CSSProperties;
-    roomId: number | undefined;
-    user: User | undefined;
-    setChatOpen: React.Dispatch<React.SetStateAction<"flex" | "none">>;
+    messages: RoomMessage[] | [],
+    chatOpen: string,
+    styles: React.CSSProperties,
+    roomId: number | undefined,
+    user: User | undefined,
+    roomData: RoomData,
+    setChatOpen: React.Dispatch<React.SetStateAction<"flex" | "none">>,
     sendMessageWs: (message: RoomMessage) => void
 }
 
 const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
-    const { styles, chatOpen, setChatOpen, sendMessageWs, roomId, messages, user } = props;
+    const { styles, chatOpen, setChatOpen, sendMessageWs, roomId, messages, user, roomData } = props;
     const [message, setMessage] = useState<string>("");
     const [name, setName] = useState<string>(user !== undefined ? user.name as string : "");
-    const { colorScheme, toggleColorScheme } = useMantineColorScheme();
-    const dark = colorScheme === 'dark';
 
     const sendMessage = () => {
         if (message.trim() == "") return;
@@ -58,10 +57,29 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
                         <IconArrowBarRight size={29} />
                     </ActionIcon>
                 </Tooltip>
-                <div style={{ marginLeft: "auto", marginRight: "1em" }}>
-                    <TextInput value={name} onChange={e => setName(e.target.value)} placeholder='Placeholder name ...' />
+                <div style={{ marginLeft: "auto" }}>
+                    <Tooltip label="Connected users" position='left'>
+                        <Box sx={(theme) => ({
+                            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+                            textAlign: 'center',
+                            padding: theme.spacing.xs,
+                            borderRadius: theme.radius.md,
+                            cursor: 'pointer',
+
+                            '&:hover': {
+                                backgroundColor:
+                                    theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1],
+                            },
+                        })}>
+                            <Group align="center" >
+                                <IconUsers color='red' size={19} />
+                                {roomData == null ? <Loader color="gray" size="xs" /> : <Text size="sm">{roomData?.ConnectedRooms.length}</Text>}
+
+                            </Group>
+                        </Box>
+                    </Tooltip>
+                    {/* <TextInput value={name} onChange={e => setName(e.target.value)} placeholder='Placeholder name ...' /> */}
                 </div>
-                <ToggleTheme />
             </div>
             <Divider style={{ width: "100%", paddingBottom: "0" }} />
             <Flex style={{ height: "100%", width: "100%", overflow: "auto", padding: "1em" }}
