@@ -25,7 +25,7 @@ const MessageChip: FunctionComponent<MessageChip> = (props) => {
 
     return (
         <Box
-            style={{ wordBreak: "break-all", padding: "0.5em", margin: "0.2em", border: session?.user?.id === user?.id ? "solid 1px rgba(228, 255, 54, 0.17)" : "none" }}
+            style={{ wordBreak: "break-all", padding: "0.5em", margin: "0.2em"}}
             sx={(theme) => ({
                 textAlign: 'left',
                 padding: theme.spacing.xl,
@@ -40,7 +40,7 @@ const MessageChip: FunctionComponent<MessageChip> = (props) => {
             <Flex direction="row">
                 <div style={{ minWidth: "3em", maxHeight: "3em" }}>
                     <Tooltip position='left' label={session?.user?.id === user?.id ? `${user?.name} (You)` : user?.name}>
-                        <Avatar radius="xl" size="md">{user?.name?.charAt(0)}</Avatar>
+                        <Avatar style={{border: session?.user?.id === user?.id ? "solid 1px rgba(228, 255, 54, 0.17)" : "none",  boxShadow:  session?.user?.id === user?.id ? '0 0 10px rgba(228, 255, 54, 0.17)' : "none"}} radius="xl" size="md">{user?.name?.charAt(0)}</Avatar>
                     </Tooltip>
                 </div>
                 <ReactLinkify componentDecorator={(decoratedHref, decoratedText, key) => (

@@ -91,7 +91,7 @@ export default (io: any, socket: any) => {
     socket.on(Events.SEND_MESSAGE, roomSendMessage)
     socket.on(Events.JOIN_ROOM, joinRoom)
     socket.on(Events.DISSCONNECT, leaveRoom)
-    // socket.on(Events.LEAVE_ROOM, leaveRoom)
+    socket.on(Events.LEAVE_ROOM, leaveRoom)
     socket.on(Events.VIDEO_PLAY, roomStartPlaying)
     socket.on(Events.VIDEO_PAUSE, roomStopPlaying)
     socket.on(Events.VIDEO_SEEK, roomSeek)

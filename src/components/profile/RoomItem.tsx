@@ -6,23 +6,22 @@ import { IconCheck, IconDots, IconDownload, IconEye, IconEyeOff, IconTrash, Icon
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import React, { useState, FunctionComponent } from 'react'
+import Moment from 'react-moment'
 import { EndPoints } from '../../constants/GlobalEnums'
 import { RoomPostReq, RoomPostRes } from '../../pages/api/room'
 
 type RoomItemProps = {
     room: Room,
-    createdTime: string,
+    createdTime: Date,
     isUsersProfile: boolean,
 }
 
 
 
-const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
-{
+const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
     const { room, createdTime, isUsersProfile } = props
     const router = useRouter();
-    const confirmDelete = () =>
-    {
+    const confirmDelete = () => {
         openConfirmModal({
             title: `Delete room '${room.name}'`,
             centered: true,
@@ -37,8 +36,7 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
             onConfirm: () => handleRoomDelete(),
         });
     }
-    const handleRoomDelete = async () =>
-    {
+    const handleRoomDelete = async () => {
         //only needs one 
         let data: RoomPostReq =
         {
@@ -46,11 +44,9 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
             isPublic: room.isPublic,
             name: room.name,
         }
-        await axios.delete(`${window.origin}${EndPoints.ROOM}`, { data: data }).then(res =>
-        {
+        await axios.delete(`${window.origin}${EndPoints.ROOM}`, { data: data }).then(res => {
             let newData = res.data as RoomPostRes;
-            if (newData.success)
-            {
+            if (newData.success) {
                 router.push({
                     pathname: router.asPath,
                 }, undefined, { scroll: false })
@@ -60,16 +56,14 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
                     color: "green",
                 })
             }
-            else
-            {
+            else {
                 showNotification({
                     message: newData.errorMessage,
                     icon: <IconX />,
                     color: "red",
                 })
             }
-        }).catch(err =>
-        {
+        }).catch(err => {
             showNotification({
                 message: err.message,
                 icon: <IconX />,
@@ -84,7 +78,7 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
                 <Group position="apart" py="xs">
                     <div>
                         <p style={{ margin: 0 }}>{room.name}{room.isPublic}</p>
-                        <small>{createdTime}</small>
+                        <small><Moment local calendar>{createdTime}</Moment></small>
                     </div>
                     {isUsersProfile ?
                         <Menu withinPortal position="bottom-end" shadow="sm">
@@ -113,7 +107,7 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
             </Card.Section>
             <Card.Section inheritPadding>
                 <Group position='right' noWrap my={20}>
-                    <Button variant='light' color="green">Some button</Button>
+                    <Button component='a' href={`/rooms/${room.id}`}  variant='light' color="green">Join room</Button>
                 </Group>
             </Card.Section>
         </Card>

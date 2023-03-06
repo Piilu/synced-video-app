@@ -11,11 +11,12 @@ import type { DefaultEventsMap } from '@socket.io/component-emitter';
 import { Events, QueryParams } from '../../constants/GlobalEnums';
 import { getServerAuthSession } from '../../server/common/get-server-auth-session';
 import { useSession } from 'next-auth/react';
-import { useLocalStorage } from '@mantine/hooks';
+import { useLocalStorage, usePageLeave, useWindowEvent } from '@mantine/hooks';
 import FloatingButtons from '../../components/room/FloatingButtons';
 import { RoomData, RoomMessage, VideoAction } from '../../constants/schema';
 import { Prisma, ConnectedRooms, User, Video, Room } from '@prisma/client';
 import Link from 'next/link';
+import handler from '../api/room';
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -185,6 +186,19 @@ const RoomTest: NextPage<RoomProps> = (props) => {
 
     }, [])
 
+    //#region Route change
+    useEffect(() => {
+        const handleRouteChange = (url: string) => {
+            socket.emit(Events.LEAVE_ROOM)
+        }
+
+        router.events.on('routeChangeStart', handleRouteChange)
+
+        return () => {
+            router.events.off('routeChangeStart', handleRouteChange)
+        }
+    }, [])
+    //#endregion
     const joinRoom = () => {
         let data: RoomMessage;
         data = { message: "Test", user: user, roomId: roomInitialData?.id }

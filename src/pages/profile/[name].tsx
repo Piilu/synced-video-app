@@ -16,8 +16,8 @@ import UploadVideoModal from '../../components/profile/UploadVideoModal';
 import CreateRoomModal from '../../components/profile/CreateRoomModal';
 import { useAutoAnimate } from "@formkit/auto-animate/react"
 import ProgressBar from '../../components/custom/ProgressBar';
-export const getServerSideProps: GetServerSideProps = async (ctx) =>
-{
+import axios from 'axios';
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const getProfileName = ctx.params?.name;
     const session = await getServerAuthSession(ctx);
     const profileUser = getProfileName !== null ? await prisma.user.findFirst({
@@ -32,8 +32,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) =>
 
     const isUsersProfile = session?.user?.id == profileUser?.id ? true : false;
 
-    if (profileUser === null)
-    {
+    if (profileUser === null) {
         return {
             notFound: true
         }
@@ -51,8 +50,7 @@ type ProfileProps = {
     isUsersProfile: boolean;
 }
 
-const Profile: NextPage<ProfileProps> = (props) =>
-{
+const Profile: NextPage<ProfileProps> = (props) => {
     const { data: session } = useSession();
     const { profileUser, isUsersProfile } = props
     const [name, setName] = useState<string>();
@@ -62,10 +60,10 @@ const Profile: NextPage<ProfileProps> = (props) =>
     const [progress, setProgress] = useState<number>(0);
     const [animationParent] = useAutoAnimate()
     const router = useRouter();
-    const handleUploadVideo = async () =>
-    {
+    const handleUploadVideo = async (file: File) => {
         setUploadVideo(false);
-
+        const test = URL.createObjectURL(file);
+        axios.post(``)
         console.log("UPLOADING")
     }
     return (
@@ -110,8 +108,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                 </Group>
                                 : null}
                             <Flex direction="column" gap={20} mb={35}>
-                                {profileUser?.videos?.length != 0 ? profileUser?.videos.map(video =>
-                                {
+                                {profileUser?.videos?.length != 0 ? profileUser?.videos.map(video => {
                                     return (
                                         <VideoItem key={video.id} isUsersProfile={isUsersProfile} />
                                     )
@@ -127,11 +124,10 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                 </Group>
                                 : null}
                             <Grid gutter="md" ref={animationParent}>
-                                {profileUser?.rooms?.length != 0 ? profileUser?.rooms.map(room =>
-                                {
+                                {profileUser?.rooms?.length != 0 ? profileUser?.rooms.map(room => {
                                     return (
                                         <Grid.Col key={room.id} md={6} lg={4}>
-                                            <RoomItem key={room.id} isUsersProfile={isUsersProfile} createdTime={room.createdAt.toDateString()} room={room} />
+                                            <RoomItem key={room.id} isUsersProfile={isUsersProfile} createdTime={room.createdAt} room={room} />
                                         </Grid.Col>
                                     )
                                 }) : <Grid.Col><NoItems text={`${isUsersProfile ? "You have no rooms" : `${profileUser?.name} have no rooms`}`} /></Grid.Col>}
