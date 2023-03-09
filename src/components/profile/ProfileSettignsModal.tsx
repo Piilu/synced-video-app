@@ -99,8 +99,8 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
             <form onSubmit={form.onSubmit((values) => { handleProfileUpdate() })}>
                 <Flex direction="column" gap={20}>
                     <Group grow>
-                        <TextInput title="Email cant't be changed" withAsterisk label="Email:" readOnly defaultValue={profileUser?.email as string} placeholder="Your email" {...form.getInputProps("email")} />
-                        <TextInput defaultValue={profileUser?.name as string} withAsterisk label="Username:" placeholder="Your name" {...form.getInputProps("name")} />
+                        <TextInput title="Email cant't be changed" withAsterisk label="Email:" readOnly placeholder="Your email" {...form.getInputProps("email")} />
+                        <TextInput withAsterisk label="Username:" placeholder="Your name" {...form.getInputProps("name")} />
                     </Group>
                     <Textarea
                         defaultValue={profileUser?.bio as string}

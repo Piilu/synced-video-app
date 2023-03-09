@@ -40,6 +40,7 @@ enum EndPoints
 {
   USER = "/api/profile/user",
   ROOM = "/api/room",
-  VIDEO = "/api/video"
+  VIDEO = "/api/video",
+  VIDEO_STREAM = "/api/video/stream",
 }
 export { Events, QueryParams, Brands, EndPoints, LinkTypes }

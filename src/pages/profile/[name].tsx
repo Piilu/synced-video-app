@@ -32,7 +32,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) =>
         },
         where: {
             name: getProfileName as string
-        }
+        },
     }) : null;
 
     const isUsersProfile = session?.user?.id == profileUser?.id ? true : false;
