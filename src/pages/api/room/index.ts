@@ -4,16 +4,17 @@ import { getServerAuthSession } from "../../../server/common/get-server-auth-ses
 import { Session, User, Video } from '@prisma/client';
 
 
-export type RoomPostReq =
+export type RoomReq =
     {
         id?: number,
         name: string
         isPublic: boolean,
         coverImage?: string | null,
         video?: Video | null
+        videoId?: number | null
     }
 
-export type RoomPostRes =
+export type RoomRes =
     {
         success: boolean,
         errorMessage?: string,
@@ -27,8 +28,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 {
     const method = req.method
     const session = await getSession({ req })
-    const { name, isPublic, coverImage, video, id } = req.body as RoomPostReq;
-    const response = {} as RoomPostRes;
+    const { name, isPublic, coverImage, video, id, videoId } = req.body as RoomReq;
+    const response = {} as RoomRes;
 
     if (!session)
     {
@@ -75,6 +76,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     {
         try
         {
+
+            console.log("______________________________________");
+            console.log(name);
+            console.log(isPublic);
+            console.log(coverImage);
+            console.log(videoId);
             const room = await prisma?.room.update({
                 include: {
                     video: true,
@@ -87,7 +94,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     name: name,
                     isPublic: isPublic,
                     coverImage: coverImage,
-                    videoId: video?.id,
+                    videoId: video?.id ?? videoId,
                 }
             })
             response.success = true;

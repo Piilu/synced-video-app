@@ -64,7 +64,7 @@ model Video {
   id        Int      @id @default(autoincrement())
   name      String   @db.VarChar(50)
   isPublic  Boolean
-  size      Bytes
+  size      Int
   location  String   @db.VarChar(255)
   userId    String
   createdAt DateTime @default(now())

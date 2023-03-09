@@ -8,7 +8,7 @@ import { useRouter } from 'next/router'
 import React, { useState, FunctionComponent } from 'react'
 import Moment from 'react-moment'
 import { EndPoints } from '../../constants/GlobalEnums'
-import { RoomPostReq, RoomPostRes } from '../../pages/api/room'
+import { RoomReq, RoomRes } from '../../pages/api/room'
 
 type RoomItemProps = {
     room: Room,
@@ -18,10 +18,12 @@ type RoomItemProps = {
 
 
 
-const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
+const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
+{
     const { room, createdTime, isUsersProfile } = props
     const router = useRouter();
-    const confirmDelete = () => {
+    const confirmDelete = () =>
+    {
         openConfirmModal({
             title: `Delete room '${room.name}'`,
             centered: true,
@@ -36,17 +38,20 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
             onConfirm: () => handleRoomDelete(),
         });
     }
-    const handleRoomDelete = async () => {
+    const handleRoomDelete = async () =>
+    {
         //only needs one 
-        let data: RoomPostReq =
+        let data: RoomReq =
         {
             id: room.id,
             isPublic: room.isPublic,
             name: room.name,
         }
-        await axios.delete(`${window.origin}${EndPoints.ROOM}`, { data: data }).then(res => {
-            let newData = res.data as RoomPostRes;
-            if (newData.success) {
+        await axios.delete(`${window.origin}${EndPoints.ROOM}`, { data: data }).then(res =>
+        {
+            let newData = res.data as RoomRes;
+            if (newData.success)
+            {
                 router.push({
                     pathname: router.asPath,
                 }, undefined, { scroll: false })
@@ -56,14 +61,16 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
                     color: "green",
                 })
             }
-            else {
+            else
+            {
                 showNotification({
                     message: newData.errorMessage,
                     icon: <IconX />,
                     color: "red",
                 })
             }
-        }).catch(err => {
+        }).catch(err =>
+        {
             showNotification({
                 message: err.message,
                 icon: <IconX />,
@@ -71,6 +78,52 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
             })
         })
     }
+
+    const handleRoomVisibility = async () =>
+    {
+        const visibility = !room.isPublic;
+        let data: RoomReq = {
+            id: room.id,
+            name: room.name,
+            isPublic: visibility,
+            coverImage: room.coverImage,
+            videoId: room.videoId,
+
+        }
+        await axios.put(`${window.origin}${EndPoints.ROOM}`, data).then(res =>
+        {
+            let newData = res.data as RoomRes;
+
+            if (newData.success)
+            {
+                router.push({
+                    pathname: router.asPath,
+                }, undefined, { scroll: false })
+                showNotification({
+                    title: "Successfully changed",
+                    message: `Room visibility changed to ${newData.isPublic ? "public" : "private"}`,
+                    color: "green",
+                    icon: <IconCheck />
+                })
+            }
+            else
+            {
+                showNotification({
+                    message: newData.errorMessage,
+                    icon: <IconX />,
+                    color: "red",
+                })
+            }
+        }).catch(err =>
+        {
+            showNotification({
+                message: err.message,
+                icon: <IconX />,
+                color: "red",
+            })
+        })
+    }
+
     { room.videoId }
     return (
         <Card shadow="sm" radius="md">
@@ -90,7 +143,7 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
 
                             <Menu.Dropdown>
                                 {room.videoId != null ? <Menu.Item icon={<IconDownload size={14} />}>Download</Menu.Item> : null}
-                                <Menu.Item icon={room.isPublic ? <IconEyeOff size={14} /> : <IconEye size={14} />}>{room.isPublic ? "Mark as private" : "Mark as public"}</Menu.Item>
+                                <Menu.Item onClick={handleRoomVisibility} icon={room.isPublic ? <IconEyeOff size={14} /> : <IconEye size={14} />}>{room.isPublic ? "Mark as private" : "Mark as public"}</Menu.Item>
                                 <Menu.Item onClick={confirmDelete} icon={<IconTrash size={14} />} color="red">
                                     Delete
                                 </Menu.Item>
@@ -107,7 +160,7 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
             </Card.Section>
             <Card.Section inheritPadding>
                 <Group position='right' noWrap my={20}>
-                    <Button component='a' href={`/rooms/${room.id}`}  variant='light' color="green">Join room</Button>
+                    <Button component='a' href={`/rooms/${room.id}`} variant='light' color="green">Join room</Button>
                 </Group>
             </Card.Section>
         </Card>

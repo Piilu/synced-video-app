@@ -17,10 +17,10 @@ export type VideoAction = {
     time: number,
     roomId: number | undefined,
     type: string,
+    user: User,
 }
 
-export type RoomData =
-(Room & {
+export type RoomData = (Room & {
     ConnectedRooms: ConnectedRooms[];
     user: User;
     video: Video | null;

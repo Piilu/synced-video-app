@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState, Dispatch, SetStateAction, FunctionComponent, forwardRef } from 'react'
 import { EndPoints } from '../../constants/GlobalEnums'
-import { RoomPostReq, RoomPostRes } from '../../pages/api/room'
+import { RoomReq, RoomRes } from '../../pages/api/room'
 
 type CreateRoomModalProps = {
     createRoom: boolean,
@@ -36,14 +36,14 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) => {
     }, [createRoom])
 
     const handleRoomCreate = async () => {
-        let data: RoomPostReq =
+        let data: RoomReq =
         {
             name: form.values.title,
             isPublic: form.values.visibility == "1" ? true : false,
         };
         setLoading(true);
         await axios.post(`${window.origin}${EndPoints.ROOM}`, data).then(res => {
-            let newData = res.data as RoomPostRes;
+            let newData = res.data as RoomRes;
             if (newData.success) {
                 router.push({
                     pathname: router.asPath,

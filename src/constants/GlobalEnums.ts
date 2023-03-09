@@ -39,6 +39,7 @@ enum LinkTypes
 enum EndPoints
 {
   USER = "/api/profile/user",
-  ROOM = "/api/room"
+  ROOM = "/api/room",
+  VIDEO = "/api/video"
 }
 export { Events, QueryParams, Brands, EndPoints, LinkTypes }
