@@ -8,10 +8,12 @@ import { IconMail } from "@tabler/icons";
 import BrandButtons from "../components/custom/BrandButtons";
 
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
+export const getServerSideProps: GetServerSideProps = async (ctx) =>
+{
   const providers = await getProviders()
   const csrfToken = await getCsrfToken(ctx)
-  return requireAuth(ctx, ({ session }: any) => {
+  return requireAuth(ctx, ({ session }: any) =>
+  {
     console.log(session)
     return { props: { providers, csrfToken } }
   })
@@ -24,7 +26,8 @@ type HomePageProps = {
   csrfToken: string | undefined
 }
 
-const Home: NextPage<HomePageProps> = (props) => {
+const Home: NextPage<HomePageProps> = (props) =>
+{
   const { providers, csrfToken } = props;
   const form = useForm({
     initialValues: {
@@ -39,9 +42,11 @@ const Home: NextPage<HomePageProps> = (props) => {
     },
   });
 
-  const handleLogin = (providerId: LiteralUnion<BuiltInProviderType, string>) => {
+  const handleLogin = (providerId: LiteralUnion<BuiltInProviderType, string>) =>
+  {
     console.log(form.values)
-    signIn(providerId).catch(err => {
+    signIn(providerId).catch(err =>
+    {
       console.log(err)
       return;
     })
@@ -57,9 +62,11 @@ const Home: NextPage<HomePageProps> = (props) => {
         </Title>
         <Paper withBorder shadow="md" p={30} mt={30} radius="md">
 
-          {providers && Object.values(providers).map(provider => {
+          {providers && Object.values(providers).map(provider =>
+          {
 
-            if (provider.name == "Email") {
+            if (provider.name == "Email")
+            {
               return (
                 <div key={provider.name}>
                   <TextInput

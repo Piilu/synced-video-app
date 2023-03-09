@@ -42,10 +42,10 @@ const UploadVideoModal: FunctionComponent<UploadVideoModalProps> = (props) =>
 
     const validateData = async () =>
     {
-        setLoading(true)
         console.log("VALIDATE HERE")
         if (file != null)
         {
+            setLoading(true)
             let data: VideoReq = {
                 name: form.values.videoTitle,
                 isPublic: form.values.visibility == "1" ? true : false,

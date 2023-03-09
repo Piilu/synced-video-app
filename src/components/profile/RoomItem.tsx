@@ -4,6 +4,7 @@ import { showNotification } from '@mantine/notifications'
 import { Room } from '@prisma/client'
 import { IconCheck, IconDots, IconDownload, IconEye, IconEyeOff, IconTrash, IconX } from '@tabler/icons'
 import axios from 'axios'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState, FunctionComponent } from 'react'
 import Moment from 'react-moment'
@@ -18,12 +19,10 @@ type RoomItemProps = {
 
 
 
-const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
-{
+const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
     const { room, createdTime, isUsersProfile } = props
     const router = useRouter();
-    const confirmDelete = () =>
-    {
+    const confirmDelete = () => {
         openConfirmModal({
             title: `Delete room '${room.name}'`,
             centered: true,
@@ -38,8 +37,7 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
             onConfirm: () => handleRoomDelete(),
         });
     }
-    const handleRoomDelete = async () =>
-    {
+    const handleRoomDelete = async () => {
         //only needs one 
         let data: RoomReq =
         {
@@ -47,11 +45,9 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
             isPublic: room.isPublic,
             name: room.name,
         }
-        await axios.delete(`${window.origin}${EndPoints.ROOM}`, { data: data }).then(res =>
-        {
+        await axios.delete(`${window.origin}${EndPoints.ROOM}`, { data: data }).then(res => {
             let newData = res.data as RoomRes;
-            if (newData.success)
-            {
+            if (newData.success) {
                 router.push({
                     pathname: router.asPath,
                 }, undefined, { scroll: false })
@@ -61,16 +57,14 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
                     color: "green",
                 })
             }
-            else
-            {
+            else {
                 showNotification({
                     message: newData.errorMessage,
                     icon: <IconX />,
                     color: "red",
                 })
             }
-        }).catch(err =>
-        {
+        }).catch(err => {
             showNotification({
                 message: err.message,
                 icon: <IconX />,
@@ -79,8 +73,7 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
         })
     }
 
-    const handleRoomVisibility = async () =>
-    {
+    const handleRoomVisibility = async () => {
         const visibility = !room.isPublic;
         let data: RoomReq = {
             id: room.id,
@@ -90,12 +83,10 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
             videoId: room.videoId,
 
         }
-        await axios.put(`${window.origin}${EndPoints.ROOM}`, data).then(res =>
-        {
+        await axios.put(`${window.origin}${EndPoints.ROOM}`, data).then(res => {
             let newData = res.data as RoomRes;
 
-            if (newData.success)
-            {
+            if (newData.success) {
                 router.push({
                     pathname: router.asPath,
                 }, undefined, { scroll: false })
@@ -106,16 +97,14 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
                     icon: <IconCheck />
                 })
             }
-            else
-            {
+            else {
                 showNotification({
                     message: newData.errorMessage,
                     icon: <IconX />,
                     color: "red",
                 })
             }
-        }).catch(err =>
-        {
+        }).catch(err => {
             showNotification({
                 message: err.message,
                 icon: <IconX />,
@@ -160,6 +149,7 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
             </Card.Section>
             <Card.Section inheritPadding>
                 <Group position='right' noWrap my={20}>
+                    <Link href={`/rooms/${room.id}`} ></Link>
                     <Button component='a' href={`/rooms/${room.id}`} variant='light' color="green">Join room</Button>
                 </Group>
             </Card.Section>

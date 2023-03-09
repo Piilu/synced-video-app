@@ -1,4 +1,5 @@
-import { ActionIcon, Badge, Box, Card, CardSection, Chip, Group, MediaQuery, Menu, Paper } from '@mantine/core'
+import { ActionIcon, Badge, Box, Card, Text, CardSection, Chip, Group, MediaQuery, Menu, Paper } from '@mantine/core'
+import { openConfirmModal } from '@mantine/modals'
 import { showNotification } from '@mantine/notifications'
 import { Video } from '@prisma/client'
 import { IconCheck, IconDots, IconDownload, IconEye, IconEyeOff, IconFileZip, IconTrash, IconVideo, IconX } from '@tabler/icons'
@@ -19,6 +20,25 @@ const VideoItem: FunctionComponent<VideoItemProps> = (props) =>
     const { isUsersProfile, video } = props;
     const { data: session } = useSession();
     const router = useRouter();
+
+    const confirmDelete = () =>
+    {
+        openConfirmModal({
+            title: `Delete video '${video.name}'`,
+            centered: true,
+            children: (
+                <Text size="sm">
+                    Are you sure you want to delete this video?
+                </Text>
+            ),
+            labels: { confirm: 'Delete', cancel: "No don't delete it" },
+            confirmProps: { color: 'red' },
+            onCancel: () => { return; },
+            onConfirm: () => handleVideoDelete(),
+        });
+    }
+
+
     const handleVideoDelete = async () =>
     {
         let data: VideoReq = {
@@ -127,7 +147,7 @@ const VideoItem: FunctionComponent<VideoItemProps> = (props) =>
                             <Menu.Dropdown>
                                 <Menu.Item icon={<IconDownload size={14} />}>Download</Menu.Item>
                                 <Menu.Item onClick={handleVideoVisibility} icon={video.isPublic ? <IconEyeOff size={14} /> : <IconEye size={14} />}>{video.isPublic ? "Mark as private" : "Mark as public"}</Menu.Item>
-                                <Menu.Item onClick={handleVideoDelete} icon={<IconTrash size={14} />} color="red">
+                                <Menu.Item onClick={confirmDelete} icon={<IconTrash size={14} />} color="red">
                                     Delete
                                 </Menu.Item>
                             </Menu.Dropdown>
