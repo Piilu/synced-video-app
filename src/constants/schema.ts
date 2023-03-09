@@ -1,4 +1,6 @@
 import { ConnectedRooms, Room, User, Video } from "@prisma/client";
+import { TablerIcon } from "@tabler/icons";
+import { LinkTypes } from "./GlobalEnums";
 
 
 type RGB = `rgb(${number}, ${number}, ${number})`;
@@ -27,4 +29,9 @@ export type RoomData = (Room & {
 }) | null | undefined;
 
 
-
+export type LinkItemData = {
+    link: string,
+    label: string,
+    icon: TablerIcon,
+    linkType: LinkTypes
+}

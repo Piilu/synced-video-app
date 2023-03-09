@@ -1,4 +1,4 @@
-import { Alert, Button, FileInput, Flex, Group, Modal, Select, TextInput } from '@mantine/core'
+import { Alert, Button, FileInput, Flex, Group, Modal, Select, TextInput, Title } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
 import { IconAlertCircle, IconCheck, IconUpload, IconX } from '@tabler/icons'
@@ -6,6 +6,7 @@ import axios from 'axios'
 import file from 'fetch-blob/file'
 import { GetServerSideProps } from 'next'
 import { useSession } from 'next-auth/react'
+import Head from 'next/head'
 import router from 'next/router'
 import React, { useEffect, useState } from 'react'
 import { EndPoints } from '../../constants/GlobalEnums'
@@ -42,6 +43,7 @@ const setup = () =>
     useEffect(() =>
     {
         form.setValues({})
+        setLoading(false)
     }, [])
 
     const handleProfileSave = async (): Promise<void> =>
@@ -57,9 +59,7 @@ const setup = () =>
             let newData: UserResBody = res.data;
             if (newData.success)
             {
-                router.push({
-                    pathname: router.asPath,
-                }, undefined, { scroll: false })
+                router.reload();
                 showNotification({
                     title: `Hey ${newData.name} :)`,
                     message: "Name added successfully",
@@ -85,14 +85,14 @@ const setup = () =>
                 color: "red",
             })
             return;
-        }).finally(() =>
-        {
-            setLoading(false)
         })
     }
 
     return (
         <>
+            <Head>
+                <title>Profile - Setup</title>
+            </Head>
             <Modal centered opened={true} withCloseButton={false} onClose={() => null}>
                 <Alert title="Bummer!" mb={5} color="red">
                     Seems like you are missing a name

@@ -17,6 +17,7 @@ import { RoomData, RoomMessage, VideoAction } from '../../constants/schema';
 import { Prisma, ConnectedRooms, User, Video, Room } from '@prisma/client';
 import Link from 'next/link';
 import handler from '../api/room';
+import Head from 'next/head';
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
 export const getServerSideProps: GetServerSideProps = async (ctx) =>
@@ -97,32 +98,41 @@ const RoomTest: NextPage<RoomProps> = (props) =>
     if (notFound)
     {
         return (
-
-            <Center style={{ height: "100%" }}>
-                <Flex direction="column" align="center">
-                    <Group>
-                        <h2>Room '{router.query.roomId}' doesn't exist</h2>
-                    </Group>
-                    <Group>
-                        <Link href={`/profile/${session?.user?.name}`} > Go to profile</Link>
-                    </Group>
-                </Flex>
-            </Center>
+            <>
+                <Head>
+                    <title>Room not found</title>
+                </Head>
+                <Center style={{ height: "100%" }}>
+                    <Flex direction="column" align="center">
+                        <Group>
+                            <h2>Room '{router.query.roomId}' doesn't exist</h2>
+                        </Group>
+                        <Group>
+                            <Link href={`/profile/${session?.user?.name}`} > Go to profile</Link>
+                        </Group>
+                    </Flex>
+                </Center>
+            </>
         )
     }
     if (multipleUsers)
     {
         return (
-            <Center style={{ height: "100%" }}>
-                <Flex direction="column" align="center">
-                    <Group>
-                        <h2>User already exists</h2>
-                    </Group>
-                    <Group>
-                        <Button leftIcon={<IconRefresh />} onClick={() => router.reload()}>Click here to refresh</Button>
-                    </Group>
-                </Flex>
-            </Center>
+            <>
+                <Head>
+                    <title>Multiple users</title>
+                </Head>
+                <Center style={{ height: "100%" }}>
+                    <Flex direction="column" align="center">
+                        <Group>
+                            <h2>User already exists</h2>
+                        </Group>
+                        <Group>
+                            <Button leftIcon={<IconRefresh />} onClick={() => router.reload()}>Click here to refresh</Button>
+                        </Group>
+                    </Flex>
+                </Center>
+            </>
         )
     }
     useEffect(() =>
@@ -290,6 +300,9 @@ const RoomTest: NextPage<RoomProps> = (props) =>
 
     return (
         <>
+            <Head>
+                <title>Room - {roomData?.name}</title>
+            </Head>
             <Drawer
                 position='top'
                 opened={settingsOpen}

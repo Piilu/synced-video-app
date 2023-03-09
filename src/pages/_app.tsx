@@ -14,11 +14,13 @@ import NavHeader from "../components/navigation/NavHeader";
 import { useEffect } from "react"
 import { useRouter } from "next/router";
 import { ModalsProvider } from "@mantine/modals";
+import Head from "next/head";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
-}) => {
+}) =>
+{
   const deviceDefaultTheme = useMediaQuery('(prefers-color-scheme:dark)');
   const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>({ key: "color-scheme", defaultValue: "light" });
   const toggleColorScheme = (value?: ColorScheme) =>
@@ -29,9 +31,11 @@ const MyApp: AppType<{ session: Session | null }> = ({
   const router = useRouter();
 
   //definitely temporary
-  useEffect(() => {
+  useEffect(() =>
+  {
     if (router.asPath != "") setLoading(false)
-    if (!session) {
+    if (!session)
+    {
       setHideNav(true)
     }
     console.log(router.pathname)
@@ -40,7 +44,6 @@ const MyApp: AppType<{ session: Session | null }> = ({
   if (loading) return null;
 
   return (
-
     <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
       <MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>
         <SessionProvider session={session}>
@@ -65,6 +68,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
                   }
                 >
                   {/* App content */}
+                  <Head><title>VideoSync</title></Head>
                   <Component {...pageProps} />
                 </AppShell>
 

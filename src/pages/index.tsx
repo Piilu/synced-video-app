@@ -6,6 +6,7 @@ import { ClientSafeProvider, getProviders, getCsrfToken, LiteralUnion, signIn } 
 import { BuiltInProviderType } from "next-auth/providers";
 import { IconMail } from "@tabler/icons";
 import BrandButtons from "../components/custom/BrandButtons";
+import Head from "next/head";
 
 
 export const getServerSideProps: GetServerSideProps = async (ctx) =>
@@ -53,6 +54,9 @@ const Home: NextPage<HomePageProps> = (props) =>
   }
   return (
     <main style={{ display: "flex", flexDirection: "column", justifyContent: "center", height: "100%" }}>
+      <Head>
+        <title>Login</title>
+      </Head>
       <Container style={{ width: "30em" }} >
         <Title
           align="center"

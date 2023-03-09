@@ -19,7 +19,8 @@ type ProfileSettignsModalProps = {
     setEditProfile: Dispatch<SetStateAction<boolean>>,
     editProfile: boolean,
 }
-const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (props) => {
+const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (props) =>
+{
     const { profileUser, editProfile, setEditProfile } = props
     const { data: session } = useSession();
     const [loading, setLoading] = useState<boolean>(false)
@@ -33,11 +34,12 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
         validate: {
             email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
             name: (value) => (value.length >= 3 && value.length <= 20 ? null : "Invalid name. Maximum 20 and minimum 3 characters "),
-            comment: (value) => (value?.length <= 191 ? null : "Comment can't be bigger than 191 characters")
+            comment: (value) => (value?.length <= 191 || value == null ? null : "Comment can't be bigger than 191 characters")
         }
     })
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         form.setValues({
             email: profileUser?.email as string,
             name: profileUser?.name as string,
@@ -45,16 +47,19 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
         })
     }, [editProfile])
 
-    const handleProfileUpdate = async (): Promise<void> => {
+    const handleProfileUpdate = async (): Promise<void> =>
+    {
         let data: UserReqBody = {
             name: form.values.name,
             comment: form.values?.comment === "" ? null : form.values?.comment,
             userId: session?.user?.id as string,
         }
         setLoading(true);
-        await axios.put(`${window.origin}${EndPoints.USER}`, data).then(res => {
+        await axios.put(`${window.origin}${EndPoints.USER}`, data).then(res =>
+        {
             let newData: UserResBody = res.data;
-            if (newData.success) {
+            if (newData.success)
+            {
                 router.push({
                     pathname: router.pathname.replace("[name]", data.name as string),
                 }, undefined, { scroll: false })
@@ -64,7 +69,8 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
                     color: "green",
                 })
             }
-            else {
+            else
+            {
                 showNotification({
                     message: newData.errormsg,
                     icon: <IconX />,
@@ -72,7 +78,8 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
                 })
                 return;
             }
-        }).catch(error => {
+        }).catch(error =>
+        {
             console.log(error)
             showNotification({
                 message: "Something went wrong when saveing,(Server)",
@@ -80,7 +87,8 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
                 color: "red",
             })
             return;
-        }).finally(() => {
+        }).finally(() =>
+        {
             setLoading(false)
             setEditProfile(false)
         })

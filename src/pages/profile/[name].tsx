@@ -1,4 +1,4 @@
-import { ActionIcon, Avatar, Button, Center, Container, FileInput, Flex, Grid, Group, Modal, NativeSelect, Paper, Progress, SimpleGrid, Tabs, Text, Textarea, TextInput } from '@mantine/core';
+import { ActionIcon, Avatar, Button, Center, Container, FileInput, Flex, Grid, Group, Modal, NativeSelect, Paper, Progress, SimpleGrid, Tabs, Text, Textarea, TextInput, Title } from '@mantine/core';
 import { closeAllModals, openConfirmModal, openModal } from '@mantine/modals';
 import { Room, Session, User, Video } from '@prisma/client';
 import { IconCheck, IconDoor, IconEdit, IconMessageCircle, IconPhoto, IconSettings, IconUpload, IconX } from '@tabler/icons';
@@ -20,6 +20,7 @@ import axios from 'axios';
 import { VideoReq, VideoRes } from '../api/video';
 import { EndPoints } from '../../constants/GlobalEnums';
 import { showNotification } from '@mantine/notifications';
+import Head from "next/head"
 export const getServerSideProps: GetServerSideProps = async (ctx) =>
 {
     const getProfileName = ctx.params?.name;
@@ -110,6 +111,9 @@ const Profile: NextPage<ProfileProps> = (props) =>
     }
     return (
         <>
+            <Head>
+                <title>Profile - {profileUser?.name}</title>
+            </Head>
             <ProfileSettignsModal profileUser={profileUser} editProfile={editProfile} setEditProfile={setEditProfile} />
             <UploadVideoModal handleUploadVideo={handleUploadVideo} profileUser={profileUser} uploadVideo={uploadVideo} setUploadVideo={setUploadVideo} />
             <CreateRoomModal createRoom={createRoom} setCreateRoom={setCreateRoom} />
