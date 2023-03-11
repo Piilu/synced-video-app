@@ -44,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     //#endregion
     try 
     {
-        if (method == "PUT")
+        if (method === "PUT")
         {
             const user = await prisma?.user.update({
                 where: {

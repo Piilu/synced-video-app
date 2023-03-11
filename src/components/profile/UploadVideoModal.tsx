@@ -1,7 +1,7 @@
-import { Avatar, Button, FileInput, Flex, Group, Text, Modal, NativeSelect, Select, TextInput, SegmentedControl, Box, Center, Radio } from '@mantine/core';
+import { Avatar, Button, FileInput, Flex, Group, Text, Modal, NativeSelect, Select, TextInput, SegmentedControl, Box, Center, Radio, Alert } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { Room, User, Video } from '@prisma/client';
-import { IconEye, IconUpload } from '@tabler/icons';
+import { IconAlertCircle, IconEye, IconUpload } from '@tabler/icons';
 import { useSession } from 'next-auth/react';
 import React, { useState, FunctionComponent, SetStateAction, Dispatch, forwardRef, useEffect } from 'react'
 import { VideoReq } from '../../pages/api/video';
@@ -21,6 +21,7 @@ const UploadVideoModal: FunctionComponent<UploadVideoModalProps> = (props) =>
     const { data: session } = useSession();
     const [file, setFile] = useState<File | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<"none" | "block">("none");
     const form = useForm({
         initialValues: {
             videoTitle: '',
@@ -38,13 +39,21 @@ const UploadVideoModal: FunctionComponent<UploadVideoModalProps> = (props) =>
         form.setValues({ videoTitle: "", visibility: "1" });
         setFile(null);
         setLoading(false);
+        setError("none");
     }, [uploadVideo])
 
     const validateData = async () =>
     {
-        console.log("VALIDATE HERE")
         if (file != null)
         {
+            if (file?.type != "video/mp4")
+            {
+                console.log(file)
+                setError("block")
+                return;
+            }
+
+            setError("none")
             setLoading(true)
             let data: VideoReq = {
                 name: form.values.videoTitle,
@@ -59,7 +68,10 @@ const UploadVideoModal: FunctionComponent<UploadVideoModalProps> = (props) =>
     }
 
     return (
-        <Modal title="Upload settings" opened={uploadVideo} onClose={() => { setUploadVideo(false); form.reset() }}>
+        <Modal closeOnClickOutside={false} title="Upload settings" opened={uploadVideo} onClose={() => { setUploadVideo(false); form.reset() }}>
+            <Alert style={{ display: error }} icon={<IconAlertCircle size="1rem" />} title="Bummer!" color="red">
+                File is in wrong format. Only .mp4 files are allowed
+            </Alert>
             <form onSubmit={form.onSubmit((values) => { validateData() })}>
                 <Flex direction="column" rowGap={10} >
                     <Group grow>
@@ -70,7 +82,7 @@ const UploadVideoModal: FunctionComponent<UploadVideoModalProps> = (props) =>
                             {...form.getInputProps("visibility")}
                         />
                     </Group>
-                    <FileInput withAsterisk value={file} onChange={setFile} label="Video" placeholder="Your video" icon={<IconUpload size={14} />} />
+                    <FileInput accept="mp4" withAsterisk value={file} onChange={setFile} label="Video" placeholder="Your video" icon={<IconUpload size={14} />} />
                 </Flex>
                 <Button loading={loading} type='submit' fullWidth mt="md">
                     Upload

@@ -1,47 +1,73 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getSession } from "next-auth/react";
 import { getServerAuthSession } from "../../../server/common/get-server-auth-session";
-import { Session, User, Video } from '@prisma/client';
+import { Room, Session, User, Video } from '@prisma/client';
 
 
-export type RoomReq =
-    {
-        id?: number,
-        name: string
-        isPublic: boolean,
-        coverImage?: string | null,
-        video?: Video | null
-        videoId?: number | null
-    }
+export type RoomReq = {
+    id?: number,
+    name: string
+    isPublic: boolean,
+    coverImage?: string | null,
+    video?: Video | null
+    videoId?: number | null,
+    userId?: string,
+    cursor?: number,
+}
 
-export type RoomRes =
-    {
-        success: boolean,
-        errorMessage?: string,
-        name?: string,
-        isPublic?: boolean,
-        coverImage?: string | null,
-        video?: Video | null
-    }
+export type RoomRes = {
+    success: boolean,
+    errorMessage?: string,
+    name?: string,
+    isPublic?: boolean,
+    coverImage?: string | null,
+    video?: Video | null
+    rooms?: Room[];
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse)
 {
     const method = req.method
     const session = await getSession({ req })
-    const { name, isPublic, coverImage, video, id, videoId } = req.body as RoomReq;
+    const { name, isPublic, coverImage, video, id, videoId, userId, cursor } = req.body as RoomReq;
     const response = {} as RoomRes;
-
-    if (!session)
+    //#region Authorize
+    if (!session && method != "GET")
     {
         res.status(401).json({ message: "Unauthorized" })
         return;
     }
+    //#endregion
 
-    //Create new 
-    if (method === "POST")
+    try
     {
-        try
+        //#region Get new x data
+        //Later auth issue 
+        if (method === "GET")
         {
+            const newData = await prisma?.room.findMany({
+                where: {
+                    userId: userId,
+                },
+                take: 10,
+                skip: 1,
+                cursor: {
+                    id: cursor,
+                }
+
+
+            })
+            response.success = true;
+            response.rooms = newData;
+            res.status(200).json(response)
+            return;
+        }
+        //#endregion
+
+        //#region Create new 
+        if (method === "POST")
+        {
+
             const room = await prisma?.room.create({
                 include: {
                     video: true,
@@ -61,20 +87,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             response.video = room?.video;
             res.status(200).json(response);
             return;
-        }
-        catch (err: any)
-        {
-            response.success = false;
-            response.errorMessage = err.message;
-            res.status(500).json(response)
-            return;
-        }
-    }
 
-    //Update existing 
-    if (method === "PUT")
-    {
-        try
+        }
+        //#endregion
+
+        //#region Update existing 
+        if (method === "PUT")
         {
 
             console.log("______________________________________");
@@ -105,19 +123,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             res.status(200).json(response);
             return;
         }
-        catch (err: any)
-        {
-            response.success = false;
-            response.errorMessage = err.message;
-            res.status(500).json(response)
-            return;
-        }
-    }
+        //#endregion
 
-    if (method === "DELETE")
-    {
-        try
+        //#region Delete 
+        if (method === "DELETE")
         {
+
             const deleteRoom = await prisma?.room.delete({
                 where: {
                     id: id,
@@ -129,13 +140,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             response.name = deleteRoom?.name;
             res.status(200).json(response);
             return;
+
+
         }
-        catch (err: any)
-        {
-            response.success = false;
-            response.errorMessage = err.message;
-            res.status(500).json(response)
-            return;
-        }
+        //#endregion
+    }
+    catch (err: any)
+    {
+        response.success = false;
+        response.errorMessage = err.message;
+        res.status(500).json(response)
+        return;
     }
 }

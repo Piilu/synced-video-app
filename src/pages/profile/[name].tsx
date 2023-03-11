@@ -1,7 +1,7 @@
-import { ActionIcon, Avatar, Button, Center, Container, FileInput, Flex, Grid, Group, Modal, NativeSelect, Paper, Progress, SimpleGrid, Tabs, Text, Textarea, TextInput, Title } from '@mantine/core';
+import { ActionIcon, Avatar, Button, Card, Center, Container, FileInput, Flex, Grid, Group, Modal, NativeSelect, Paper, Progress, SimpleGrid, Tabs, Text, Textarea, TextInput, Title } from '@mantine/core';
 import { closeAllModals, openConfirmModal, openModal } from '@mantine/modals';
 import { Room, Session, User, Video } from '@prisma/client';
-import { IconCheck, IconDoor, IconEdit, IconMessageCircle, IconPhoto, IconSettings, IconUpload, IconX } from '@tabler/icons';
+import { IconCheck, IconDoor, IconEdit, IconMessageCircle, IconPhoto, IconSearch, IconSettings, IconUpload, IconX } from '@tabler/icons';
 import { GetServerSideProps, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import { ReactElement, RefAttributes, useRef, useState } from 'react';
@@ -16,11 +16,13 @@ import UploadVideoModal from '../../components/profile/UploadVideoModal';
 import CreateRoomModal from '../../components/profile/CreateRoomModal';
 import { useAutoAnimate } from "@formkit/auto-animate/react"
 import ProgressBar from '../../components/custom/ProgressBar';
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import { VideoReq, VideoRes } from '../api/video';
 import { EndPoints } from '../../constants/GlobalEnums';
 import { showNotification } from '@mantine/notifications';
 import Head from "next/head"
+import Search from '../../components/custom/Search';
+import SmallStatsCard from '../../components/custom/SmallStatsCard';
 export const getServerSideProps: GetServerSideProps = async (ctx) =>
 {
     const getProfileName = ctx.params?.name;
@@ -104,10 +106,39 @@ const Profile: NextPage<ProfileProps> = (props) =>
                 color: "red"
             })
         })
+
         setUploadVideo(false);
-        const test = URL.createObjectURL(file);
-        axios.post(``)
-        console.log("UPLOADING")
+        const dataFile = new FormData();
+        dataFile.append('file', file);
+        const config: AxiosRequestConfig = {
+            onUploadProgress: function (progressEvent)
+            {
+                const precentComplete = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                setProgress(precentComplete)
+            }
+        }
+        await axios.post(`${window.origin}${EndPoints.VIDEO_STREAM}`, dataFile, config)
+            .then(res =>
+            {
+                showNotification({
+                    title: "Uploaded",
+                    message: res.data.message,
+                    icon: <IconCheck />,
+                    color: 'green'
+                })
+            }).catch(err =>
+            {
+                showNotification({
+                    title: "Failed",
+                    message: err.message,
+                    icon: <IconX />,
+                    color: 'red'
+                })
+            })
+    }
+
+    const searchVideos = async () =>
+    {
     }
     return (
         <>
@@ -119,8 +150,8 @@ const Profile: NextPage<ProfileProps> = (props) =>
             <CreateRoomModal createRoom={createRoom} setCreateRoom={setCreateRoom} />
             <Container>
                 <Flex direction="column">
-                    <Paper shadow="sm" radius="lg" mt="lg" p="sm" >
-                        <Group position="right">
+                    <Paper shadow="sm" radius="lg" mt="lg" p="sm" style={{ position: "relative" }} >
+                        <Group style={{ position: "absolute", right: 10 }}>
                             {isUsersProfile ?
                                 <ActionIcon onClick={() => { setEditProfile(true) }} size="md" radius="lg">
                                     <IconEdit size={19} />
@@ -128,11 +159,15 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                 : null}
                         </Group>
                         <Group position='center' p="lg">
-                            <Flex gap={3} align="center" direction={"column"}>
-                                <Avatar component='a' href='#' radius="xl" size="xl" src={profileUser?.image} />
-                                <h4 style={{ margin: 0 }}>{profileUser?.name}</h4>
-                                <small>{profileUser?.email}</small>
-                                <small style={{ minWidth: "50%", textAlign: "center" }}>{profileUser?.bio}</small>
+                            <Flex w="100%" justify="center" wrap='wrap'>
+                                <SmallStatsCard label='Videos' value={profileUser?.videos.length} />
+                                <Flex gap={4} align="center" direction={"column"} mx={20}>
+                                    <Avatar component='a' href='#' radius={120} size={120} src={profileUser?.image} />
+                                    <h4 style={{ margin: 0 }}>{profileUser?.name}</h4>
+                                    <small>{profileUser?.email}</small>
+                                    <small style={{ minWidth: "50%", textAlign: "center" }}>{profileUser?.bio}</small>
+                                </Flex>
+                                <SmallStatsCard label='Rooms' value={profileUser?.rooms.length} />
                             </Flex>
                         </Group>
                     </Paper>
@@ -148,11 +183,14 @@ const Profile: NextPage<ProfileProps> = (props) =>
 
                         <Tabs.Panel value="videos" pt="xs">
                             <ProgressBar progress={progress} setProgress={setProgress} />
-                            {isUsersProfile ?
-                                <Group position='right' my={10}>
-                                    <Button color="teal" onClick={() => { setUploadVideo(true) }} size='xs' radius="md" leftIcon={<IconUpload size={18} />}>Upload video</Button>
-                                </Group>
-                                : null}
+                            <Flex direction="row" wrap="nowrap" justify="space-between">
+                                <Search getSearchData={searchVideos} />
+                                {isUsersProfile ?
+                                    <Group position='right' my={10}>
+                                        <Button color="teal" onClick={() => { setUploadVideo(true) }} size='xs' radius="md" leftIcon={<IconUpload size={18} />}>Upload video</Button>
+                                    </Group>
+                                    : null}
+                            </Flex>
                             <Flex direction="column" gap={20} mb={35} ref={animationParent}>
                                 {profileUser?.videos?.length != 0 ? profileUser?.videos.map(video =>
                                 {

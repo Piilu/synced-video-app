@@ -28,7 +28,7 @@ const ProgressBar: FunctionComponent<ProgressBarProps> = (props) =>
         <Tooltip label="Uploading video" position="bottom" withArrow>
             <div style={{ display: visible }}>
                 <Text align='center'>{progress}%</Text>
-                <Progress color="green" size="sm" value={progress} animate />
+                <Progress translate='yes' color="green" size="md" value={progress} animate />
             </div>
         </Tooltip>
     )

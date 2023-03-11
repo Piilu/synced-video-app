@@ -8,7 +8,7 @@ export const config = {
         bodyParser: false,
     }
 }
-//For now, should use S3
+
 function uploadVideoStream(req: NextApiRequest, res: NextApiResponse)
 {
     const bb = busboy({ headers: req.headers })

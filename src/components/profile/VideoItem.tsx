@@ -1,4 +1,4 @@
-import { ActionIcon, Badge, Box, Card, Text, CardSection, Chip, Group, MediaQuery, Menu, Paper } from '@mantine/core'
+import { ActionIcon, Badge, Box, Card, Text, CardSection, Chip, Group, MediaQuery, Menu, Paper, Tooltip } from '@mantine/core'
 import { openConfirmModal } from '@mantine/modals'
 import { showNotification } from '@mantine/notifications'
 import { Video } from '@prisma/client'
@@ -6,6 +6,7 @@ import { IconCheck, IconDots, IconDownload, IconEye, IconEyeOff, IconFileZip, Ic
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
+import prettyBytes from 'pretty-bytes'
 import React, { FunctionComponent } from 'react'
 import Moment from 'react-moment'
 import { EndPoints } from '../../constants/GlobalEnums'
@@ -158,16 +159,16 @@ const VideoItem: FunctionComponent<VideoItemProps> = (props) =>
             <Card.Section py="xs" inheritPadding withBorder>
                 <MediaQuery largerThan="sm" styles={{ display: "none" }}>
                     <Group position='center'>
-                        <Badge><strong>Video lenght:</strong> 100min</Badge>
-                        <Badge><strong>Video lenght:</strong> 100min</Badge>
-                        <Badge><strong>Video lenght:</strong> 100min</Badge>
+                        <Badge size="sm"><strong>Video size:</strong> {prettyBytes(video.size)}</Badge>
+                        <Badge size="sm"><strong>Video lenght:</strong> 100min</Badge>
+                        <Badge size="sm"><strong>Video lenght:</strong> 100min</Badge>
                     </Group>
                 </MediaQuery>
                 <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
                     <Group position='left'>
-                        <Badge><strong>Video lenght:</strong> 100min</Badge>
-                        <Badge><strong>Video lenght:</strong> 100min</Badge>
-                        <Badge><strong>Video lenght:</strong> 100min</Badge>
+                        <Badge size="sm"><strong>Video size:</strong> {prettyBytes(video.size)}</Badge>
+                        <Badge size="sm"><strong>Video lenght:</strong> 100min</Badge>
+                        <Badge size="sm"><strong>Video lenght:</strong> 100min</Badge>
                     </Group>
                 </MediaQuery>
             </Card.Section>
