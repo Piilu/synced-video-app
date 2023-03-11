@@ -1,4 +1,4 @@
-import { Room, User } from "@prisma/client";
+import { Room, User, Video } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getSession } from "next-auth/react";
 
@@ -8,7 +8,9 @@ export type VideoReq = {
     isPublic: boolean,
     size: number,
     location: string,
-    userId: string,
+    userId?: string,
+    cursor?: number,
+    useSearch?: boolean,
 }
 
 export type VideoRes = {
@@ -21,6 +23,7 @@ export type VideoRes = {
     success: boolean,
     room?: Room[],
     user?: User,
+    videos?: Video[],
 
 }
 
@@ -28,21 +31,64 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 {
     const method = req.method
     const session = await getSession({ req });
-    const { name, isPublic, size, location, userId, id } = req.body as VideoReq;
+    const { name, isPublic, size, location, userId, id, cursor, useSearch } = req.body as VideoReq;
     const response = {} as VideoRes;
 
-    if (!session)
+    if (!session && method !== "GET")
     {
         response.success = false;
         response.errorMessage = "Unauthorized";
         res.status(401).json(response)
         return;
     }
-
-    if (method === "POST")
+    try
     {
-        try
+        //#region Get new x data
+        //Later auth issue 
+        if (method === "GET")
         {
+            const { userId, cursor, useSearch, name } = req.query as unknown as VideoReq;
+            //#region Video Search
+            if (useSearch)
+            {
+                const queryData = await prisma?.video.findMany({
+                    where: {
+                        userId: userId,
+                        name: {
+                            contains: name,
+                        }
+                    },
+                })
+
+                response.videos = queryData
+                response.success = true;
+                res.status(200).json(response)
+                return;
+            }
+            //#endregion
+
+            const newData = await prisma?.video.findMany({
+                take: 10,
+                skip: 1,
+                cursor: {
+                    id: cursor,
+                },
+                where: {
+                    userId: userId,
+                },
+            })
+
+            response.videos = newData;
+            response.success = true;
+            res.status(200).json(response);
+            return;
+        }
+        //#endregion
+
+        //#region  Add Data
+        if (method === "POST")
+        {
+
             const video = await prisma?.video.create({
                 include: {
                     user: true,
@@ -53,7 +99,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     isPublic: isPublic,
                     size: size,
                     location: location,
-                    userId: userId as string,
+                    userId: session?.user?.id as string,
                 }
             })
 
@@ -67,22 +113,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             response.success = true;
             res.status(200).json(response)
             return;
-        }
-        catch (err: any)
-        {
-            response.success = false;
-            response.errorMessage = err.message;
-            console.log(err.message);
-            res.status(200).json(response)
-            return;
-        }
 
-    }
+        }
+        //#endregion
 
-    if (method === "PUT")
-    {
-        try
+        //#region Edit Data
+        if (method === "PUT")
         {
+
             const video = await prisma?.video.update({
                 where: {
                     id: id
@@ -110,21 +148,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             response.success = true;
             res.status(200).json(response)
             return;
-        }
-        catch (err: any)
-        {
-            response.success = false;
-            response.errorMessage = err.message;
-            res.status(200).json(response)
-            return;
-        }
 
-    }
 
-    if (method === "DELETE")
-    {
-        try
+        }
+        //#endregion
+
+        //#region  Delete Data
+        if (method === "DELETE")
         {
+
             const deleteVideo = await prisma?.video.delete({
                 where: {
                     id: id
@@ -136,18 +168,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             res.status(200).json(response)
             return;
         }
-        catch (err: any)
-        {
-            response.success = false;
-            response.errorMessage = err.message;
-            res.status(200).json(response)
-            return;
-        }
+        //#endregion
 
+    } catch (err: any)
+    {
+        response.success = false;
+        response.errorMessage = err.message;
+        console.log(err.message);
+        res.status(500).json(response)
+        return;
     }
 
-    response.success = false;
-    response.errorMessage = "Not allowed"
-    res.status(405).json(response)
-    return;
 }

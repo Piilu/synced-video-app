@@ -23,6 +23,7 @@ import { showNotification } from '@mantine/notifications';
 import Head from "next/head"
 import Search from '../../components/custom/Search';
 import SmallStatsCard from '../../components/custom/SmallStatsCard';
+import { RoomReq } from '../api/room';
 export const getServerSideProps: GetServerSideProps = async (ctx) =>
 {
     const getProfileName = ctx.params?.name;
@@ -137,8 +138,41 @@ const Profile: NextPage<ProfileProps> = (props) =>
             })
     }
 
-    const searchVideos = async () =>
+    const searchVideos = async (value: string) =>
     {
+        let data: RoomReq =
+        {
+            userId: session?.user?.id,
+            isPublic: session?.user?.id == profileUser?.id, //Security problem in api 
+            name: value,
+            useSearch: true,
+
+        }
+        await axios.get(`${window.origin}${EndPoints.VIDEO}`, { params: data }).then(res =>
+        {
+            console.log(res.data)
+        }).catch(err =>
+        {
+            console.log(err.message)
+        })
+    }
+
+    const searchRooms = async (value: string) =>
+    {
+        let data: RoomReq =
+        {
+            userId: session?.user?.id,
+            isPublic: session?.user?.id == profileUser?.id, //Security problem in api 
+            name: value,
+            useSearch: true,
+        }
+        await axios.get(`${window.origin}${EndPoints.ROOM}`, { params: data }).then(res =>
+        {
+            console.log(res.data)
+        }).catch(err =>
+        {
+            console.log(err.message)
+        })
     }
     return (
         <>
@@ -203,11 +237,15 @@ const Profile: NextPage<ProfileProps> = (props) =>
                         </Tabs.Panel>
 
                         <Tabs.Panel value="rooms" pt="xs">
-                            {isUsersProfile ?
-                                <Group position='right' my={10}>
-                                    <Button color="teal" onClick={() => setCreateRoom(true)} size='xs' radius="md" leftIcon={<IconDoor size={18} />}>Create a new room</Button>
-                                </Group>
-                                : null}
+                            <Flex direction="row" wrap="nowrap" justify="space-between">
+                                <Search getSearchData={searchRooms} />
+
+                                {isUsersProfile ?
+                                    <Group position='right' my={10}>
+                                        <Button color="teal" onClick={() => setCreateRoom(true)} size='xs' radius="md" leftIcon={<IconDoor size={18} />}>Create a new room</Button>
+                                    </Group>
+                                    : null}
+                            </Flex>
                             <Grid gutter="md" ref={animationParent}>
                                 {profileUser?.rooms?.length != 0 ? profileUser?.rooms.map(room =>
                                 {

@@ -13,6 +13,7 @@ export type RoomReq = {
     videoId?: number | null,
     userId?: string,
     cursor?: number,
+    useSearch?: boolean,
 }
 
 export type RoomRes = {
@@ -29,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 {
     const method = req.method
     const session = await getSession({ req })
-    const { name, isPublic, coverImage, video, id, videoId, userId, cursor } = req.body as RoomReq;
+    const { name, isPublic, coverImage, video, id, videoId, userId, cursor, useSearch } = req.body as RoomReq;
     const response = {} as RoomRes;
     //#region Authorize
     if (!session && method != "GET")
@@ -45,7 +46,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         //Later auth issue 
         if (method === "GET")
         {
-            const newData = await prisma?.room.findMany({
+            const { userId, cursor, useSearch, name } = req.query as unknown as RoomReq;
+
+            //#region Room search
+            if (useSearch)
+            {
+
+                const queryData = await prisma?.room.findMany({
+                    where: {
+                        userId: userId,
+                        name: {
+                            contains: name,
+                        }
+                    }
+                })
+
+                response.rooms = queryData;
+                response.success = true;
+                res.status(200).json(response)
+                return;
+            }
+            //#endregion
+
+            const nextData = await prisma?.room.findMany({
                 where: {
                     userId: userId,
                 },
@@ -58,7 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             })
             response.success = true;
-            response.rooms = newData;
+            response.rooms = nextData;
             res.status(200).json(response)
             return;
         }
@@ -73,7 +96,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     video: true,
                 },
                 data: {
-                    userId: session.user?.id,
+                    userId: session?.user?.id as string,
                     coverImage: coverImage,
                     name: name,
                     isPublic: isPublic,
