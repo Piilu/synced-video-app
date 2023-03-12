@@ -47,18 +47,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (method === "GET")
         {
             const { userId, cursor, useSearch, name } = req.query as unknown as RoomReq;
-
+            const limit = 10;
             //#region Room search
             if (useSearch)
             {
-
                 const queryData = await prisma?.room.findMany({
                     where: {
                         userId: userId,
                         name: {
                             contains: name,
                         }
-                    }
+                    },
+                    take: limit,
                 })
 
                 response.rooms = queryData;
@@ -72,7 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 where: {
                     userId: userId,
                 },
-                take: 10,
+                take: limit,
                 skip: 1,
                 cursor: {
                     id: cursor,

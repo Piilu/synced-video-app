@@ -26,9 +26,9 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
     const [loading, setLoading] = useState<boolean>(false)
     const form = useForm({
         initialValues: {
-            email: profileUser?.email as string,
-            name: profileUser?.name as string,
-            comment: profileUser?.bio as string,
+            email: profileUser?.email as string ?? "",
+            name: profileUser?.name as string ?? "",
+            comment: profileUser?.bio as string ?? "",
         },
 
         validate: {
@@ -41,9 +41,9 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
     useEffect(() =>
     {
         form.setValues({
-            email: profileUser?.email as string,
-            name: profileUser?.name as string,
-            comment: profileUser?.bio as string,
+            email: profileUser?.email as  string ?? "",
+            name: profileUser?.name as  string ?? "",
+            comment: profileUser?.bio as  string ?? "",
         })
     }, [editProfile])
 
@@ -103,7 +103,6 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
                         <TextInput withAsterisk label="Username:" placeholder="Your name" {...form.getInputProps("name")} />
                     </Group>
                     <Textarea
-                        defaultValue={profileUser?.bio as string}
                         placeholder="Your comment"
                         label="Your comment"
                         {...form.getInputProps("comment")}

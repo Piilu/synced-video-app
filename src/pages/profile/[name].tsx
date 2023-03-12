@@ -4,7 +4,7 @@ import { Room, Session, User, Video } from '@prisma/client';
 import { IconCheck, IconDoor, IconEdit, IconMessageCircle, IconPhoto, IconSearch, IconSettings, IconUpload, IconX } from '@tabler/icons';
 import { GetServerSideProps, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
-import { ReactElement, RefAttributes, useRef, useState } from 'react';
+import { ReactElement, RefAttributes, useEffect, useRef, useState } from 'react';
 import NoItems from '../../components/custom/NoItems';
 import RoomItem from '../../components/profile/RoomItem';
 import VideoItem from '../../components/profile/VideoItem';
@@ -23,20 +23,33 @@ import { showNotification } from '@mantine/notifications';
 import Head from "next/head"
 import Search from '../../components/custom/Search';
 import SmallStatsCard from '../../components/custom/SmallStatsCard';
-import { RoomReq } from '../api/room';
+import { RoomReq, RoomRes } from '../api/room';
+import { useIntersection } from '@mantine/hooks';
 export const getServerSideProps: GetServerSideProps = async (ctx) =>
 {
     const getProfileName = ctx.params?.name;
     const session = await getServerAuthSession(ctx);
     const profileUser = getProfileName !== null ? await prisma.user.findFirst({
         include: {
-            rooms: true,
-            videos: true,
+            rooms: { take: 10 },
+            videos: { take: 10 }
         },
         where: {
             name: getProfileName as string
         },
     }) : null;
+
+    const videoCount = await prisma.video.count({
+        where: {
+            userId: profileUser?.id as string,
+        }
+    })
+
+    const roomCount = await prisma.room.count({
+        where: {
+            userId: profileUser?.id as string,
+        }
+    })
 
     const isUsersProfile = session?.user?.id == profileUser?.id ? true : false;
 
@@ -46,12 +59,14 @@ export const getServerSideProps: GetServerSideProps = async (ctx) =>
             notFound: true
         }
     }
+
     if (!isUsersProfile)
     {
         profileUser.rooms = profileUser.rooms.filter(room => { return room.isPublic })
         profileUser.videos = profileUser.videos.filter(video => { return video.isPublic })
     }
-    return { props: { profileUser, session, isUsersProfile } }
+
+    return { props: { profileUser, session, isUsersProfile, videoCount, roomCount } }
 };
 
 type ProfileProps = {
@@ -60,19 +75,29 @@ type ProfileProps = {
         rooms: Room[];
     }) | null;
     isUsersProfile: boolean;
+    videoCount: number,
+    roomCount: number,
 }
 
 const Profile: NextPage<ProfileProps> = (props) =>
 {
     const { data: session } = useSession();
-    const { profileUser, isUsersProfile } = props
+    const { profileUser, isUsersProfile, videoCount, roomCount } = props
     const [name, setName] = useState<string>();
     const [editProfile, setEditProfile] = useState<boolean>(false);
     const [uploadVideo, setUploadVideo] = useState<boolean>(false);
     const [createRoom, setCreateRoom] = useState<boolean>(false);
     const [progress, setProgress] = useState<number>(0);
+    const [videos, setVideos] = useState<Video[] | undefined>(profileUser?.videos)
+    const [rooms, setRooms] = useState<Room[] | undefined>(profileUser?.rooms)
     const [animationParent] = useAutoAnimate()
     const router = useRouter();
+
+    useEffect(() =>
+    {
+        setRooms(profileUser?.rooms)
+        setVideos(profileUser?.videos)
+    }, [profileUser])
 
     const handleUploadVideo = async (file: File, data: VideoReq) =>
     {
@@ -150,7 +175,9 @@ const Profile: NextPage<ProfileProps> = (props) =>
         }
         await axios.get(`${window.origin}${EndPoints.VIDEO}`, { params: data }).then(res =>
         {
-            console.log(res.data)
+            let newData = res.data as VideoRes;
+            setVideos(newData.videos)
+
         }).catch(err =>
         {
             console.log(err.message)
@@ -168,12 +195,14 @@ const Profile: NextPage<ProfileProps> = (props) =>
         }
         await axios.get(`${window.origin}${EndPoints.ROOM}`, { params: data }).then(res =>
         {
-            console.log(res.data)
+            let newData = res.data as RoomRes;
+            setRooms(newData.rooms)
         }).catch(err =>
         {
             console.log(err.message)
         })
     }
+
     return (
         <>
             <Head>
@@ -193,15 +222,15 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                 : null}
                         </Group>
                         <Group position='center' p="lg">
-                            <Flex w="100%" justify="center" wrap='wrap'>
-                                <SmallStatsCard label='Videos' value={profileUser?.videos.length} />
-                                <Flex gap={4} align="center" direction={"column"} mx={20}>
-                                    <Avatar component='a' href='#' radius={120} size={120} src={profileUser?.image} />
-                                    <h4 style={{ margin: 0 }}>{profileUser?.name}</h4>
-                                    <small>{profileUser?.email}</small>
-                                    <small style={{ minWidth: "50%", textAlign: "center" }}>{profileUser?.bio}</small>
+                            <Flex gap={4} align="center" direction={"column"}>
+                                <Flex w="100%" justify="center" gap={20}>
+                                    <SmallStatsCard label='Videos' value={videoCount} />
+                                    <Avatar component='a' href='' radius={120} size={120} src={profileUser?.image} />
+                                    <SmallStatsCard label='Rooms' value={roomCount} />
                                 </Flex>
-                                <SmallStatsCard label='Rooms' value={profileUser?.rooms.length} />
+                                <h4 style={{ margin: 0 }}>{profileUser?.name}</h4>
+                                <small>{profileUser?.email}</small>
+                                <small style={{ minWidth: "50%", textAlign: "center" }}>{profileUser?.bio}</small>
                             </Flex>
                         </Group>
                     </Paper>
@@ -226,20 +255,23 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                     : null}
                             </Flex>
                             <Flex direction="column" gap={20} mb={35} ref={animationParent}>
-                                {profileUser?.videos?.length != 0 ? profileUser?.videos.map(video =>
+                                {videos?.length != 0 ? videos?.map(video =>
                                 {
                                     return (
-                                        <VideoItem video={video} key={video.id} isUsersProfile={isUsersProfile} />
+                                        <>
+                                            <VideoItem video={video} key={video.id} isUsersProfile={isUsersProfile} />
+                                        </>
+
                                     )
 
                                 }) : <NoItems text='No videos' />}
                             </Flex>
+
                         </Tabs.Panel>
 
                         <Tabs.Panel value="rooms" pt="xs">
                             <Flex direction="row" wrap="nowrap" justify="space-between">
                                 <Search getSearchData={searchRooms} />
-
                                 {isUsersProfile ?
                                     <Group position='right' my={10}>
                                         <Button color="teal" onClick={() => setCreateRoom(true)} size='xs' radius="md" leftIcon={<IconDoor size={18} />}>Create a new room</Button>
@@ -247,11 +279,11 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                     : null}
                             </Flex>
                             <Grid gutter="md" ref={animationParent}>
-                                {profileUser?.rooms?.length != 0 ? profileUser?.rooms.map(room =>
+                                {rooms?.length != 0 ? rooms?.map(room =>
                                 {
                                     return (
                                         <Grid.Col key={room.id} md={6} lg={4}>
-                                            <RoomItem key={room.id} isUsersProfile={isUsersProfile} createdTime={room.createdAt} room={room} />
+                                            <RoomItem isUsersProfile={isUsersProfile} createdTime={room.createdAt} room={room} />
                                         </Grid.Col>
                                     )
                                 }) : <Grid.Col><NoItems text={`${isUsersProfile ? "You have no rooms" : `${profileUser?.name} have no rooms`}`} /></Grid.Col>}

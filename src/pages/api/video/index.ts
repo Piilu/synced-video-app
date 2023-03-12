@@ -48,6 +48,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (method === "GET")
         {
             const { userId, cursor, useSearch, name } = req.query as unknown as VideoReq;
+            const limit = 10;
+
             //#region Video Search
             if (useSearch)
             {
@@ -58,6 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             contains: name,
                         }
                     },
+                    take: limit,
                 })
 
                 response.videos = queryData
@@ -68,7 +71,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             //#endregion
 
             const newData = await prisma?.video.findMany({
-                take: 10,
+                take: limit,
                 skip: 1,
                 cursor: {
                     id: cursor,
