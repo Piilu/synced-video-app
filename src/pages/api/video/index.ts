@@ -74,7 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 take: limit,
                 skip: 1,
                 cursor: {
-                    id: cursor,
+                    id: parseInt(cursor),
                 },
                 where: {
                     userId: userId,

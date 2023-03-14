@@ -1,9 +1,10 @@
-import { ActionIcon, Button, Card, Group, Image, Menu, Text } from '@mantine/core'
+import { ActionIcon, Avatar, Button, Card, Flex, Group, Image, Menu, Text, Tooltip } from '@mantine/core'
 import { closeAllModals, openConfirmModal } from '@mantine/modals'
 import { showNotification } from '@mantine/notifications'
-import { Room } from '@prisma/client'
-import { IconCheck, IconDots, IconDownload, IconEye, IconEyeOff, IconTrash, IconX } from '@tabler/icons'
+import { ConnectedRooms, Room, User } from '@prisma/client'
+import { IconCheck, IconDots, IconDownload, IconEye, IconEyeOff, IconTrash, IconUser, IconUserOff, IconUsers, IconX } from '@tabler/icons'
 import axios from 'axios'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState, FunctionComponent } from 'react'
@@ -12,17 +13,24 @@ import { EndPoints } from '../../constants/GlobalEnums'
 import { RoomReq, RoomRes } from '../../pages/api/room'
 
 type RoomItemProps = {
-    room: Room,
+    room: Room & {
+        ConnectedRooms: (ConnectedRooms & {
+            user: User;
+        })[];
+    }
     createdTime: Date,
     isUsersProfile: boolean,
 }
 
 
 
-const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
+const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
+{
     const { room, createdTime, isUsersProfile } = props
+    const { data: session } = useSession();
     const router = useRouter();
-    const confirmDelete = () => {
+    const confirmDelete = () =>
+    {
         openConfirmModal({
             title: `Delete room '${room.name}'`,
             centered: true,
@@ -37,7 +45,8 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
             onConfirm: () => handleRoomDelete(),
         });
     }
-    const handleRoomDelete = async () => {
+    const handleRoomDelete = async () =>
+    {
         //only needs one 
         let data: RoomReq =
         {
@@ -45,9 +54,11 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
             isPublic: room.isPublic,
             name: room.name,
         }
-        await axios.delete(`${window.origin}${EndPoints.ROOM}`, { data: data }).then(res => {
+        await axios.delete(`${window.origin}${EndPoints.ROOM}`, { data: data }).then(res =>
+        {
             let newData = res.data as RoomRes;
-            if (newData.success) {
+            if (newData.success)
+            {
                 router.push({
                     pathname: router.asPath,
                 }, undefined, { scroll: false })
@@ -57,14 +68,16 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
                     color: "green",
                 })
             }
-            else {
+            else
+            {
                 showNotification({
                     message: newData.errorMessage,
                     icon: <IconX />,
                     color: "red",
                 })
             }
-        }).catch(err => {
+        }).catch(err =>
+        {
             showNotification({
                 message: err.message,
                 icon: <IconX />,
@@ -73,7 +86,8 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
         })
     }
 
-    const handleRoomVisibility = async () => {
+    const handleRoomVisibility = async () =>
+    {
         const visibility = !room.isPublic;
         let data: RoomReq = {
             id: room.id,
@@ -83,10 +97,12 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
             videoId: room.videoId,
 
         }
-        await axios.put(`${window.origin}${EndPoints.ROOM}`, data).then(res => {
+        await axios.put(`${window.origin}${EndPoints.ROOM}`, data).then(res =>
+        {
             let newData = res.data as RoomRes;
 
-            if (newData.success) {
+            if (newData.success)
+            {
                 router.push({
                     pathname: router.asPath,
                 }, undefined, { scroll: false })
@@ -97,14 +113,16 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
                     icon: <IconCheck />
                 })
             }
-            else {
+            else
+            {
                 showNotification({
                     message: newData.errorMessage,
                     icon: <IconX />,
                     color: "red",
                 })
             }
-        }).catch(err => {
+        }).catch(err =>
+        {
             showNotification({
                 message: err.message,
                 icon: <IconX />,
@@ -148,10 +166,29 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) => {
                     alt="Norway" />
             </Card.Section>
             <Card.Section inheritPadding>
-                <Group position='right' noWrap my={20}>
-                    <Link href={`/rooms/${room.id}`} ></Link>
-                    <Button component='a' href={`/rooms/${room.id}`} variant='light' color="green">Join room</Button>
-                </Group>
+                <Flex>
+                    <Group>
+
+                        <Tooltip.Group openDelay={300} closeDelay={100}>
+                            <Avatar.Group spacing="sm">
+                                {room.ConnectedRooms.length !== 0 ? room.ConnectedRooms.map(user =>
+                                {
+                                    //Later make it so when more then three users then start showing number
+                                    return (
+                                        <Tooltip key={user.socketId} label={session?.user?.id === user.user.id ? user.user.name + " (You)" : user.user.name} withArrow>
+                                            <Avatar src={user.user.image} radius="xl" >{user.user.name?.charAt(0)}</Avatar>
+                                        </Tooltip>
+                                    )
+                                }) : <Avatar radius="xl" ><IconUserOff /></Avatar>
+                                }
+                            </Avatar.Group>
+                        </Tooltip.Group>
+                    </Group>
+                    <Group ml="auto" noWrap my={20}>
+                        {/* <Link href={`/rooms/${room.id}`} >Test</Link> */}
+                        <Button component='a' href={`/rooms/${room.id}`} variant='light' color="green">Join room</Button>
+                    </Group>
+                </Flex>
             </Card.Section>
         </Card>
     )

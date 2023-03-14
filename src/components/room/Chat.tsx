@@ -30,7 +30,7 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
         if (name.trim() == "") {
             showNotification({
                 title: 'Name is required',
-                message: "Hey there, your don't have a name! 🤥",
+                message: "Hey there, your don't h e a name! 🤥",
                 icon: <IconX />,
                 color: "red",
             })

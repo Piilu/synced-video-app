@@ -24,7 +24,7 @@ const Search: FunctionComponent<SearchProps> = (props) =>
     }, [value])
     return (
         <>
-            <Group my={10}>
+            <Group my={10} mr={10}>
                 <TextInput onChange={(e) => { setValue(e.target.value) }} radius="md" icon={<IconSearch />} placeholder='Search' />
             </Group>
         </>

@@ -41,9 +41,9 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
     useEffect(() =>
     {
         form.setValues({
-            email: profileUser?.email as  string ?? "",
-            name: profileUser?.name as  string ?? "",
-            comment: profileUser?.bio as  string ?? "",
+            email: profileUser?.email as string ?? "",
+            name: profileUser?.name as string ?? "",
+            comment: profileUser?.bio as string ?? "",
         })
     }, [editProfile])
 
@@ -95,7 +95,7 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
 
     }
     return (
-        <Modal title="Profile settings" opened={editProfile} onClose={() => { setEditProfile(false); }}>
+        <Modal title="Profile settings" opened={editProfile} onClose={() => { setEditProfile(false); }} >
             <form onSubmit={form.onSubmit((values) => { handleProfileUpdate() })}>
                 <Flex direction="column" gap={20}>
                     <Group grow>
@@ -103,6 +103,7 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
                         <TextInput withAsterisk label="Username:" placeholder="Your name" {...form.getInputProps("name")} />
                     </Group>
                     <Textarea
+                        minRows={5}
                         placeholder="Your comment"
                         label="Your comment"
                         {...form.getInputProps("comment")}

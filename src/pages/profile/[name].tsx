@@ -1,6 +1,6 @@
-import { ActionIcon, Avatar, Button, Card, Center, Container, FileInput, Flex, Grid, Group, Modal, NativeSelect, Paper, Progress, SimpleGrid, Tabs, Text, Textarea, TextInput, Title } from '@mantine/core';
+import { ActionIcon, Avatar, Button, Card, Center, Container, FileInput, Flex, Grid, Group, Loader, Modal, NativeSelect, Paper, Progress, SimpleGrid, Tabs, Text, Textarea, TextInput, Title } from '@mantine/core';
 import { closeAllModals, openConfirmModal, openModal } from '@mantine/modals';
-import { Room, Session, User, Video } from '@prisma/client';
+import { ConnectedRooms, Room, Session, User, Video } from '@prisma/client';
 import { IconCheck, IconDoor, IconEdit, IconMessageCircle, IconPhoto, IconSearch, IconSettings, IconUpload, IconX } from '@tabler/icons';
 import { GetServerSideProps, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
@@ -25,13 +25,15 @@ import Search from '../../components/custom/Search';
 import SmallStatsCard from '../../components/custom/SmallStatsCard';
 import { RoomReq, RoomRes } from '../api/room';
 import { useIntersection } from '@mantine/hooks';
+import InfiniteScroll from 'react-infinite-scroller';
+
 export const getServerSideProps: GetServerSideProps = async (ctx) =>
 {
     const getProfileName = ctx.params?.name;
     const session = await getServerAuthSession(ctx);
     const profileUser = getProfileName !== null ? await prisma.user.findFirst({
         include: {
-            rooms: { take: 10 },
+            rooms: { take: 10, include: { ConnectedRooms: { include: { user: true } } } },
             videos: { take: 10 }
         },
         where: {
@@ -39,19 +41,42 @@ export const getServerSideProps: GetServerSideProps = async (ctx) =>
         },
     }) : null;
 
-    const videoCount = await prisma.video.count({
-        where: {
-            userId: profileUser?.id as string,
-        }
-    })
+    let videoCount = 0;
 
-    const roomCount = await prisma.room.count({
-        where: {
-            userId: profileUser?.id as string,
-        }
-    })
+    let roomCount = 0;
 
     const isUsersProfile = session?.user?.id == profileUser?.id ? true : false;
+
+    if (isUsersProfile)
+    {
+        videoCount = await prisma.video.count({
+            where: {
+                userId: profileUser?.id as string,
+            }
+        })
+
+        roomCount = await prisma.room.count({
+            where: {
+                userId: profileUser?.id as string,
+            }
+        })
+    }
+    else
+    {
+        videoCount = await prisma.video.count({
+            where: {
+                userId: profileUser?.id as string,
+                isPublic: true,
+            }
+        })
+
+        roomCount = await prisma.room.count({
+            where: {
+                userId: profileUser?.id as string,
+                isPublic: true,
+            }
+        })
+    }
 
     if (profileUser === null)
     {
@@ -71,9 +96,13 @@ export const getServerSideProps: GetServerSideProps = async (ctx) =>
 
 type ProfileProps = {
     profileUser: (User & {
+        rooms: (Room & {
+            ConnectedRooms: (ConnectedRooms & {
+                user: User;
+            })[];
+        })[];
         videos: Video[];
-        rooms: Room[];
-    }) | null;
+    }) | null
     isUsersProfile: boolean;
     videoCount: number,
     roomCount: number,
@@ -89,7 +118,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
     const [createRoom, setCreateRoom] = useState<boolean>(false);
     const [progress, setProgress] = useState<number>(0);
     const [videos, setVideos] = useState<Video[] | undefined>(profileUser?.videos)
-    const [rooms, setRooms] = useState<Room[] | undefined>(profileUser?.rooms)
+    const [rooms, setRooms] = useState<(Room & { ConnectedRooms: (ConnectedRooms & { user: User; })[]; })[] | undefined | undefined>(profileUser?.rooms)
     const [animationParent] = useAutoAnimate()
     const router = useRouter();
 
@@ -167,7 +196,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
     {
         let data: RoomReq =
         {
-            userId: session?.user?.id,
+            userId: profileUser?.id,
             isPublic: session?.user?.id == profileUser?.id, //Security problem in api 
             name: value,
             useSearch: true,
@@ -188,7 +217,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
     {
         let data: RoomReq =
         {
-            userId: session?.user?.id,
+            userId: profileUser?.id,
             isPublic: session?.user?.id == profileUser?.id, //Security problem in api 
             name: value,
             useSearch: true,
@@ -203,6 +232,47 @@ const Profile: NextPage<ProfileProps> = (props) =>
         })
     }
 
+    const searchNextRoom = () =>
+    {
+        console.log("Load Rooms")
+    }
+
+    const searchNextVideos = async () =>
+    {
+        if (videos === undefined) return;
+
+        console.log(Math.max(...videos.map(video => video.id)),)
+        let data: VideoReq = {
+            cursor: Math.max(...videos.map(video => video.id)),
+            userId: profileUser?.id,
+            isPublic: true, //doesn't matter
+            name: "",//doesn't matter
+            location: "sasd",//doesn't matter
+            size: 1111//doesn't matter
+        }
+
+        await axios.get(`${window.origin}${EndPoints.VIDEO}`, { params: data }).then(res =>
+        {
+            const newData = res.data as VideoRes;
+            if (newData.success)
+            {
+                console.log(newData.videos)
+                setVideos((prevVideos) => [
+                    ...prevVideos, ...newData.videos
+                ])
+            }
+        }).catch(err =>
+        {
+            showNotification(
+                {
+                    title: "Error",
+                    message: err.message,
+                }
+            )
+        })
+        console.log("Videos list Count:" + videos.length)
+        console.log("Videos all Count:" + videoCount)
+    }
     return (
         <>
             <Head>
@@ -254,18 +324,24 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                     </Group>
                                     : null}
                             </Flex>
-                            <Flex direction="column" gap={20} mb={35} ref={animationParent}>
-                                {videos?.length != 0 ? videos?.map(video =>
-                                {
-                                    return (
-                                        <>
+
+                            <InfiniteScroll
+                                threshold={300}
+                                loadMore={searchNextVideos}
+                                hasMore={videos?.length !== videoCount}
+                                loader={<Group key={0} mb={10} position='center'><Loader variant="dots" ></Loader></Group>}
+                            >
+                                <Flex direction="column" gap={20} mb={35} ref={animationParent}>
+
+                                    {videos?.length != 0 ? videos?.map(video =>
+                                    {
+                                        return (
                                             <VideoItem video={video} key={video.id} isUsersProfile={isUsersProfile} />
-                                        </>
+                                        )
 
-                                    )
-
-                                }) : <NoItems text='No videos' />}
-                            </Flex>
+                                    }) : <NoItems text='No videos' />}
+                                </Flex>
+                            </InfiniteScroll>
 
                         </Tabs.Panel>
 
