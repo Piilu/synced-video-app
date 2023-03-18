@@ -6,3 +6,4 @@
 - Allow guest into rooms
 - Pin videos and rooms.
 - Some filters for videos and rooms 
+- Infinity scroll search doesn't include name rn 

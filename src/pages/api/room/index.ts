@@ -52,11 +52,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (useSearch)
             {
                 const queryData = await prisma?.room.findMany({
+                    include: {
+                        ConnectedRooms: true,
+                        user: true,
+                    },
                     where: {
                         userId: userId,
                         name: {
                             contains: name,
-                        }
+                        },
+                        isPublic: session?.user?.id == userId ? {} : true,
                     },
                     take: limit,
                 })
@@ -71,14 +76,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const nextData = await prisma?.room.findMany({
                 where: {
                     userId: userId,
+                    isPublic: session?.user?.id == userId ? {} : true,
+                },
+                include: {
+                    ConnectedRooms: true,
+                    user: true,
                 },
                 take: limit,
                 skip: 1,
                 cursor: {
-                    id: cursor,
+                    id: parseInt(cursor as unknown as string),
                 }
-
-
             })
             response.success = true;
             response.rooms = nextData;

@@ -168,7 +168,6 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
             <Card.Section inheritPadding>
                 <Flex>
                     <Group>
-
                         <Tooltip.Group openDelay={300} closeDelay={100}>
                             <Avatar.Group spacing="sm">
                                 {room.ConnectedRooms.length !== 0 ? room.ConnectedRooms.map(user =>
@@ -179,14 +178,16 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
                                             <Avatar src={user.user.image} radius="xl" >{user.user.name?.charAt(0)}</Avatar>
                                         </Tooltip>
                                     )
-                                }) : <Avatar radius="xl" ><IconUserOff /></Avatar>
+                                }) : <Tooltip label="No connected users"><Avatar opacity={0.45} radius="xl" ><IconUserOff /></Avatar></Tooltip>
                                 }
                             </Avatar.Group>
                         </Tooltip.Group>
                     </Group>
                     <Group ml="auto" noWrap my={20}>
-                        {/* <Link href={`/rooms/${room.id}`} >Test</Link> */}
-                        <Button component='a' href={`/rooms/${room.id}`} variant='light' color="green">Join room</Button>
+                        <Link href={`/rooms/${room.id}`}>
+
+                            <Button size='sm' radius={20} variant='light' color="green">Join room</Button>
+                        </Link>
                     </Group>
                 </Flex>
             </Card.Section>

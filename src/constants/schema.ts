@@ -35,3 +35,5 @@ export type LinkItemData = {
     icon: TablerIcon,
     linkType: LinkTypes
 }
+
+

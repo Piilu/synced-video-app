@@ -58,7 +58,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         userId: userId,
                         name: {
                             contains: name,
-                        }
+                        },
+                        isPublic: session?.user?.id == userId ? {} : true,
                     },
                     take: limit,
                 })
@@ -74,10 +75,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 take: limit,
                 skip: 1,
                 cursor: {
-                    id: parseInt(cursor),
+                    id: parseInt(cursor as unknown as string),
                 },
                 where: {
                     userId: userId,
+                    isPublic: session?.user?.id == userId ? {} : true,
                 },
             })
 

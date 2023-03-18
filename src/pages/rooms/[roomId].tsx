@@ -29,6 +29,16 @@ export const getServerSideProps: GetServerSideProps = async (ctx) =>
     {
         return { props: { notFound: true } }
     }
+    if (!session)
+    {
+        return {
+
+            redirect: {
+                permanent: false,
+                destination: `/rooms/guest?${QueryParams.RETURN_URL}=${ctx.resolvedUrl}`,
+            },
+        }
+    }
     const roomInitialData = await prisma?.room.findFirst({
         where: {
             id: roomIdNumber,

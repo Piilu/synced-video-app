@@ -24,7 +24,6 @@ import Head from "next/head"
 import Search from '../../components/custom/Search';
 import SmallStatsCard from '../../components/custom/SmallStatsCard';
 import { RoomReq, RoomRes } from '../api/room';
-import { useIntersection } from '@mantine/hooks';
 import InfiniteScroll from 'react-infinite-scroller';
 
 export const getServerSideProps: GetServerSideProps = async (ctx) =>
@@ -113,6 +112,8 @@ const Profile: NextPage<ProfileProps> = (props) =>
     const { data: session } = useSession();
     const { profileUser, isUsersProfile, videoCount, roomCount } = props
     const [name, setName] = useState<string>();
+    const [videoSearch, setVideoSearch] = useState<boolean>(true);
+    const [roomSearch, setRoomSearch] = useState<boolean>(true);
     const [editProfile, setEditProfile] = useState<boolean>(false);
     const [uploadVideo, setUploadVideo] = useState<boolean>(false);
     const [createRoom, setCreateRoom] = useState<boolean>(false);
@@ -202,6 +203,17 @@ const Profile: NextPage<ProfileProps> = (props) =>
             useSearch: true,
 
         }
+        setTimeout(() =>
+        {
+            if (value === "")
+            {
+                setVideoSearch(true)
+            }
+            else
+            {
+                setVideoSearch(false)
+            }
+        }, 500)
         await axios.get(`${window.origin}${EndPoints.VIDEO}`, { params: data }).then(res =>
         {
             let newData = res.data as VideoRes;
@@ -222,6 +234,18 @@ const Profile: NextPage<ProfileProps> = (props) =>
             name: value,
             useSearch: true,
         }
+
+        setTimeout(() =>
+        {
+            if (value === "")
+            {
+                setRoomSearch(true)
+            }
+            else
+            {
+                setRoomSearch(false)
+            }
+        }, 500)
         await axios.get(`${window.origin}${EndPoints.ROOM}`, { params: data }).then(res =>
         {
             let newData = res.data as RoomRes;
@@ -232,16 +256,48 @@ const Profile: NextPage<ProfileProps> = (props) =>
         })
     }
 
-    const searchNextRoom = () =>
+    const searchNextRooms = async () =>
     {
-        console.log("Load Rooms")
+        if (rooms === undefined) return;
+        if (rooms.length === 0) return;
+
+        let data: RoomReq = {
+            cursor: Math.max(...rooms.map(room => room.id)),
+            userId: profileUser?.id,
+            isPublic: true, //doesn't matter
+            name: "",//doesn't matter
+        }
+
+        await axios.get(`${window.origin}${EndPoints.ROOM}`, { params: data }).then(res =>
+        {
+            const newData = res.data as RoomRes;
+            if (newData.success)
+            {
+                if (newData.rooms?.length == 0)
+                {
+                    return;
+                }
+                setRooms((prevRooms) => [
+                    ...prevRooms, ...newData.rooms
+                ])
+            }
+        }).catch(err =>
+        {
+            showNotification(
+                {
+                    title: "Error",
+                    message: err.message,
+                }
+            )
+        })
+
     }
 
     const searchNextVideos = async () =>
     {
         if (videos === undefined) return;
+        if (videos.length === 0) return;
 
-        console.log(Math.max(...videos.map(video => video.id)),)
         let data: VideoReq = {
             cursor: Math.max(...videos.map(video => video.id)),
             userId: profileUser?.id,
@@ -256,7 +312,11 @@ const Profile: NextPage<ProfileProps> = (props) =>
             const newData = res.data as VideoRes;
             if (newData.success)
             {
+                console.log("TEEEEEEEEEEEEEEEEEEST")
                 console.log(newData.videos)
+
+                if (newData.videos?.length == 0) return;
+
                 setVideos((prevVideos) => [
                     ...prevVideos, ...newData.videos
                 ])
@@ -270,8 +330,6 @@ const Profile: NextPage<ProfileProps> = (props) =>
                 }
             )
         })
-        console.log("Videos list Count:" + videos.length)
-        console.log("Videos all Count:" + videoCount)
     }
     return (
         <>
@@ -326,9 +384,9 @@ const Profile: NextPage<ProfileProps> = (props) =>
                             </Flex>
 
                             <InfiniteScroll
-                                threshold={300}
+                                threshold={350}
                                 loadMore={searchNextVideos}
-                                hasMore={videos?.length !== videoCount}
+                                hasMore={videos?.length !== videoCount && videoSearch}
                                 loader={<Group key={0} mb={10} position='center'><Loader variant="dots" ></Loader></Group>}
                             >
                                 <Flex direction="column" gap={20} mb={35} ref={animationParent}>
@@ -354,16 +412,23 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                     </Group>
                                     : null}
                             </Flex>
-                            <Grid gutter="md" ref={animationParent}>
-                                {rooms?.length != 0 ? rooms?.map(room =>
-                                {
-                                    return (
-                                        <Grid.Col key={room.id} md={6} lg={4}>
-                                            <RoomItem isUsersProfile={isUsersProfile} createdTime={room.createdAt} room={room} />
-                                        </Grid.Col>
-                                    )
-                                }) : <Grid.Col><NoItems text={`${isUsersProfile ? "You have no rooms" : `${profileUser?.name} have no rooms`}`} /></Grid.Col>}
-                            </Grid>
+                            <InfiniteScroll
+                                threshold={350}
+                                loadMore={searchNextRooms}
+                                hasMore={rooms?.length !== roomCount && roomSearch}
+                                loader={<Group key={0} mb={10} position='center'><Loader variant="dots" ></Loader></Group>}
+                            >
+                                <Grid gutter="md" ref={animationParent}>
+                                    {rooms?.length != 0 ? rooms?.map(room =>
+                                    {
+                                        return (
+                                            <Grid.Col key={room.id} md={6} lg={4}>
+                                                <RoomItem isUsersProfile={isUsersProfile} createdTime={room.createdAt} room={room} />
+                                            </Grid.Col>
+                                        )
+                                    }) : <Grid.Col><NoItems text={`${isUsersProfile ? "You have no rooms" : `${profileUser?.name} have no rooms`}`} /></Grid.Col>}
+                                </Grid>
+                            </InfiniteScroll>
                         </Tabs.Panel>
 
                         <Tabs.Panel value="settings" pt="xs">
