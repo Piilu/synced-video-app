@@ -30,13 +30,17 @@ export const getServerSideProps: GetServerSideProps = async (ctx) =>
 {
     const getProfileName = ctx.params?.name;
     const session = await getServerAuthSession(ctx);
+    console.log("JEEEEE:" + ctx.query.search)
+    const test = true;
     const profileUser = getProfileName !== null ? await prisma.user.findFirst({
         include: {
-            rooms: { take: 10, include: { ConnectedRooms: { include: { user: true } } } },
-            videos: { take: 10 }
+            rooms: {
+                where: { name: { contains: ctx.query?.search as string } }, take: 10, include: { ConnectedRooms: { include: { user: true } } }
+            },
+            videos: { where: { name: { contains: ctx.query?.search as string } }, take: 10, include: { user: true, } }
         },
         where: {
-            name: getProfileName as string
+            name: getProfileName as string,
         },
     }) : null;
 
@@ -46,36 +50,21 @@ export const getServerSideProps: GetServerSideProps = async (ctx) =>
 
     const isUsersProfile = session?.user?.id == profileUser?.id ? true : false;
 
-    if (isUsersProfile)
-    {
-        videoCount = await prisma.video.count({
-            where: {
-                userId: profileUser?.id as string,
-            }
-        })
 
-        roomCount = await prisma.room.count({
-            where: {
-                userId: profileUser?.id as string,
-            }
-        })
-    }
-    else
-    {
-        videoCount = await prisma.video.count({
-            where: {
-                userId: profileUser?.id as string,
-                isPublic: true,
-            }
-        })
+    videoCount = await prisma.video.count({
+        where: {
+            userId: profileUser?.id as string,
+            isPublic: isUsersProfile ? {} : true,
+        }
+    })
 
-        roomCount = await prisma.room.count({
-            where: {
-                userId: profileUser?.id as string,
-                isPublic: true,
-            }
-        })
-    }
+    roomCount = await prisma.room.count({
+        where: {
+            userId: profileUser?.id as string,
+            isPublic: isUsersProfile ? {} : true,
+        }
+    })
+
 
     if (profileUser === null)
     {
@@ -125,8 +114,20 @@ const Profile: NextPage<ProfileProps> = (props) =>
 
     useEffect(() =>
     {
+        if (router.query.search !== "")
+        {
+            setVideoSearch(false)
+            setRoomSearch(false)
+        }
+        else
+        {
+            setVideoSearch(true)
+            setRoomSearch(true)
+        }
+
         setRooms(profileUser?.rooms)
         setVideos(profileUser?.videos)
+        console.log("Testin tab change")
     }, [profileUser])
 
     const handleUploadVideo = async (file: File, data: VideoReq) =>
@@ -193,19 +194,20 @@ const Profile: NextPage<ProfileProps> = (props) =>
             })
     }
 
-    const searchVideos = async (value: string) =>
+    const searchVideos = async () =>
     {
         let data: RoomReq =
         {
             userId: profileUser?.id,
             isPublic: session?.user?.id == profileUser?.id, //Security problem in api 
-            name: value,
+            name: router.query.search as string,
             useSearch: true,
 
         }
+
         setTimeout(() =>
         {
-            if (value === "")
+            if (router.query.search === "")
             {
                 setVideoSearch(true)
             }
@@ -225,27 +227,29 @@ const Profile: NextPage<ProfileProps> = (props) =>
         })
     }
 
-    const searchRooms = async (value: string) =>
+    const searchRooms = async () =>
     {
         let data: RoomReq =
         {
             userId: profileUser?.id,
             isPublic: session?.user?.id == profileUser?.id, //Security problem in api 
-            name: value,
+            name: router.query.search as string,
             useSearch: true,
         }
 
         setTimeout(() =>
         {
-            if (value === "")
+            if (router.query.search === "")
             {
                 setRoomSearch(true)
             }
-            else
-            {
-                setRoomSearch(false)
-            }
+
         }, 500)
+
+        if (router.query.search !== "")
+        {
+            setRoomSearch(false)
+        }
         await axios.get(`${window.origin}${EndPoints.ROOM}`, { params: data }).then(res =>
         {
             let newData = res.data as RoomRes;
@@ -265,7 +269,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
             cursor: Math.max(...rooms.map(room => room.id)),
             userId: profileUser?.id,
             isPublic: true, //doesn't matter
-            name: "",//doesn't matter
+            name: router.query.search as string,
         }
 
         await axios.get(`${window.origin}${EndPoints.ROOM}`, { params: data }).then(res =>
@@ -297,12 +301,11 @@ const Profile: NextPage<ProfileProps> = (props) =>
     {
         if (videos === undefined) return;
         if (videos.length === 0) return;
-
         let data: VideoReq = {
             cursor: Math.max(...videos.map(video => video.id)),
             userId: profileUser?.id,
             isPublic: true, //doesn't matter
-            name: "",//doesn't matter
+            name: router.query.search as string,
             location: "sasd",//doesn't matter
             size: 1111//doesn't matter
         }
@@ -312,7 +315,6 @@ const Profile: NextPage<ProfileProps> = (props) =>
             const newData = res.data as VideoRes;
             if (newData.success)
             {
-                console.log("TEEEEEEEEEEEEEEEEEEST")
                 console.log(newData.videos)
 
                 if (newData.videos?.length == 0) return;
@@ -363,7 +365,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
                         </Group>
                     </Paper>
 
-                    <Tabs defaultValue="videos">
+                    <Tabs value={router.query.activeTab as string} defaultValue="videos" onTabChange={(value) => router.push({ query: { ...router.query, activeTab: value, search: "" } }, undefined)}>
                         <Paper shadow="sm" radius="lg" mt="lg" p="sm" >
                             <Tabs.List grow={true}>
                                 <Tabs.Tab value="videos" icon={<IconPhoto size={14} />}>Videos</Tabs.Tab>
@@ -416,7 +418,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                 threshold={350}
                                 loadMore={searchNextRooms}
                                 hasMore={rooms?.length !== roomCount && roomSearch}
-                                loader={<Group key={0} mb={10} position='center'><Loader variant="dots" ></Loader></Group>}
+                                loader={<Group key={0} my={10} position='center'><Loader variant="dots" ></Loader></Group>}
                             >
                                 <Grid gutter="md" ref={animationParent}>
                                     {rooms?.length != 0 ? rooms?.map(room =>

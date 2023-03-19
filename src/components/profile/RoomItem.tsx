@@ -23,7 +23,6 @@ type RoomItemProps = {
 }
 
 
-
 const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
 {
     const { room, createdTime, isUsersProfile } = props
@@ -174,9 +173,22 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
                                 {
                                     //Later make it so when more then three users then start showing number
                                     return (
-                                        <Tooltip key={user.socketId} label={session?.user?.id === user.user.id ? user.user.name + " (You)" : user.user.name} withArrow>
-                                            <Avatar src={user.user.image} radius="xl" >{user.user.name?.charAt(0)}</Avatar>
-                                        </Tooltip>
+                                        <div key={user.socketId}>
+                                            <Tooltip label={session?.user?.id === user.user.id ? user.user.name + " (You)" : user.user.name} withArrow>
+                                                <Avatar src={user.user.image} radius="xl" >{user.user.name?.charAt(0)}</Avatar>
+                                            </Tooltip>
+                                            {/* <Tooltip
+                                                withArrow
+                                                label={
+                                                    <>
+                                                        <div>John Outcast</div>
+                                                        <div>Levi Capitan</div>
+                                                    </>
+                                                }
+                                            >
+                                                <Avatar radius="xl">+2</Avatar>
+                                            </Tooltip> */}
+                                        </div>
                                     )
                                 }) : <Tooltip label="No connected users"><Avatar opacity={0.45} radius="xl" ><IconUserOff /></Avatar></Tooltip>
                                 }

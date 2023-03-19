@@ -72,11 +72,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 return;
             }
             //#endregion
-
+            console.log("SEEEEEEAAAAARCH =>>>>"+name)
             const nextData = await prisma?.room.findMany({
                 where: {
                     userId: userId,
                     isPublic: session?.user?.id == userId ? {} : true,
+                    name: {
+                        contains: name,
+                    }
                 },
                 include: {
                     ConnectedRooms: true,

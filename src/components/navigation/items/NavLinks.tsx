@@ -65,18 +65,19 @@ const useStyles = createStyles((theme, _params, getRef) =>
 
 type NavDefaultItemProps = {
     item: LinkItemData,
-    path: string,
+    profileName: string,
 }
 const NavDefaultItem: FunctionComponent<NavDefaultItemProps> = (props) =>
 {
-    const { item, path } = props;
+    const { item, profileName } = props;
     const { classes, cx } = useStyles();
     const { data: session } = useSession();
     const link = item.linkType != LinkTypes.PROFILE ? item.link : item.link.replace("{0}", session?.user?.name as string)
+    const name = "Test";
 
     return (
         <Link
-            className={cx(classes.link, { [classes.linkActive]: item.linkType === LinkTypes.DEFAULT ? link === path : link === path && link.includes(session?.user?.name as string) })}
+            className={cx(classes.link, { [classes.linkActive]: item.linkType === LinkTypes.DEFAULT ? session?.user?.name as string === profileName : profileName === session?.user?.name as string && link.includes(session?.user?.name as string) })}
             href={link}
             key={item.label}
         >

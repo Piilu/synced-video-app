@@ -37,12 +37,13 @@ type AppSideNavProps = {
 const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
 {
     const { opened, setOpened } = props;
-    const {data:session} = useSession();
+    const { data: session } = useSession();
     const { classes, cx } = useStyles();
 
     const router = useRouter();
+    console.log("APPSIDENAV:", router)
     const links = data.map((item) => (
-        <NavDefaultItem key={item.label} item={item} path={router.asPath} />
+        <NavDefaultItem key={item.label} item={item} profileName={router.query.name as string} />
     ));
     return (
 
@@ -50,7 +51,7 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
 
             <Navbar.Section grow>
                 <Group className={classes.header} position="apart">
-                    <Link  href={`/profile/${session?.user?.name}`} style={{ margin: 0,fontSize:"1.5em"}}>App?</Link>
+                    <Link href={`/profile/${session?.user?.name}`} style={{ margin: 0, fontSize: "1.5em" }}>App?</Link>
                 </Group>
                 {links}
             </Navbar.Section>

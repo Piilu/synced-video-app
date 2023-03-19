@@ -2,6 +2,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import busboy from "busboy";
 import fs from 'fs'
+import { getSession } from "next-auth/react";
 
 export const config = {
     api: {
@@ -9,14 +10,15 @@ export const config = {
     }
 }
 
-function uploadVideoStream(req: NextApiRequest, res: NextApiResponse)
+async function uploadVideoStream(req: NextApiRequest, res: NextApiResponse)
 {
+    const session = await getSession({req})
     const bb = busboy({ headers: req.headers })
 
     bb.on('file', (_, file, info) =>
     {
         const fileName = info.filename;
-        const filePath = `./videos/${fileName}`
+        const filePath = `./videos/${session?.user?.id}/${fileName}` //make custom filenames
 
         const stream = fs.createWriteStream(filePath);
 
@@ -27,6 +29,7 @@ function uploadVideoStream(req: NextApiRequest, res: NextApiResponse)
     {
         res.writeHead(200, { Connection: "close" })
         res.end('Upload end');
+        //make new video here
     })
 
     req.pipe(bb)

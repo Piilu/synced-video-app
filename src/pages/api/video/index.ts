@@ -80,6 +80,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 where: {
                     userId: userId,
                     isPublic: session?.user?.id == userId ? {} : true,
+                    name: {
+                        contains: name,
+                    }
                 },
             })
 
