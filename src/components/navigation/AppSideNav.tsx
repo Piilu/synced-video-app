@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { Dispatch, FunctionComponent, SetStateAction, useState } from 'react'
 import { LinkTypes } from '../../constants/GlobalEnums';
+import UserButton from '../custom/UserButton';
 import { LogoutButton, NavDefaultItem } from './items/NavLinks';
 
 const data = [
@@ -56,10 +57,10 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
             </Navbar.Section>
 
             <Navbar.Section className={classes.footer}>
-                <LogoutButton />
+                {/* <LogoutButton /> */}
+                <UserButton image={session?.user?.image as string} name={session?.user?.name as string} email={session?.user?.email as string} />
             </Navbar.Section>
         </Navbar>
     )
 }
-
 export default AppSideNav

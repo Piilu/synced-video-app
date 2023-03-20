@@ -13,7 +13,7 @@ import { RoomReq, RoomRes } from '../../pages/api/room'
 type CreateRoomModalProps = {
     createRoom: boolean,
     setCreateRoom: Dispatch<SetStateAction<boolean>>,
-    videos: Video[],
+    videos: Video[] | undefined,
 }
 const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
 {
@@ -52,6 +52,7 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
             let newData = res.data as RoomRes;
             if (newData.success)
             {
+                alert(router.asPath)
                 router.push({
                     pathname: router.asPath,
                 }, undefined, { scroll: false })

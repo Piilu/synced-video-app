@@ -10,7 +10,7 @@ export type Color = RGB | RGBA | HEX
 export type ChatOpen = "flex" | "none";
 
 export type RoomMessage = {
-    roomId: number | undefined,
+    roomId: string,
     user: User | undefined,
     message: string,
 }

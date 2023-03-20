@@ -5,7 +5,7 @@ import { Room, Session, User, Video } from '@prisma/client';
 
 
 export type RoomReq = {
-    id?: number,
+    id?: string,
     name: string
     isPublic: boolean,
     coverImage?: string | null,

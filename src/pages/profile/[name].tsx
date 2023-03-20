@@ -1,4 +1,4 @@
-import { ActionIcon, Avatar, Button, Card, Center, Container, FileInput, Flex, Grid, Group, Loader, Modal, NativeSelect, Paper, Progress, SimpleGrid, Tabs, Text, Textarea, TextInput, Title } from '@mantine/core';
+import { ActionIcon, Avatar, Button, Card, Center, Container, FileInput, Flex, Grid, Group, Loader, Modal, NativeSelect, Paper, Progress, SimpleGrid, Tabs, Text, Textarea, TextInput, Title, Tooltip } from '@mantine/core';
 import { closeAllModals, openConfirmModal, openModal } from '@mantine/modals';
 import { ConnectedRooms, Room, Session, User, Video } from '@prisma/client';
 import { IconCheck, IconDoor, IconEdit, IconMessageCircle, IconPhoto, IconSearch, IconSettings, IconUpload, IconX } from '@tabler/icons';
@@ -197,6 +197,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
 
     }
 
+    //#region SEARCH
     const searchVideos = async () =>
     {
         let data: RoomReq =
@@ -269,7 +270,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
         if (rooms.length === 0) return;
 
         let data: RoomReq = {
-            cursor: Math.max(...rooms.map(room => room.id)),
+            // cursor: Math.max(...rooms.map(room => room.id)),
             userId: profileUser?.id,
             isPublic: true, //doesn't matter
             name: router.query.search as string,
@@ -336,6 +337,8 @@ const Profile: NextPage<ProfileProps> = (props) =>
             )
         })
     }
+    //#endregion
+
     return (
         <>
             <Head>
@@ -344,7 +347,8 @@ const Profile: NextPage<ProfileProps> = (props) =>
             <ProfileSettignsModal profileUser={profileUser} editProfile={editProfile} setEditProfile={setEditProfile} />
             <UploadVideoModal handleUploadVideo={handleUploadVideo} profileUser={profileUser} uploadVideo={uploadVideo} setUploadVideo={setUploadVideo} />
             <CreateRoomModal videos={profileUser?.videos} createRoom={createRoom} setCreateRoom={setCreateRoom} />
-            <Container>
+           
+            <Container className='border' style={{ position: "relative" }}>
                 <Flex direction="column">
                     <Paper shadow="sm" radius="lg" mt="lg" p="sm" style={{ position: "relative" }} >
                         <Group style={{ position: "absolute", right: 10 }}>
@@ -368,7 +372,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
                         </Group>
                     </Paper>
 
-                    <Tabs value={router.query.activeTab as string} defaultValue="videos" onTabChange={(value) => router.push({ query: { ...router.query, activeTab: value, search: "" } }, undefined)}>
+                    <Tabs  defaultValue="videos" >
                         <Paper shadow="sm" radius="lg" mt="lg" p="sm" >
                             <Tabs.List grow={true}>
                                 <Tabs.Tab value="videos" icon={<IconPhoto size={14} />}>Videos</Tabs.Tab>

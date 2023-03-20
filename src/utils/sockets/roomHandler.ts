@@ -23,7 +23,7 @@ export default (io: any, socket: any) => {
         console.log(`User ${data.user?.name} joined: `, socket.id)
         console.log("----------------------------------------------")
         socket.to(data.roomId).emit(Events.JOIN_ROOM_UPDATE, data)
-        await getRoomData(data.roomId as number);
+        await getRoomData(data.roomId);
     };
 
     const leaveRoom = async () => {
@@ -47,11 +47,11 @@ export default (io: any, socket: any) => {
         socket.leave(user?.roomId)
         const data: RoomMessage = {
             message: "Left",
-            roomId: user?.roomId,
+            roomId: user?.roomId as string,
             user: user?.user,
         }
         socket.to(user?.roomId).emit(Events.LEAVE_ROOM_UPDATE, user)
-        await getRoomData(user?.roomId as number)
+        await getRoomData(user?.roomId as string)
     };
 
     const roomSendMessage = (data: RoomMessage) => {
@@ -71,7 +71,7 @@ export default (io: any, socket: any) => {
         socket.to(data.roomId).emit(Events.VIDEO_SEEK_UPDATE, data)
     };
 
-    const getRoomData = async (roomId: number) => {
+    const getRoomData = async (roomId: string) => {
 
         const roomData = await prisma?.room.findUnique({
             where: {

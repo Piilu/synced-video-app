@@ -24,8 +24,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) =>
 {
     const session = await getServerAuthSession(ctx);
     const roomId = ctx.query.roomId as string;
-    const roomIdNumber = parseInt(roomId);
-    if (isNaN(roomIdNumber))
+    if (roomId == "" || roomId == null)
     {
         return { props: { notFound: true } }
     }
@@ -41,7 +40,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) =>
     }
     const roomInitialData = await prisma?.room.findFirst({
         where: {
-            id: roomIdNumber,
+            id: roomId,
         },
         include: {
             ConnectedRooms: true,
@@ -64,7 +63,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) =>
         return { props: { notFound: true } }
     }
 
-    if (roomInitialData?.ConnectedRooms.filter(connection => { return connection.userId == user?.id && connection.roomId == roomIdNumber }).length != 0)
+    if (roomInitialData?.ConnectedRooms.filter(connection => { return connection.userId == user?.id && connection.roomId == roomId }).length != 0)
     {
         return { props: { multipleUsers: true } }
     }
