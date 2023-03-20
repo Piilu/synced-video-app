@@ -25,7 +25,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
   const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>({ key: "color-scheme", defaultValue: "light" });
   const toggleColorScheme = (value?: ColorScheme) =>
     setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
-  const [opened, setOpened] = useState(false);
+  const [opened, setOpened] = useState<boolean>(true);
   const [hideNav, setHideNav] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();

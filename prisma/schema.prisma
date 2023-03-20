@@ -83,7 +83,7 @@ model Video {
 }
 
 model Room {
-  id             Int              @id @default(autoincrement())
+  id             String           @id @default(cuid())
   name           String           @db.VarChar(50)
   isPublic       Boolean
   coverImage     String?          @db.VarChar(255)
@@ -102,7 +102,7 @@ model Room {
 model ConnectedRooms {
   userId   String @id
   socketId String
-  roomId   Int
+  roomId   String
   room     Room   @relation(fields: [roomId], references: [id])
   user     User   @relation(fields: [userId], references: [id])
 

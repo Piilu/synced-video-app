@@ -1,6 +1,7 @@
-import { Avatar, Button, FileInput,Text, Flex, Group, Modal, NativeSelect, Radio, Select, TextInput } from '@mantine/core'
+import { Avatar, Button, FileInput, Text, Flex, Group, Modal, NativeSelect, Radio, Select, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
+import { Video } from '@prisma/client'
 import { IconCheck, IconUpload, IconX } from '@tabler/icons'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
@@ -11,10 +12,12 @@ import { RoomReq, RoomRes } from '../../pages/api/room'
 
 type CreateRoomModalProps = {
     createRoom: boolean,
-    setCreateRoom: Dispatch<SetStateAction<boolean>>
+    setCreateRoom: Dispatch<SetStateAction<boolean>>,
+    videos: Video[],
 }
-const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) => {
-    const { createRoom, setCreateRoom } = props
+const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
+{
+    const { createRoom, setCreateRoom, videos } = props
     const [loading, setLoading] = useState<boolean>(false)
     const [newVideo, setNewVideo] = useState<"yes" | "no">("no")
     const [file, setFile] = useState<File | null>(null);
@@ -31,20 +34,24 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) => {
         }
     })
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         form.setValues({ title: "", visibility: "1" });
     }, [createRoom])
 
-    const handleRoomCreate = async () => {
+    const handleRoomCreate = async () =>
+    {
         let data: RoomReq =
         {
             name: form.values.title,
             isPublic: form.values.visibility == "1" ? true : false,
         };
         setLoading(true);
-        await axios.post(`${window.origin}${EndPoints.ROOM}`, data).then(res => {
+        await axios.post(`${window.origin}${EndPoints.ROOM}`, data).then(res =>
+        {
             let newData = res.data as RoomRes;
-            if (newData.success) {
+            if (newData.success)
+            {
                 router.push({
                     pathname: router.asPath,
                 }, undefined, { scroll: false })
@@ -54,7 +61,8 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) => {
                     color: "green"
                 })
             }
-            else {
+            else
+            {
                 showNotification({
                     message: newData.errorMessage,
                     icon: <IconX />,
@@ -62,19 +70,25 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) => {
                 })
             }
 
-        }).catch(err => {
+        }).catch(err =>
+        {
             showNotification({
                 message: err.message,
                 icon: <IconX />,
                 color: "red"
             })
-        }).finally(() => {
+        }).finally(() =>
+        {
             setLoading(false);
             setCreateRoom(false);
         })
 
     }
 
+    const getVideoData = () =>
+    {
+
+    }
     return (
         <Modal title="Create a room" opened={createRoom} onClose={() => { setCreateRoom(false) }}>
             <form onSubmit={form.onSubmit((values) => { handleRoomCreate() })}>
@@ -88,30 +102,16 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) => {
                         />
 
                     </Group>
-                    <Radio.Group
-                        name="uploadSelectVideo"
-                        label="Do you want to upload new video file"
-                        onChange={e => { setNewVideo(e) }}
-                        value={newVideo}
-                    >
-                        <Radio value="yes" label="Yes" />
-                        <Radio value="no" label="No" />
-                    </Radio.Group>
-                    {newVideo === "yes"
-                        ?
-                        <FileInput withAsterisk value={file} onChange={setFile} label="Video" placeholder="Your video" icon={<IconUpload size={14} />} />
-                        :
-                        <Select
-                            label="Choose video"
-                            placeholder="Pick one"
-                            itemComponent={SelectItem}
-                            nothingFound="Nothing found"
-                            data={data}
-                            searchable
-                            withAsterisk
-                            maxDropdownHeight={400} />
-                    }
-                    {/* <FileInput value={file} onChange={setFile} label="Video" placeholder="Your video" icon={<IconUpload size={14} />} /> */}
+
+                    <Select
+                        label="Choose video"
+                        placeholder="Pick one"
+                        itemComponent={SelectItem}
+                        nothingFound="Nothing found"
+                        data={[]}
+                        searchable
+                        withAsterisk
+                        maxDropdownHeight={400} />
                 </Flex>
                 <Button loading={loading} type='submit' fullWidth mt="md">
                     Create
@@ -155,22 +155,22 @@ const data = [
     },
 ];
 
-interface ItemProps extends React.ComponentPropsWithoutRef<'div'> {
-    image: string;
-    label: string;
-    description: string;
+interface ItemProps extends React.ComponentPropsWithoutRef<'div'>
+{
+    name: string;
+    isPublic: boolean;
 }
 
 const SelectItem = forwardRef<HTMLDivElement, ItemProps>(
-    ({ image, label, description, ...others }: ItemProps, ref) => (
+    ({ name, isPublic, ...others }: ItemProps, ref) => (
         <div ref={ref} {...others}>
             <Group noWrap>
-                <Avatar src={image} />
+                {/* <Avatar src={image} /> */}
 
                 <div>
-                    <Text size="sm">{label}</Text>
+                    <Text size="sm">{name}</Text>
                     <Text size="xs" opacity={0.65}>
-                        {description}
+                        {/* {description} */}
                     </Text>
                 </div>
             </Group>

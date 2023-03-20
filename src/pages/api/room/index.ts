@@ -53,7 +53,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             {
                 const queryData = await prisma?.room.findMany({
                     include: {
-                        ConnectedRooms: true,
+                        ConnectedRooms: {
+                            include: {
+                                user: true,
+                            }
+                        },
                         user: true,
                     },
                     where: {
@@ -72,7 +76,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 return;
             }
             //#endregion
-            console.log("SEEEEEEAAAAARCH =>>>>"+name)
             const nextData = await prisma?.room.findMany({
                 where: {
                     userId: userId,
@@ -82,7 +85,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                 },
                 include: {
-                    ConnectedRooms: true,
+                    ConnectedRooms: {
+                        include: {
+                            user: true,
+                        }
+                    },
                     user: true,
                 },
                 take: limit,

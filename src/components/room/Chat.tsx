@@ -20,14 +20,17 @@ type ChatProps = {
     sendMessageWs: (message: RoomMessage) => void
 }
 
-const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
+const Chat: FunctionComponent<ChatProps> = (props: ChatProps) =>
+{
     const { styles, chatOpen, setChatOpen, sendMessageWs, roomId, messages, user, roomData } = props;
     const [message, setMessage] = useState<string>("");
     const [name, setName] = useState<string>(user !== undefined ? user.name as string : "");
 
-    const sendMessage = () => {
+    const sendMessage = () =>
+    {
         if (message.trim() == "") return;
-        if (name.trim() == "") {
+        if (name.trim() == "")
+        {
             showNotification({
                 title: 'Name is required',
                 message: "Hey there, your don't h e a name! 🤥",
@@ -40,9 +43,11 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
         setMessage("");
     }
 
-    const keyboardSend = (event: React.KeyboardEvent) => {
+    const keyboardSend = (event: React.KeyboardEvent) =>
+    {
         if (event.code == "Enter" && (event.shiftKey) || event.code == "NumpadEnter" && (event.shiftKey)) return;
-        if (event.code === 'Enter' || event.code == "NumpadEnter") {
+        if (event.code === 'Enter' || event.code == "NumpadEnter")
+        {
             event.preventDefault();
             sendMessage();
         }
@@ -57,6 +62,9 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
                         <IconArrowBarRight size={29} />
                     </ActionIcon>
                 </Tooltip>
+                <div style={{ marginLeft: "auto" }}>
+                    <h4>{roomData?.name}</h4>
+                </div>
                 <div style={{ marginLeft: "auto" }}>
                     <Tooltip label="Connected users" position='left'>
                         <Box sx={(theme) => ({
@@ -86,7 +94,8 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) => {
                 align="flex"
                 direction="column-reverse"
                 wrap="nowrap">
-                {messages.length !== 0 ? messages?.map(message => {
+                {messages.length !== 0 ? messages?.map(message =>
+                {
                     return (
                         <MessageChip key={Math.floor(Math.random() * 100000)} user={message.user} message={message.message} />
                     );

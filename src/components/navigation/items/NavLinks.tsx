@@ -66,6 +66,7 @@ const useStyles = createStyles((theme, _params, getRef) =>
 type NavDefaultItemProps = {
     item: LinkItemData,
     profileName: string,
+    path: string,
 }
 const NavDefaultItem: FunctionComponent<NavDefaultItemProps> = (props) =>
 {
@@ -73,7 +74,6 @@ const NavDefaultItem: FunctionComponent<NavDefaultItemProps> = (props) =>
     const { classes, cx } = useStyles();
     const { data: session } = useSession();
     const link = item.linkType != LinkTypes.PROFILE ? item.link : item.link.replace("{0}", session?.user?.name as string)
-    const name = "Test";
 
     return (
         <Link

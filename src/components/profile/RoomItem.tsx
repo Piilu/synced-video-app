@@ -22,6 +22,8 @@ type RoomItemProps = {
     isUsersProfile: boolean,
 }
 
+const showCount = 3;
+const startCount = showCount;
 
 const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
 {
@@ -130,7 +132,6 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
         })
     }
 
-    { room.videoId }
     return (
         <Card shadow="sm" radius="md">
             <Card.Section withBorder inheritPadding>
@@ -169,29 +170,39 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
                     <Group>
                         <Tooltip.Group openDelay={300} closeDelay={100}>
                             <Avatar.Group spacing="sm">
-                                {room.ConnectedRooms.length !== 0 ? room.ConnectedRooms.map(user =>
+                                {room.ConnectedRooms.length !== 0 ? room.ConnectedRooms.slice(0, showCount).map(user =>
                                 {
                                     //Later make it so when more then three users then start showing number
                                     return (
                                         <div key={user.socketId}>
-                                            <Tooltip label={session?.user?.id === user.user.id ? user.user.name + " (You)" : user.user.name} withArrow>
-                                                <Avatar src={user.user.image} radius="xl" >{user.user.name?.charAt(0)}</Avatar>
+                                            <Tooltip label={session?.user?.id === user?.user?.id ? user?.user?.name + " (You)" : user?.user?.name} withArrow>
+                                                <Avatar src={user?.user?.image} radius="xl" >{user?.user?.name?.charAt(0)}</Avatar>
                                             </Tooltip>
-                                            {/* <Tooltip
-                                                withArrow
-                                                label={
-                                                    <>
-                                                        <div>John Outcast</div>
-                                                        <div>Levi Capitan</div>
-                                                    </>
-                                                }
-                                            >
-                                                <Avatar radius="xl">+2</Avatar>
-                                            </Tooltip> */}
+
                                         </div>
                                     )
                                 }) : <Tooltip label="No connected users"><Avatar opacity={0.45} radius="xl" ><IconUserOff /></Avatar></Tooltip>
                                 }
+                                {room.ConnectedRooms.splice(startCount).length !== 0 ?
+                                    <Tooltip
+                                        withArrow
+                                        label={
+                                            <>
+                                                {room.ConnectedRooms.slice(startCount).map(user =>
+                                                {
+                                                    return (
+                                                        <div>{user.user.name}</div>
+                                                    );
+
+                                                })}
+
+                                            </>
+                                        }
+                                    >
+                                        <Avatar radius="xl">+{room.ConnectedRooms.splice(startCount).length}</Avatar>
+                                    </Tooltip>
+
+                                    : null}
                             </Avatar.Group>
                         </Tooltip.Group>
                     </Group>

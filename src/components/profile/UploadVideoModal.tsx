@@ -59,7 +59,7 @@ const UploadVideoModal: FunctionComponent<UploadVideoModalProps> = (props) =>
                 name: form.values.videoTitle,
                 isPublic: form.values.visibility == "1" ? true : false,
                 size: file.size,
-                location: file.name,
+                location: `./videos/${session?.user?.id}/${file.name}`,
                 userId: session?.user?.id as string
             }
             console.log(form.values)
@@ -82,7 +82,7 @@ const UploadVideoModal: FunctionComponent<UploadVideoModalProps> = (props) =>
                             {...form.getInputProps("visibility")}
                         />
                     </Group>
-                    <FileInput accept="mp4" withAsterisk value={file} onChange={setFile} label="Video" placeholder="Your video" icon={<IconUpload size={14} />} />
+                    <FileInput accept="video/mp4" withAsterisk value={file} onChange={setFile} label="Video" placeholder="Your video" icon={<IconUpload size={14} />} />
                 </Flex>
                 <Button loading={loading} type='submit' fullWidth mt="md">
                     Upload

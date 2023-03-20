@@ -43,4 +43,11 @@ enum EndPoints
   VIDEO = "/api/video",
   VIDEO_STREAM = "/api/video/stream",
 }
-export { Events, QueryParams, Brands, EndPoints, LinkTypes }
+
+enum SearchType
+{
+  Room = "SEARCH_ROOM",
+  Video = "SEARCH_VIDEO",
+}
+
+export { Events, QueryParams, Brands, EndPoints, LinkTypes, SearchType }

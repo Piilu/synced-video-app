@@ -8,12 +8,14 @@ export type UserResBody = {
     success: boolean,
     name: string | null | undefined,
     comment: string | null | undefined,
+    image: string | null | undefined,
     errormsg?: string,
 }
 
 export type UserReqBody = {
     name: string | null | undefined,
     comment: string | null | undefined,
+    image: string | null | undefined,
     userId: string,
 }
 
@@ -22,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let response: UserResBody = {} as UserResBody
 
     const method = req.method;
-    const { name, comment, userId } = req.body as UserReqBody;
+    const { name, comment, userId, image } = req.body as UserReqBody;
     const session = await getSession({ req });
     //#region Authorize
     if (session?.user?.id != userId)
@@ -53,6 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 data: {
                     name: name,
                     bio: comment,
+                    image: image,
                 }
             })
             response.name = user?.name;

@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Center, Container, CopyButton, Drawer, Flex, Group, Tooltip, Transition, useMantineColorScheme } from '@mantine/core';
+import { ActionIcon, Button, Center, Container, CopyButton, Drawer, Flex, Group, Textarea, TextInput, Tooltip, Transition, useMantineColorScheme } from '@mantine/core';
 import { useRouter } from 'next/router'
 import type { GetServerSideProps, NextPage } from 'next/types';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
@@ -319,9 +319,16 @@ const RoomTest: NextPage<RoomProps> = (props) =>
                 onClose={() => setSettingsOpen(false)}
                 title="Settings"
                 padding="xl"
-                size="xl"
+                size="md"
             >
-                <h4>Conetn in here {roomInitialData?.ConnectedRooms.length}</h4>
+                <Flex direction="column" gap={20}>
+                    <Group grow>
+                        {/* <TextInput title="Email cant't be changed" withAsterisk label="Email:" readOnly placeholder="Your email" />
+                        <TextInput withAsterisk label="Username:" placeholder="Your name" /> */}
+                    </Group>
+                    <TextInput label="Current video" defaultValue={roomData?.video?.location} placeholder="http//:..." />
+                </Flex>
+
             </Drawer>
 
             <Flex style={{ backgroundColor: "black", width: "100%", height: "100%" }} direction="row" justify={"flex-end"}>

@@ -12,24 +12,33 @@ export const config = {
 
 async function uploadVideoStream(req: NextApiRequest, res: NextApiResponse)
 {
-    const session = await getSession({req})
+    const session = await getSession({ req })
+    if (session === null)
+    {
+        res.status(401).json({ message: "Unauthorized" })
+        return;
+    }
+
     const bb = busboy({ headers: req.headers })
+    var dir = `./videos/${session?.user?.id}`;
+
+    if (!fs.existsSync(dir))
+    {
+        fs.mkdirSync(dir);
+    }
 
     bb.on('file', (_, file, info) =>
     {
         const fileName = info.filename;
         const filePath = `./videos/${session?.user?.id}/${fileName}` //make custom filenames
-
         const stream = fs.createWriteStream(filePath);
-
         file.pipe(stream);
     })
 
     bb.on('close', () =>
     {
         res.writeHead(200, { Connection: "close" })
-        res.end('Upload end');
-        //make new video here
+        res.end('Upload end')
     })
 
     req.pipe(bb)

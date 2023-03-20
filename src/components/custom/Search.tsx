@@ -32,18 +32,6 @@ const Search: FunctionComponent<SearchProps> = (props) =>
 
     }, [value])
 
-    useEffect(() =>
-    {
-        if (router.query.search === "")
-        {
-            console.log("Change " + value)
-            router.query.search = value;
-            router.push({
-                query: { ...router.query, search: value }
-            }, undefined, { shallow: true })
-        }
-    }, [])
-
     return (
         <>
             <Group my={10} mr={10}>

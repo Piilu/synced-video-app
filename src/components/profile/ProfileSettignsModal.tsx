@@ -29,6 +29,7 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
             email: profileUser?.email as string ?? "",
             name: profileUser?.name as string ?? "",
             comment: profileUser?.bio as string ?? "",
+            image: profileUser?.image as string ?? "",
         },
 
         validate: {
@@ -44,6 +45,7 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
             email: profileUser?.email as string ?? "",
             name: profileUser?.name as string ?? "",
             comment: profileUser?.bio as string ?? "",
+            image: profileUser?.image as string ?? "",
         })
     }, [editProfile])
 
@@ -52,6 +54,7 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
         let data: UserReqBody = {
             name: form.values.name,
             comment: form.values?.comment === "" ? null : form.values?.comment,
+            image: form.values?.image === "" ? null : form.values?.image,
             userId: session?.user?.id as string,
         }
         setLoading(true);
@@ -102,6 +105,7 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
                         <TextInput title="Email cant't be changed" withAsterisk label="Email:" readOnly placeholder="Your email" {...form.getInputProps("email")} />
                         <TextInput withAsterisk label="Username:" placeholder="Your name" {...form.getInputProps("name")} />
                     </Group>
+                    <TextInput label="Profile picture:" placeholder="http//:..." {...form.getInputProps("image")} />
                     <Textarea
                         minRows={5}
                         placeholder="Your comment"

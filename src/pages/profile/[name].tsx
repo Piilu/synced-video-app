@@ -35,9 +35,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) =>
     const profileUser = getProfileName !== null ? await prisma.user.findFirst({
         include: {
             rooms: {
-                where: { name: { contains: ctx.query?.search as string } }, take: 10, include: { ConnectedRooms: { include: { user: true } } }
+                where: { name: { contains: ctx.query?.search as string } }, include: { ConnectedRooms: { include: { user: true } } }
             },
-            videos: { where: { name: { contains: ctx.query?.search as string } }, take: 10, include: { user: true, } }
+            videos: { where: { name: { contains: ctx.query?.search as string } }, include: { user: true, } }
         },
         where: {
             name: getProfileName as string,
@@ -132,6 +132,34 @@ const Profile: NextPage<ProfileProps> = (props) =>
 
     const handleUploadVideo = async (file: File, data: VideoReq) =>
     {
+        setUploadVideo(false);
+        const dataFile = new FormData();
+        dataFile.append('file', file);
+        const config: AxiosRequestConfig = {
+            onUploadProgress: function (progressEvent)
+            {
+                const precentComplete = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                setProgress(precentComplete)
+            }
+        }
+        await axios.post(`${window.origin}${EndPoints.VIDEO_STREAM}`, dataFile, config).then(res =>
+        {
+            showNotification({
+                title: "Uploaded",
+                message: res.data.message,
+                icon: <IconCheck />,
+                color: 'green'
+            })
+        }).catch(err =>
+        {
+            showNotification({
+                title: "Failed",
+                message: err.message,
+                icon: <IconX />,
+                color: 'red'
+            })
+        })
+
         await axios.post(`${window.origin}${EndPoints.VIDEO}`, data).then(res =>
         {
             let newData = res.data as VideoRes;
@@ -164,34 +192,9 @@ const Profile: NextPage<ProfileProps> = (props) =>
             })
         })
 
-        setUploadVideo(false);
-        const dataFile = new FormData();
-        dataFile.append('file', file);
-        const config: AxiosRequestConfig = {
-            onUploadProgress: function (progressEvent)
-            {
-                const precentComplete = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                setProgress(precentComplete)
-            }
-        }
-        await axios.post(`${window.origin}${EndPoints.VIDEO_STREAM}`, dataFile, config)
-            .then(res =>
-            {
-                showNotification({
-                    title: "Uploaded",
-                    message: res.data.message,
-                    icon: <IconCheck />,
-                    color: 'green'
-                })
-            }).catch(err =>
-            {
-                showNotification({
-                    title: "Failed",
-                    message: err.message,
-                    icon: <IconX />,
-                    color: 'red'
-                })
-            })
+
+
+
     }
 
     const searchVideos = async () =>
@@ -340,7 +343,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
             </Head>
             <ProfileSettignsModal profileUser={profileUser} editProfile={editProfile} setEditProfile={setEditProfile} />
             <UploadVideoModal handleUploadVideo={handleUploadVideo} profileUser={profileUser} uploadVideo={uploadVideo} setUploadVideo={setUploadVideo} />
-            <CreateRoomModal createRoom={createRoom} setCreateRoom={setCreateRoom} />
+            <CreateRoomModal videos={profileUser?.videos} createRoom={createRoom} setCreateRoom={setCreateRoom} />
             <Container>
                 <Flex direction="column">
                     <Paper shadow="sm" radius="lg" mt="lg" p="sm" style={{ position: "relative" }} >
@@ -385,23 +388,23 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                     : null}
                             </Flex>
 
-                            <InfiniteScroll
+                            {/* <InfiniteScroll
                                 threshold={350}
                                 loadMore={searchNextVideos}
                                 hasMore={videos?.length !== videoCount && videoSearch}
                                 loader={<Group key={0} mb={10} position='center'><Loader variant="dots" ></Loader></Group>}
-                            >
-                                <Flex direction="column" gap={20} mb={35} ref={animationParent}>
+                            > */}
+                            <Flex direction="column" gap={20} mb={35} ref={animationParent}>
 
-                                    {videos?.length != 0 ? videos?.map(video =>
-                                    {
-                                        return (
-                                            <VideoItem video={video} key={video.id} isUsersProfile={isUsersProfile} />
-                                        )
+                                {videos?.length != 0 ? videos?.map(video =>
+                                {
+                                    return (
+                                        <VideoItem video={video} key={video.id} isUsersProfile={isUsersProfile} />
+                                    )
 
-                                    }) : <NoItems text='No videos' />}
-                                </Flex>
-                            </InfiniteScroll>
+                                }) : <NoItems text='No videos' />}
+                            </Flex>
+                            {/* </InfiniteScroll> */}
 
                         </Tabs.Panel>
 
@@ -414,23 +417,23 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                     </Group>
                                     : null}
                             </Flex>
-                            <InfiniteScroll
+                            {/* <InfiniteScroll
                                 threshold={350}
                                 loadMore={searchNextRooms}
                                 hasMore={rooms?.length !== roomCount && roomSearch}
                                 loader={<Group key={0} my={10} position='center'><Loader variant="dots" ></Loader></Group>}
-                            >
-                                <Grid gutter="md" ref={animationParent}>
-                                    {rooms?.length != 0 ? rooms?.map(room =>
-                                    {
-                                        return (
-                                            <Grid.Col key={room.id} md={6} lg={4}>
-                                                <RoomItem isUsersProfile={isUsersProfile} createdTime={room.createdAt} room={room} />
-                                            </Grid.Col>
-                                        )
-                                    }) : <Grid.Col><NoItems text={`${isUsersProfile ? "You have no rooms" : `${profileUser?.name} have no rooms`}`} /></Grid.Col>}
-                                </Grid>
-                            </InfiniteScroll>
+                            > */}
+                            <Grid gutter="md" ref={animationParent}>
+                                {rooms?.length != 0 ? rooms?.map(room =>
+                                {
+                                    return (
+                                        <Grid.Col key={room.id} md={6} lg={4}>
+                                            <RoomItem isUsersProfile={isUsersProfile} createdTime={room.createdAt} room={room} />
+                                        </Grid.Col>
+                                    )
+                                }) : <Grid.Col><NoItems text={`${isUsersProfile ? "You have no rooms" : `${profileUser?.name} have no rooms`}`} /></Grid.Col>}
+                            </Grid>
+                            {/* </InfiniteScroll> */}
                         </Tabs.Panel>
 
                         <Tabs.Panel value="settings" pt="xs">

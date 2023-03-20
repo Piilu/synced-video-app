@@ -160,15 +160,15 @@ const VideoItem: FunctionComponent<VideoItemProps> = (props) =>
                 <MediaQuery largerThan="sm" styles={{ display: "none" }}>
                     <Group position='center'>
                         <Badge size="sm"><strong>Video size:</strong> {prettyBytes(video.size)}</Badge>
-                        <Badge size="sm"><strong>Video lenght:</strong> 100min</Badge>
-                        <Badge size="sm"><strong>Video lenght:</strong> 100min</Badge>
+                        {/* <Badge size="sm"><strong>Video lenght:</strong> 100min</Badge>
+                        <Badge size="sm"><strong>Video lenght:</strong> 100min</Badge> */}
                     </Group>
                 </MediaQuery>
                 <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
                     <Group position='left'>
                         <Badge size="sm"><strong>Video size:</strong> {prettyBytes(video.size)}</Badge>
-                        <Badge size="sm"><strong>Video lenght:</strong> 100min</Badge>
-                        <Badge size="sm"><strong>Video lenght:</strong> 100min</Badge>
+                        {/* <Badge size="sm"><strong>Video lenght:</strong> 100min</Badge>
+                        <Badge size="sm"><strong>Video lenght:</strong> 100min</Badge> */}
                     </Group>
                 </MediaQuery>
             </Card.Section>
