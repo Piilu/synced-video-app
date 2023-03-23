@@ -52,10 +52,7 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
             let newData = res.data as RoomRes;
             if (newData.success)
             {
-                alert(router.asPath)
-                router.push({
-                    pathname: router.asPath,
-                }, undefined, { scroll: false })
+                router.replace(router.asPath, undefined, { scroll: false });
                 showNotification({
                     message: "New room created",
                     icon: <IconCheck />,

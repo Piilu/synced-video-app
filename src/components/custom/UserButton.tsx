@@ -13,6 +13,7 @@ import
 } from '@mantine/core';
 import React, { useState } from "react"
 import { IconArrowsLeftRight, IconChevronRight, IconMessageCircle, IconPhoto, IconSearch, IconSettings, IconTrash } from '@tabler/icons';
+import prettyBytes from 'pretty-bytes';
 
 const useStyles = createStyles((theme) => ({
     user: {
@@ -33,13 +34,14 @@ interface UserButtonProps extends UnstyledButtonProps
     image: string;
     name: string;
     email: string;
+    usedStorage: number | null | undefined,
 }
 
-const UserButton = ({ image, name, email, ...others }: UserButtonProps) =>
+const UserButton = ({ usedStorage, image, name, email, ...others }: UserButtonProps) =>
 {
     const { classes } = useStyles();
     const [opened, setOpened] = useState<boolean>()
-
+    const MAXGB = 5000000000 //5GB
     return (
         <>
             <Menu shadow="md" opened={opened} withArrow position="right" width={200}>
@@ -56,11 +58,13 @@ const UserButton = ({ image, name, email, ...others }: UserButtonProps) =>
                                     {email}
                                 </Text>
 
-                                <Tooltip label="50%">
+                                {/* max 5Gb   */}
+                                <Tooltip label={`${usedStorage != null ? Math.floor((usedStorage * 100) / MAXGB) : null}%`}>
                                     <div style={{ marginTop: "0.5em" }}>
-                                        <Progress color="cyan" radius="xl" size="xs" value={50} />
+                                        <Progress color="cyan" radius="xl" size="xs" value={usedStorage != null ? (usedStorage * 100) / MAXGB : 0} />
                                         <Group position='apart'>
                                             <Text size="xs">0GB</Text>
+                                            <Text component='small' size="xs">{prettyBytes(usedStorage != null ? usedStorage : 0)}</Text>
                                             <Text size="xs">5GB</Text>
                                         </Group>
                                     </div>

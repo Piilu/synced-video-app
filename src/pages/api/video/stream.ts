@@ -10,7 +10,7 @@ export const config = {
     }
 }
 
-async function uploadVideoStream(req: NextApiRequest, res: NextApiResponse)
+async function uploadVideoStream(req: NextApiRequest, res: NextApiResponse) //use import formidable from "formidable";
 {
     const session = await getSession({ req })
     if (session === null)

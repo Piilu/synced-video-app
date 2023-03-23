@@ -9,6 +9,7 @@ export type UserResBody = {
     name: string | null | undefined,
     comment: string | null | undefined,
     image: string | null | undefined,
+    usedStorage?: number | null | undefined,
     errormsg?: string,
 }
 
@@ -27,21 +28,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { name, comment, userId, image } = req.body as UserReqBody;
     const session = await getSession({ req });
     //#region Authorize
-    if (session?.user?.id != userId)
-    {
-        //Idk if it has to be here 
-        response.errormsg = "Not allowed"
-        response.success = false;
-        res.status(400).json(response);
-        return;
-    }
-
+    // if (session?.user?.id != userId)
+    // {
+    //     //Idk if it has to be here 
+    //     response.errormsg = "Not allowed"
+    //     response.success = false;
+    //     res.status(400).json(response);
+    //     return;
+    // }
+    //need to chage some prisma actions
     if (session == null)
     {
         response.errormsg = "Unauthorized"
         response.success = false;
         res.status(401).json(response)
         return;
+    }
+    if (method === "GET")
+    {
+        try
+        {
+
+            const usedStorage = await prisma?.video.aggregate({
+                where: {
+                    userId: session.user.id
+                },
+                _sum: {
+                    size: true,
+                }
+            })
+            response.success = true;
+            response.usedStorage = usedStorage?._sum.size
+            res.status(200).json(response);
+            return;
+        }
+        catch (err: any)
+        {
+            response.success = false
+            response.errormsg = err.message;
+            res.status(500).json(response);
+            return;
+        }
     }
     //#endregion
     try 

@@ -1,4 +1,4 @@
-import { Burger, Group, Header, MediaQuery, TextInput } from '@mantine/core'
+import { Burger, Flex, Group, Header, MediaQuery, TextInput } from '@mantine/core'
 import React, { Dispatch, FunctionComponent, SetStateAction } from 'react'
 import ToggleTheme from '../custom/ToggleTheme';
 
@@ -12,7 +12,7 @@ const NavHeader: FunctionComponent<NavHeaderProps> = (props) =>
     const { setOpened, opened } = props;
     return (
         <Header height={{ base: 50, md: 70 }} p="md">
-            <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+            <Flex align="center" h="100%" justify="space-between">
                 <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                     <Burger
                         opened={opened}
@@ -21,14 +21,14 @@ const NavHeader: FunctionComponent<NavHeaderProps> = (props) =>
                         mr="xl"
                     />
                 </MediaQuery>
-                <div>
-                    <TextInput w={300} placeholder='Username' />
+                <TextInput w={300} placeholder='Username' />
+                <div >
                 </div>
-                <div style={{ marginLeft: "auto" }}>
+                <div >
                     <ToggleTheme />
                 </div>
-            </div>
-        </Header>
+            </Flex>
+        </Header >
     )
 }
 

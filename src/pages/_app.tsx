@@ -15,6 +15,8 @@ import { useEffect } from "react"
 import { useRouter } from "next/router";
 import { ModalsProvider } from "@mantine/modals";
 import Head from "next/head";
+import { GetServerSideProps } from "next";
+import { getServerAuthSession } from "../server/common/get-server-auth-session";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,

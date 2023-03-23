@@ -30,7 +30,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) =>
 {
     const getProfileName = ctx.params?.name;
     const session = await getServerAuthSession(ctx);
-    console.log("JEEEEE:" + ctx.query.search)
     const test = true;
     const profileUser = getProfileName !== null ? await prisma.user.findFirst({
         include: {
@@ -130,6 +129,16 @@ const Profile: NextPage<ProfileProps> = (props) =>
         console.log("Testin tab change")
     }, [profileUser])
 
+    //#region Load data
+    useEffect(() =>
+    {
+        console.log(router.query.activeTab)
+        if (router.query.activeTab !== undefined)
+        {
+            console.log("LOAD " + router.query.activeTab + " data")
+        }
+    }, [router.query.activeTab])
+    //#endregion
     const handleUploadVideo = async (file: File, data: VideoReq) =>
     {
         setUploadVideo(false);
@@ -166,9 +175,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
 
             if (newData.success)
             {
-                router.push({
-                    pathname: router.asPath,
-                }, undefined, { scroll: false })
+                router.replace(router.asPath, undefined, { scroll: false });
                 showNotification({
                     message: "New video uploaded",
                     icon: <IconCheck />,
@@ -347,8 +354,8 @@ const Profile: NextPage<ProfileProps> = (props) =>
             <ProfileSettignsModal profileUser={profileUser} editProfile={editProfile} setEditProfile={setEditProfile} />
             <UploadVideoModal handleUploadVideo={handleUploadVideo} profileUser={profileUser} uploadVideo={uploadVideo} setUploadVideo={setUploadVideo} />
             <CreateRoomModal videos={profileUser?.videos} createRoom={createRoom} setCreateRoom={setCreateRoom} />
-           
-            <Container className='border' style={{ position: "relative" }}>
+
+            <Container style={{ position: "relative" }}>
                 <Flex direction="column">
                     <Paper shadow="sm" radius="lg" mt="lg" p="sm" style={{ position: "relative" }} >
                         <Group style={{ position: "absolute", right: 10 }}>
@@ -372,7 +379,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
                         </Group>
                     </Paper>
 
-                    <Tabs  defaultValue="videos" >
+                    <Tabs value={router.query.activeTab as string} defaultValue="videos" onTabChange={(value) => router.push({ query: { ...router.query, activeTab: value, search: "" } }, undefined, { shallow: true, })}>
                         <Paper shadow="sm" radius="lg" mt="lg" p="sm" >
                             <Tabs.List grow={true}>
                                 <Tabs.Tab value="videos" icon={<IconPhoto size={14} />}>Videos</Tabs.Tab>

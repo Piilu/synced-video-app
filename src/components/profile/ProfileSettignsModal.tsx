@@ -63,9 +63,7 @@ const ProfileSettignsModal: FunctionComponent<ProfileSettignsModalProps> = (prop
             let newData: UserResBody = res.data;
             if (newData.success)
             {
-                router.push({
-                    pathname: router.pathname.replace("[name]", data.name as string),
-                }, undefined, { scroll: false })
+                router.replace(router.asPath, undefined, { scroll: false });
                 showNotification({
                     message: "Profile successfully changed",
                     icon: <IconCheck />,

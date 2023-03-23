@@ -13,7 +13,7 @@ type SearchProps = {
 const Search: FunctionComponent<SearchProps> = (props) =>
 {
     const { getSearchData } = props
-    const [value, setValue] = useDebouncedState<string | undefined>(undefined, 500);
+    const [value, setValue] = useDebouncedState<string | undefined>(undefined, 300);
     const router = useRouter();
 
     useEffect(() =>
