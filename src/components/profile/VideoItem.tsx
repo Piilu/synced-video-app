@@ -54,9 +54,7 @@ const VideoItem: FunctionComponent<VideoItemProps> = (props) =>
         await axios.delete(`${window.origin}${EndPoints.VIDEO}`, { data: data }).then(res =>
         {
             let newData = res.data as VideoRes;
-            router.push({
-                pathname: router.asPath,
-            }, undefined, { scroll: false })
+            router.replace(router.asPath, undefined, { scroll: false });
             if (newData.success)
             {
                 showNotification({
@@ -100,9 +98,7 @@ const VideoItem: FunctionComponent<VideoItemProps> = (props) =>
 
             if (newData.success)
             {
-                router.push({
-                    pathname: router.asPath,
-                }, undefined, { scroll: false })
+                router.replace(router.asPath, undefined, { scroll: false });
                 showNotification({
                     title: "Successfully changed",
                     message: `Video visibility changed to ${newData.isPublic ? "public" : "private"}`,
@@ -159,7 +155,7 @@ const VideoItem: FunctionComponent<VideoItemProps> = (props) =>
             <Card.Section py="xs" inheritPadding withBorder>
                 <MediaQuery largerThan="sm" styles={{ display: "none" }}>
                     <Group position='center'>
-                        <Badge size="sm"><strong>Video size:</strong> {prettyBytes(video.size)}</Badge>
+                        <Badge size="sm"><strong>Video size:</strong>   </Badge>
                         {/* <Badge size="sm"><strong>Video lenght:</strong> 100min</Badge>
                         <Badge size="sm"><strong>Video lenght:</strong> 100min</Badge> */}
                     </Group>

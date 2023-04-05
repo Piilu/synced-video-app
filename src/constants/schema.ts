@@ -35,3 +35,9 @@ export type LinkItemData = {
     icon: TablerIcon,
     linkType: LinkTypes
 }
+
+export type UserSmall = {
+    name: string | null,
+    email: string | null,
+    image: string | null
+}

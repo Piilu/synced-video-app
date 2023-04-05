@@ -159,7 +159,7 @@ interface ItemProps extends React.ComponentPropsWithoutRef<'div'>
     isPublic: boolean;
 }
 
-const SelectItem = forwardRef<HTMLDivElement, ItemProps>(
+export const SelectItem = forwardRef<HTMLDivElement, ItemProps>(
     ({ name, isPublic, ...others }: ItemProps, ref) => (
         <div ref={ref} {...others}>
             <Group noWrap>

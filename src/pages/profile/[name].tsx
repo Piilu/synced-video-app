@@ -1,7 +1,7 @@
 import { ActionIcon, Avatar, Button, Card, Center, Container, FileInput, Flex, Grid, Group, Loader, Modal, NativeSelect, Paper, Progress, SimpleGrid, Tabs, Text, Textarea, TextInput, Title, Tooltip } from '@mantine/core';
 import { closeAllModals, openConfirmModal, openModal } from '@mantine/modals';
 import { ConnectedRooms, Room, Session, User, Video } from '@prisma/client';
-import { IconCheck, IconDoor, IconEdit, IconMessageCircle, IconPhoto, IconSearch, IconSettings, IconUpload, IconX } from '@tabler/icons';
+import { IconChalkboard, IconCheck, IconDoor, IconEdit, IconMessageCircle, IconPhoto, IconSearch, IconSettings, IconSlideshow, IconUpload, IconX } from '@tabler/icons';
 import { GetServerSideProps, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import { ReactElement, RefAttributes, useEffect, useRef, useState } from 'react';
@@ -382,9 +382,8 @@ const Profile: NextPage<ProfileProps> = (props) =>
                     <Tabs value={router.query.activeTab as string} defaultValue="videos" onTabChange={(value) => router.push({ query: { ...router.query, activeTab: value, search: "" } }, undefined, { shallow: true, })}>
                         <Paper shadow="sm" radius="lg" mt="lg" p="sm" >
                             <Tabs.List grow={true}>
-                                <Tabs.Tab value="videos" icon={<IconPhoto size={14} />}>Videos</Tabs.Tab>
-                                <Tabs.Tab value="rooms" icon={<IconMessageCircle size={14} />}>Rooms</Tabs.Tab>
-                                <Tabs.Tab value="settings" icon={<IconSettings size={14} />}>Settings</Tabs.Tab>
+                                <Tabs.Tab value="videos" icon={<IconSlideshow size={14} />}>Videos</Tabs.Tab>
+                                <Tabs.Tab value="rooms" icon={<IconChalkboard size={14} />}>Rooms</Tabs.Tab>
                             </Tabs.List>
                         </Paper>
 
@@ -445,12 +444,6 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                 }) : <Grid.Col><NoItems text={`${isUsersProfile ? "You have no rooms" : `${profileUser?.name} have no rooms`}`} /></Grid.Col>}
                             </Grid>
                             {/* </InfiniteScroll> */}
-                        </Tabs.Panel>
-
-                        <Tabs.Panel value="settings" pt="xs">
-                            <Center style={{ height: "100%" }}>
-                                <NoItems text="Settings tab content" />
-                            </Center>
                         </Tabs.Panel>
                     </Tabs>
                 </Flex>

@@ -10,6 +10,7 @@ import React, { Dispatch, FunctionComponent, SetStateAction, useState, useEffect
 import { EndPoints, LinkTypes } from '../../constants/GlobalEnums';
 import { UserResBody } from '../../pages/api/profile/user';
 import { getServerAuthSession } from '../../server/common/get-server-auth-session';
+import ToggleTheme from '../custom/ToggleTheme';
 import UserButton from '../custom/UserButton';
 import { LogoutButton, NavDefaultItem } from './items/NavLinks';
 
@@ -74,6 +75,7 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
             <Navbar.Section grow>
                 <Group className={classes.header} position="apart">
                     <Link href={`/profile/${session?.user?.name}`} style={{ margin: 0, fontSize: "1.5em" }}>Party</Link>
+                    <ToggleTheme />
                 </Group>
                 {links}
             </Navbar.Section>

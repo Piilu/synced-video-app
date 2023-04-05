@@ -60,9 +60,7 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
             let newData = res.data as RoomRes;
             if (newData.success)
             {
-                router.push({
-                    pathname: router.asPath,
-                }, undefined, { scroll: false })
+                router.replace(router.asPath, undefined, { scroll: false });
                 showNotification({
                     message: `Room '${newData.name}' Deleted`,
                     icon: <IconCheck />,
@@ -104,9 +102,7 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
 
             if (newData.success)
             {
-                router.push({
-                    pathname: router.asPath,
-                }, undefined, { scroll: false })
+                router.replace(router.asPath, undefined, { scroll: false });
                 showNotification({
                     title: "Successfully changed",
                     message: `Room visibility changed to ${newData.isPublic ? "public" : "private"}`,

@@ -10,6 +10,7 @@ import
     Menu,
     Progress,
     Tooltip,
+    MediaQuery,
 } from '@mantine/core';
 import React, { useState } from "react"
 import { IconArrowsLeftRight, IconChevronRight, IconMessageCircle, IconPhoto, IconSearch, IconSettings, IconTrash } from '@tabler/icons';
@@ -44,11 +45,14 @@ const UserButton = ({ usedStorage, image, name, email, ...others }: UserButtonPr
     const MAXGB = 5000000000 //5GB
     return (
         <>
-            <Menu shadow="md" opened={opened} withArrow position="right" width={200}>
+            <Menu shadow="md" opened={opened} withArrow position="right" >
                 <Menu.Target>
                     <UnstyledButton className={classes.user} {...others}>
                         <Group>
+                        <MediaQuery smallerThan="md" styles={{ display: "none" }}>
                             <Avatar src={image} radius="xl" />
+                        </MediaQuery>
+
                             <div style={{ flex: 1 }}>
                                 <Text size="sm" weight={500}>
                                     {name}
@@ -59,7 +63,7 @@ const UserButton = ({ usedStorage, image, name, email, ...others }: UserButtonPr
                                 </Text>
 
                                 {/* max 5Gb   */}
-                                <Tooltip label={`${usedStorage != null ? Math.floor((usedStorage * 100) / MAXGB) : null}%`}>
+                                <Tooltip label={`${usedStorage != null ? Math.floor((usedStorage * 100) / MAXGB) : 0}%`}>
                                     <div style={{ marginTop: "0.5em" }}>
                                         <Progress color="cyan" radius="xl" size="xs" value={usedStorage != null ? (usedStorage * 100) / MAXGB : 0} />
                                         <Group position='apart'>

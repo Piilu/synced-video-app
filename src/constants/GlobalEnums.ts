@@ -42,6 +42,7 @@ enum EndPoints
   ROOM = "/api/room",
   VIDEO = "/api/video",
   VIDEO_STREAM = "/api/video/stream",
+  USER_SEARCH = "/api/user/search",
 }
 
 enum SearchType
