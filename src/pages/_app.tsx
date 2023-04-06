@@ -12,17 +12,20 @@ import NavSideBar from "../components/navigation/NavSideBar";
 import AppSideNav from "../components/navigation/AppSideNav";
 import NavHeader from "../components/navigation/NavHeader";
 import { useEffect } from "react"
-import { useRouter } from "next/router";
+import { useRouter, Router } from "next/router";
 import { ModalsProvider } from "@mantine/modals";
 import Head from "next/head";
 import { GetServerSideProps } from "next";
 import { getServerAuthSession } from "../server/common/get-server-auth-session";
+import NProgress from 'nprogress'
+NProgress.configure({showSpinner:false})
+import "nprogress/nprogress.css";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
-  pageProps: { session, ...pageProps },
-}) =>
-{
+  pageProps: { session, ...pageProps},
+  router,
+}) => {
   const deviceDefaultTheme = useMediaQuery('(prefers-color-scheme:dark)');
   const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>({ key: "color-scheme", defaultValue: "light" });
   const toggleColorScheme = (value?: ColorScheme) =>
@@ -30,18 +33,31 @@ const MyApp: AppType<{ session: Session | null }> = ({
   const [opened, setOpened] = useState<boolean>(true);
   const [hideNav, setHideNav] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const router = useRouter();
+  const [visible, setVisible] = useState<boolean>(false);
+  const routerR = useRouter();
 
   //definitely temporary
-  useEffect(() =>
-  {
+  useEffect(() => {
     if (router.asPath != "") setLoading(false)
-    if (!session)
-    {
+    if (!session) {
       setHideNav(true)
     }
     console.log(router.pathname)
   }, [])
+
+  useEffect(()=>{
+    const handleRouteStart = () => NProgress.start();
+    const handleRouteDone = () => NProgress.done();
+    router.events.on("routeChangeStart", handleRouteStart);
+    router.events.on("routeChangeComplete", handleRouteDone);
+    router.events.on("routeChangeError", handleRouteDone);
+ 
+    return () => {
+      router.events.off("routeChangeStart", handleRouteStart);
+      router.events.off("routeChangeComplete", handleRouteDone);
+      router.events.off("routeChangeError", handleRouteDone);
+    };
+},[Router])
 
   if (loading) return null;
 
@@ -52,6 +68,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
           <NotificationsProvider position="bottom-left">
             <ModalsProvider>
               <>
+              
                 {/* Find A system to turn navbar off and on in every page  */}
                 <AppShell hidden={hideNav} style={{ height: "100%" }}
                   navbarOffsetBreakpoint="sm"
@@ -72,6 +89,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
                   {/* App content */}
                   <Head><title>VideoSync</title></Head>
                   <Component {...pageProps} />
+                  <LoadingOverlay visible={visible} overlayBlur={2} />
                 </AppShell>
 
               </>

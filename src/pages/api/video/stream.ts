@@ -48,9 +48,10 @@ async function uploadVideoStream(req: NextApiRequest, res: NextApiResponse) //us
 
 const CHUNK_SIZE_IN_BYTES = 1000000//1mb;
 
-function getVideoStream(req: NextApiRequest, res: NextApiResponse)
+async function getVideoStream(req: NextApiRequest, res: NextApiResponse)
 {
     const range = req.headers.range;
+    const session = await getSession({ req })
 
     if (!range)
     {
@@ -58,7 +59,7 @@ function getVideoStream(req: NextApiRequest, res: NextApiResponse)
     }
 
     const videoId = req.query.videoId
-    const videoPath = `./videos/${videoId}.mp4`
+    const videoPath = `./videos/cleum2xki0000v8wkuvazzda7/${videoId}.mp4`
 
     const videoSizeInBytes = fs.statSync(videoPath).size;
 
