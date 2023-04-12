@@ -39,10 +39,10 @@ enum LinkTypes
 enum EndPoints
 {
   USER = "/api/profile/user",
-  ROOM = "/api/room",
-  VIDEO = "/api/video",
+  ROOM = "/api/rooms",
+  VIDEO = "/api/videos",
   VIDEO_STREAM = "/api/video/stream",
-  USER_SEARCH = "/api/user/search",
+  USER_SEARCH = "/api/users/search",
 }
 
 enum SearchType

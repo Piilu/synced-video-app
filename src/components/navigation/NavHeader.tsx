@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import React, { Dispatch, forwardRef, FunctionComponent, SetStateAction, useEffect, useState } from 'react'
 import { EndPoints } from '../../constants/GlobalEnums';
 import { UserSmall } from '../../constants/schema';
-import { SearchReqBody, SearchResBody } from '../../pages/api/user/search';
+import { SearchReqBody, SearchResBody } from '../../pages/api/users/search';
 import ToggleTheme from '../custom/ToggleTheme';
 import { SelectItem } from '../profile/CreateRoomModal';
 
@@ -26,14 +26,14 @@ const NavHeader: FunctionComponent<NavHeaderProps> = (props) =>
 {
   const { setOpened, opened } = props;
   const [data, setData] = useState<UserSmall[]>([]);
-  const [value, setValue] = useDebouncedState<string | undefined>(undefined, 300);
+  const [value, setValue] = useDebouncedState<string | undefined>("", 300);
+  const [searchText, setSearchText] = useState<string>("")
   const router = useRouter();
 
   useEffect(() =>
   {
     if (value !== undefined)
     {
-      console.log("Value: " + value)
       searchUsers(value)
     }
 
@@ -51,8 +51,7 @@ const NavHeader: FunctionComponent<NavHeaderProps> = (props) =>
 
       if (newData.success)
       {
-        console.log(newData.users)
-        const data2 = newData.users!==undefined ? newData.users.map((item) => ({ ...item, value: item.name })):null;
+        const data2 = newData.users !== undefined ? newData.users.map((item) => ({ ...item, value: item.name })) : null;
         setData(data2)
       }
       else
@@ -77,17 +76,21 @@ const NavHeader: FunctionComponent<NavHeaderProps> = (props) =>
           />
         </MediaQuery>
         <Autocomplete
-        icon={<IconUsers size={18}/>}
+          icon={<IconUsers size={18} />}
           ml="auto"
           mr={10}
           w={300}
+          value={searchText}
           placeholder="Search ..."
           itemComponent={AutoCompleteItem}
-          nothingFound={`User '${value??"-"}' doesn't exist`}
-          onChange={(e) => { setValue(e) }}
-          onItemSubmit = {(e)=>{ router.push({
-            pathname: "/profile/{0}".replace("{0}",e.value),
-        }, undefined);}}
+          nothingFound={`User '${value ?? "-"}' doesn't exist`}
+          onChange={(e) => { setValue(e); setSearchText(e) }}
+          onItemSubmit={(e) =>
+          {
+            router.push({
+              pathname: "/profile/{0}".replace("{0}", e.value),
+            }, undefined);
+          }}
           data={data}
           filter={(value, item) =>
             item.value.toLowerCase().includes(value.toLowerCase().trim())

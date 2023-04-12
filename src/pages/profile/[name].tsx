@@ -17,14 +17,15 @@ import CreateRoomModal from '../../components/profile/CreateRoomModal';
 import { useAutoAnimate } from "@formkit/auto-animate/react"
 import ProgressBar from '../../components/custom/ProgressBar';
 import axios, { AxiosRequestConfig } from 'axios';
-import { VideoReq, VideoRes } from '../api/video';
+import { VideoReq, VideoRes } from '../api/videos';
 import { EndPoints } from '../../constants/GlobalEnums';
 import { showNotification } from '@mantine/notifications';
 import Head from "next/head"
 import Search from '../../components/custom/Search';
 import SmallStatsCard from '../../components/custom/SmallStatsCard';
-import { RoomReq, RoomRes } from '../api/room';
+import { RoomReq, RoomRes } from '../api/rooms';
 import InfiniteScroll from 'react-infinite-scroller';
+import { UploadVideoRes } from '../api/videos/stream';
 
 export const getServerSideProps: GetServerSideProps = async (ctx) =>
 {
@@ -153,12 +154,46 @@ const Profile: NextPage<ProfileProps> = (props) =>
         }
         await axios.post(`${window.origin}${EndPoints.VIDEO_STREAM}`, dataFile, config).then(res =>
         {
-            showNotification({
-                title: "Uploaded",
-                message: res.data.message,
-                icon: <IconCheck />,
-                color: 'green'
-            })
+            let newData = res.data as UploadVideoRes;
+            if (newData.success)
+            {
+                showNotification({
+                    title: "Uploaded",
+                    message: res.data.message,
+                    icon: <IconCheck />,
+                    color: 'green'
+                })
+
+                axios.post(`${window.origin}${EndPoints.VIDEO}`, data).then(res =>
+                {
+                    let newData = res.data as VideoRes;
+
+                    if (newData.success)
+                    {
+                        router.replace(router.asPath, undefined, { scroll: false });
+                        showNotification({
+                            message: "New video uploaded",
+                            icon: <IconCheck />,
+                            color: "green"
+                        })
+                    }
+                    else
+                    {
+                        showNotification({
+                            message: newData.errorMessage,
+                            icon: <IconX />,
+                            color: "red"
+                        })
+                    }
+                }).catch(err =>
+                {
+                    showNotification({
+                        message: err.message,
+                        icon: <IconX />,
+                        color: "red"
+                    })
+                })
+            }
         }).catch(err =>
         {
             showNotification({
@@ -168,40 +203,6 @@ const Profile: NextPage<ProfileProps> = (props) =>
                 color: 'red'
             })
         })
-
-        await axios.post(`${window.origin}${EndPoints.VIDEO}`, data).then(res =>
-        {
-            let newData = res.data as VideoRes;
-
-            if (newData.success)
-            {
-                router.replace(router.asPath, undefined, { scroll: false });
-                showNotification({
-                    message: "New video uploaded",
-                    icon: <IconCheck />,
-                    color: "green"
-                })
-            }
-            else
-            {
-                showNotification({
-                    message: newData.errorMessage,
-                    icon: <IconX />,
-                    color: "red"
-                })
-            }
-        }).catch(err =>
-        {
-            showNotification({
-                message: err.message,
-                icon: <IconX />,
-                color: "red"
-            })
-        })
-
-
-
-
     }
 
     //#region SEARCH
@@ -213,7 +214,6 @@ const Profile: NextPage<ProfileProps> = (props) =>
             isPublic: session?.user?.id == profileUser?.id, //Security problem in api 
             name: router.query.search as string,
             useSearch: true,
-
         }
 
         setTimeout(() =>
@@ -271,6 +271,15 @@ const Profile: NextPage<ProfileProps> = (props) =>
         })
     }
 
+
+
+
+
+
+
+
+
+    
     const searchNextRooms = async () =>
     {
         if (rooms === undefined) return;

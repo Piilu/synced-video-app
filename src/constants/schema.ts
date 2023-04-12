@@ -41,3 +41,9 @@ export type UserSmall = {
     email: string | null,
     image: string | null
 }
+
+export type VideoSmall = {
+    name: string | null,
+    owner: string | null,
+    location: string | null
+}

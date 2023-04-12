@@ -32,7 +32,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const session = await getSession({ req })
     const { name, isPublic, coverImage, video, id, videoId, userId, cursor, useSearch } = req.body as RoomReq;
     const response = {} as RoomRes;
-    //#region Authorize
+
+    //#region Validate request
     if (!session && method != "GET")
     {
         res.status(401).json({ message: "Unauthorized" })
@@ -42,48 +43,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try
     {
-        //#region Get new x data
-        //Later auth issue 
+        //#region Room search
         if (method === "GET")
         {
             const { userId, cursor, useSearch, name } = req.query as unknown as RoomReq;
             const limit = 10;
-            //#region Room search
-            if (useSearch)
-            {
-                const queryData = await prisma?.room.findMany({
-                    include: {
-                        ConnectedRooms: {
-                            include: {
-                                user: true,
-                            }
-                        },
-                        user: true,
-                    },
-                    where: {
-                        userId: userId,
-                        name: {
-                            contains: name,
-                        },
-                        isPublic: session?.user?.id == userId ? {} : true,
-                    },
-                    take: limit,
-                })
-
-                response.rooms = queryData;
-                response.success = true;
-                res.status(200).json(response)
-                return;
-            }
-            //#endregion
-            const nextData = await prisma?.room.findMany({
-                where: {
-                    userId: userId,
-                    isPublic: session?.user?.id == userId ? {} : true,
-                    name: {
-                        contains: name,
-                    }
-                },
+            const queryData = await prisma?.room.findMany({
                 include: {
                     ConnectedRooms: {
                         include: {
@@ -92,14 +57,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     },
                     user: true,
                 },
+                where: {
+                    userId: userId,
+                    name: {
+                        contains: name,
+                    },
+                    isPublic: session?.user?.id == userId ? {} : true,
+                },
                 take: limit,
-                skip: 1,
-                cursor: {
-                    id: parseInt(cursor as unknown as string),
-                }
             })
+
+            response.rooms = queryData;
             response.success = true;
-            response.rooms = nextData;
             res.status(200).json(response)
             return;
         }
@@ -135,12 +104,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         //#region Update existing 
         if (method === "PUT")
         {
-
-            console.log("______________________________________");
-            console.log(name);
-            console.log(isPublic);
-            console.log(coverImage);
-            console.log(videoId);
             const room = await prisma?.room.update({
                 include: {
                     video: true,
@@ -176,7 +139,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 },
             })
 
-
             response.success = true;
             response.name = deleteRoom?.name;
             res.status(200).json(response);
@@ -193,4 +155,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(500).json(response)
         return;
     }
+
+    res.status(405).json({ message: "Method not allowed" });
 }

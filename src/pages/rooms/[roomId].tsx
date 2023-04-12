@@ -16,7 +16,7 @@ import FloatingButtons from '../../components/room/FloatingButtons';
 import { RoomData, RoomMessage, VideoAction } from '../../constants/schema';
 import { Prisma, ConnectedRooms, User, Video, Room } from '@prisma/client';
 import Link from 'next/link';
-import handler from '../api/room';
+import handler from '../api/rooms';
 import Head from 'next/head';
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
@@ -332,7 +332,7 @@ const RoomTest: NextPage<RoomProps> = (props) =>
 
             <Flex style={{ backgroundColor: "black", width: "100%", height: "100%" }} direction="row" justify={"flex-end"}>
                 <Center style={{ width: "100%", height: "100%", position: "relative" }}>
-                    <video muted={true} ref={videoTag} onPause={event => { videoPause(event, socketSend) }} onPlay={(event) => { videoPlay(event, socketSend) }} onSeeked={(event) => { videoSeek(event, socketSend) }} src={`${EndPoints.VIDEO_STREAM}?videoId=${roomData?.id}`} width="100%" height="100%" controls />
+                    <video muted={true} ref={videoTag} onPause={event => { videoPause(event, socketSend) }} onPlay={(event) => { videoPlay(event, socketSend) }} onSeeked={(event) => { videoSeek(event, socketSend) }} src={roomData?.video?.location} width="100%" height="100%" controls />
                     <FloatingButtons setSettingsOpen={setSettingsOpen} settingsOpen={settingsOpen} chatOpen={chatOpen} setChatOpen={setChatOpen} />
                 </Center>
                 <Transition mounted={chatOpen === "flex"} transition={slideLeft} duration={200} timingFunction="ease">

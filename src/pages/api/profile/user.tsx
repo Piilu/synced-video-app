@@ -1,8 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSession } from 'next-auth/react'
-type Data = {
-    id: string,
-}
 
 export type UserResBody = {
     success: boolean,
@@ -23,35 +20,26 @@ export type UserReqBody = {
 export default async function handler(req: NextApiRequest, res: NextApiResponse)
 {
     let response: UserResBody = {} as UserResBody
-
     const method = req.method;
     const { name, comment, userId, image } = req.body as UserReqBody;
     const session = await getSession({ req });
-    //#region Authorize
-    // if (session?.user?.id != userId)
-    // {
-    //     //Idk if it has to be here 
-    //     response.errormsg = "Not allowed"
-    //     response.success = false;
-    //     res.status(400).json(response);
-    //     return;
-    // }
-    //need to chage some prisma actions
-    if (session == null)
+    try 
     {
-        response.errormsg = "Unauthorized"
-        response.success = false;
-        res.status(401).json(response)
-        return;
-    }
-    if (method === "GET")
-    {
-        try
+        //#region Validate request
+        if (session == null)
         {
+            response.errormsg = "Unauthorized"
+            response.success = false;
+            res.status(401).json(response)
+            return;
+        }
+        //#endregion
 
+        if (method === "GET")
+        {
             const usedStorage = await prisma?.video.aggregate({
                 where: {
-                    userId: session.user.id
+                    userId: session?.user?.id
                 },
                 _sum: {
                     size: true,
@@ -62,17 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             res.status(200).json(response);
             return;
         }
-        catch (err: any)
-        {
-            response.success = false
-            response.errormsg = err.message;
-            res.status(500).json(response);
-            return;
-        }
-    }
-    //#endregion
-    try 
-    {
+
         if (method === "PUT")
         {
             const user = await prisma?.user.update({
@@ -99,4 +77,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         response.errormsg = err.message;
         res.status(500).json(response)
     }
+
+    res.status(405).json({ message: "Method not allowed" });
 }

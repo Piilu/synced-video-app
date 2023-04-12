@@ -10,7 +10,7 @@ import { useRouter } from 'next/router'
 import React, { useState, FunctionComponent } from 'react'
 import Moment from 'react-moment'
 import { EndPoints } from '../../constants/GlobalEnums'
-import { RoomReq, RoomRes } from '../../pages/api/room'
+import { RoomReq, RoomRes } from '../../pages/api/rooms'
 
 type RoomItemProps = {
     room: Room & {

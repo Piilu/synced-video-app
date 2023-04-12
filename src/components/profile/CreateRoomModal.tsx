@@ -2,13 +2,16 @@ import { Avatar, Button, FileInput, Text, Flex, Group, Modal, NativeSelect, Radi
 import { useForm } from '@mantine/form'
 import { showNotification } from '@mantine/notifications'
 import { Video } from '@prisma/client'
+import { useDebouncedState } from '@mantine/hooks';
 import { IconCheck, IconUpload, IconX } from '@tabler/icons'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState, Dispatch, SetStateAction, FunctionComponent, forwardRef } from 'react'
 import { EndPoints } from '../../constants/GlobalEnums'
-import { RoomReq, RoomRes } from '../../pages/api/room'
+import { VideoSmall } from '../../constants/schema'
+import { RoomReq, RoomRes } from '../../pages/api/rooms'
+import { VideoRes } from '../../pages/api/videos'
 
 type CreateRoomModalProps = {
     createRoom: boolean,
@@ -21,6 +24,9 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
     const [loading, setLoading] = useState<boolean>(false)
     const [newVideo, setNewVideo] = useState<"yes" | "no">("no")
     const [file, setFile] = useState<File | null>(null);
+    const [data, setData] = useState<VideoSmall[]>([]);
+    const [value, setValue] = useDebouncedState<string | undefined>("", 300);
+
     const { data: session } = useSession()
     const router = useRouter()
     const form = useForm({
@@ -83,10 +89,41 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
 
     }
 
-    const getVideoData = () =>
+    const searchVideos = async (name: string) =>
     {
+        let data: RoomReq =
+        {
+            userId: session?.user?.id,
+            isPublic: false,
+            name: name,
+            useSearch: true,
+        }
 
+        await axios.get(`${window.origin}${EndPoints.VIDEO}`, { params: data }).then(res =>
+        {
+            let newData = res.data as VideoRes;
+            if (newData.success)
+            {
+                console.log(newData.videos)
+                const data2 = newData.videos !== undefined ? newData.videos.map((item) => ({ ...item, value: item.name })) : null;
+                setData(data2)
+            }
+
+        }).catch(err =>
+        {
+            console.log(err.message)
+        })
     }
+
+    useEffect(() =>
+    {
+        if (value !== undefined)
+        {
+            console.log("Value: " + value)
+            searchVideos(value)
+        }
+
+    }, [value])
     return (
         <Modal title="Create a room" opened={createRoom} onClose={() => { setCreateRoom(false) }}>
             <form onSubmit={form.onSubmit((values) => { handleRoomCreate() })}>
@@ -106,9 +143,13 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
                         placeholder="Pick one"
                         itemComponent={SelectItem}
                         nothingFound="Nothing found"
-                        data={[]}
+                        data={data}
+                        onSearchChange={(e) => { setValue(e) }}
                         searchable
                         withAsterisk
+                        filter={(value, item) =>
+                            item.value.toLowerCase().includes(value.toLowerCase().trim())
+                        }
                         maxDropdownHeight={400} />
                 </Flex>
                 <Button loading={loading} type='submit' fullWidth mt="md">
