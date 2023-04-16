@@ -18,7 +18,7 @@ import { Prisma, ConnectedRooms, User, Video, Room } from '@prisma/client';
 import Link from 'next/link';
 import handler, { RoomReq, RoomRes, RoomUpdateReq } from '../api/rooms';
 import Head from 'next/head';
-import VideoSearch from '../../components/custom/VideoSearch';
+import VideoSearch from '../../components/custom/search/VideoSearch';
 import { useForm } from '@mantine/form';
 import axios from 'axios';
 import { showNotification } from '@mantine/notifications';
@@ -69,6 +69,11 @@ export const getServerSideProps: GetServerSideProps = async (ctx) =>
 
     if (roomInitialData?.ConnectedRooms.filter(connection => { return connection.userId == user?.id && connection.roomId == roomId }).length != 0)
     {
+        const deleteUser = await prisma?.connectedRooms.deleteMany({ //for now
+            where: {
+                userId: user?.id,
+            }
+        })
         return { props: { multipleUsers: true } }
     }
 

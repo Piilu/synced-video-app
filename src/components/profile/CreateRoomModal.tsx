@@ -12,7 +12,7 @@ import { EndPoints } from '../../constants/GlobalEnums'
 import { VideoSmall } from '../../constants/schema'
 import { RoomReq, RoomRes } from '../../pages/api/rooms'
 import { VideoRes } from '../../pages/api/videos'
-import VideoSearch from '../custom/VideoSearch';
+import VideoSearch from '../custom/search/VideoSearch';
 
 type CreateRoomModalProps = {
     createRoom: boolean,

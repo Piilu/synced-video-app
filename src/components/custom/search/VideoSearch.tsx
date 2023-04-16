@@ -1,12 +1,12 @@
 import { Select } from '@mantine/core'
 import axios from 'axios'
 import React, { FunctionComponent, useEffect, useState } from 'react'
-import { EndPoints } from '../../constants/GlobalEnums'
-import { RoomReq } from '../../pages/api/rooms'
-import { VideoRes } from '../../pages/api/videos'
+import { EndPoints } from '../../../constants/GlobalEnums'
+import { RoomReq } from '../../../pages/api/rooms'
+import { VideoRes } from '../../../pages/api/videos'
 import { useSession } from 'next-auth/react'
 import { useDebouncedState } from '@mantine/hooks'
-import { VideoSmall } from '../../constants/schema'
+import { VideoSmall } from '../../../constants/schema'
 
 type VideoSearchType = {
     label: string,

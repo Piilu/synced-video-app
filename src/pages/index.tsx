@@ -35,10 +35,11 @@ const errors = {
   default: "Unable to sign in."
 }
 
-const getErrorMessage = errorType =>
+const getErrorMessage = (errorType: string) =>
 {
   console.log(errorType)
   if (!errorType) return;
+  //@ts-ignore
   return errors[errorType]
 }
 
@@ -71,7 +72,7 @@ const Home: NextPage<HomePageProps> = (props) =>
     signIn(providerId)
   }
 
-  const error = getErrorMessage(errorType);
+  const error = getErrorMessage(errorType as string);
   return (
     <main style={{ display: "flex", flexDirection: "column", justifyContent: "center", height: "100%" }}>
       <Head>
