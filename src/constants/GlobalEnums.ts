@@ -41,7 +41,7 @@ enum EndPoints
   USER = "/api/profile/user",
   ROOM = "/api/rooms",
   VIDEO = "/api/videos",
-  VIDEO_STREAM = "/api/video/stream",
+  VIDEO_STREAM = "/api/videos/stream",
   USER_SEARCH = "/api/users/search",
 }
 
@@ -51,4 +51,9 @@ enum SearchType
   Video = "SEARCH_VIDEO",
 }
 
-export { Events, QueryParams, Brands, EndPoints, LinkTypes, SearchType }
+enum Helpers
+{
+  VideoStartPath = "./videos"
+}
+
+export { Events, QueryParams, Brands, EndPoints, LinkTypes, SearchType, Helpers }

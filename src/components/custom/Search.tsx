@@ -20,12 +20,10 @@ const Search: FunctionComponent<SearchProps> = (props) =>
     {
         if (value !== undefined)
         {
-            console.log("Value: " + value)
             router.query.search = value;
             router.push({
                 query: { ...router.query, search: value }
             }, undefined, { shallow: true })
-            console.log("Test: " + router.query.search)
             getSearchData();
 
         }

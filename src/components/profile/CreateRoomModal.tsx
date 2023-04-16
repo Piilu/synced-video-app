@@ -12,6 +12,7 @@ import { EndPoints } from '../../constants/GlobalEnums'
 import { VideoSmall } from '../../constants/schema'
 import { RoomReq, RoomRes } from '../../pages/api/rooms'
 import { VideoRes } from '../../pages/api/videos'
+import VideoSearch from '../custom/VideoSearch';
 
 type CreateRoomModalProps = {
     createRoom: boolean,
@@ -23,7 +24,6 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
     const { createRoom, setCreateRoom, videos } = props
     const [loading, setLoading] = useState<boolean>(false)
     const [newVideo, setNewVideo] = useState<"yes" | "no">("no")
-    const [file, setFile] = useState<File | null>(null);
     const [data, setData] = useState<VideoSmall[]>([]);
     const [value, setValue] = useDebouncedState<string | undefined>("", 300);
 
@@ -33,6 +33,7 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
         initialValues: {
             title: '',
             visibility: '1',
+            video: '0',
         },
         validate:
         {
@@ -42,15 +43,17 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
 
     useEffect(() =>
     {
-        form.setValues({ title: "", visibility: "1" });
+        form.setValues({ title: "", visibility: "1", video: "0" });
     }, [createRoom])
 
     const handleRoomCreate = async () =>
     {
+        console.log("ID:" + form.values.video.split("|")[1]?.trim() as string)
         let data: RoomReq =
         {
             name: form.values.title,
             isPublic: form.values.visibility == "1" ? true : false,
+            videoId: parseInt(form.values.video.split("|")[1]?.trim() as string)
         };
         setLoading(true);
         await axios.post(`${window.origin}${EndPoints.ROOM}`, data).then(res =>
@@ -88,42 +91,7 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
         })
 
     }
-
-    const searchVideos = async (name: string) =>
-    {
-        let data: RoomReq =
-        {
-            userId: session?.user?.id,
-            isPublic: false,
-            name: name,
-            useSearch: true,
-        }
-
-        await axios.get(`${window.origin}${EndPoints.VIDEO}`, { params: data }).then(res =>
-        {
-            let newData = res.data as VideoRes;
-            if (newData.success)
-            {
-                console.log(newData.videos)
-                const data2 = newData.videos !== undefined ? newData.videos.map((item) => ({ ...item, value: item.name })) : null;
-                setData(data2)
-            }
-
-        }).catch(err =>
-        {
-            console.log(err.message)
-        })
-    }
-
-    useEffect(() =>
-    {
-        if (value !== undefined)
-        {
-            console.log("Value: " + value)
-            searchVideos(value)
-        }
-
-    }, [value])
+   
     return (
         <Modal title="Create a room" opened={createRoom} onClose={() => { setCreateRoom(false) }}>
             <form onSubmit={form.onSubmit((values) => { handleRoomCreate() })}>
@@ -137,20 +105,7 @@ const CreateRoomModal: FunctionComponent<CreateRoomModalProps> = (props) =>
                         />
 
                     </Group>
-
-                    <Select
-                        label="Choose video"
-                        placeholder="Pick one"
-                        itemComponent={SelectItem}
-                        nothingFound="Nothing found"
-                        data={data}
-                        onSearchChange={(e) => { setValue(e) }}
-                        searchable
-                        withAsterisk
-                        filter={(value, item) =>
-                            item.value.toLowerCase().includes(value.toLowerCase().trim())
-                        }
-                        maxDropdownHeight={400} />
+                    <VideoSearch label='Choose video' notFoundLabel='Nothing found' isAsterisk form={form} />
                 </Flex>
                 <Button loading={loading} type='submit' fullWidth mt="md">
                     Create
@@ -164,57 +119,5 @@ const selectData = [
     { value: "1", label: "Public" },
     { value: "2", label: "Private" },
 ];
-
-
-const data = [
-    {
-        image: 'https://img.icons8.com/clouds/256/000000/futurama-bender.png',
-        label: 'Bender Bending Rodríguez',
-        value: 'Bender Bending Rodríguez',
-        description: 'Fascinated with cooking',
-    },
-
-    {
-        image: 'https://img.icons8.com/clouds/256/000000/futurama-mom.png',
-        label: 'Carol Miller',
-        value: 'Carol Miller',
-        description: 'One of the richest people on Earth',
-    },
-    {
-        image: 'https://img.icons8.com/clouds/256/000000/homer-simpson.png',
-        label: 'Homer Simpson',
-        value: 'Homer Simpson',
-        description: 'Overweight, lazy, and often ignorant',
-    },
-    {
-        image: 'https://img.icons8.com/clouds/256/000000/spongebob-squarepants.png',
-        label: 'Spongebob Squarepants',
-        value: 'Spongebob Squarepants',
-        description: 'Not just a sponge',
-    },
-];
-
-interface ItemProps extends React.ComponentPropsWithoutRef<'div'>
-{
-    name: string;
-    isPublic: boolean;
-}
-
-export const SelectItem = forwardRef<HTMLDivElement, ItemProps>(
-    ({ name, isPublic, ...others }: ItemProps, ref) => (
-        <div ref={ref} {...others}>
-            <Group noWrap>
-                {/* <Avatar src={image} /> */}
-
-                <div>
-                    <Text size="sm">{name}</Text>
-                    <Text size="xs" opacity={0.65}>
-                        {/* {description} */}
-                    </Text>
-                </div>
-            </Group>
-        </div>
-    )
-);
 
 export default CreateRoomModal

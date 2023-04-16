@@ -81,8 +81,8 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
             </Navbar.Section>
 
             <Navbar.Section className={classes.footer}>
-                {/* <LogoutButton /> */}
                 <UserButton usedStorage={usedStorage} image={session?.user?.image as string} name={session?.user?.name as string} email={session?.user?.email as string} />
+                <LogoutButton />
             </Navbar.Section>
         </Navbar>
     )

@@ -100,9 +100,6 @@ const Profile: NextPage<ProfileProps> = (props) =>
 {
     const { data: session } = useSession();
     const { profileUser, isUsersProfile, videoCount, roomCount } = props
-    const [name, setName] = useState<string>();
-    const [videoSearch, setVideoSearch] = useState<boolean>(true);
-    const [roomSearch, setRoomSearch] = useState<boolean>(true);
     const [editProfile, setEditProfile] = useState<boolean>(false);
     const [uploadVideo, setUploadVideo] = useState<boolean>(false);
     const [createRoom, setCreateRoom] = useState<boolean>(false);
@@ -114,32 +111,11 @@ const Profile: NextPage<ProfileProps> = (props) =>
 
     useEffect(() =>
     {
-        if (router.query.search !== "")
-        {
-            setVideoSearch(false)
-            setRoomSearch(false)
-        }
-        else
-        {
-            setVideoSearch(true)
-            setRoomSearch(true)
-        }
-
         setRooms(profileUser?.rooms)
         setVideos(profileUser?.videos)
-        console.log("Testin tab change")
     }, [profileUser])
 
-    //#region Load data
-    useEffect(() =>
-    {
-        console.log(router.query.activeTab)
-        if (router.query.activeTab !== undefined)
-        {
-            console.log("LOAD " + router.query.activeTab + " data")
-        }
-    }, [router.query.activeTab])
-    //#endregion
+
     const handleUploadVideo = async (file: File, data: VideoReq) =>
     {
         setUploadVideo(false);
@@ -164,6 +140,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
                     color: 'green'
                 })
 
+                data.location = newData.fileName as string;
                 axios.post(`${window.origin}${EndPoints.VIDEO}`, data).then(res =>
                 {
                     let newData = res.data as VideoRes;
@@ -176,15 +153,14 @@ const Profile: NextPage<ProfileProps> = (props) =>
                             icon: <IconCheck />,
                             color: "green"
                         })
+                        return;
                     }
-                    else
-                    {
-                        showNotification({
-                            message: newData.errorMessage,
-                            icon: <IconX />,
-                            color: "red"
-                        })
-                    }
+
+                    showNotification({
+                        message: newData.errorMessage,
+                        icon: <IconX />,
+                        color: "red"
+                    })
                 }).catch(err =>
                 {
                     showNotification({
@@ -206,6 +182,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
     }
 
     //#region SEARCH
+
     const searchVideos = async () =>
     {
         let data: RoomReq =
@@ -216,17 +193,6 @@ const Profile: NextPage<ProfileProps> = (props) =>
             useSearch: true,
         }
 
-        setTimeout(() =>
-        {
-            if (router.query.search === "")
-            {
-                setVideoSearch(true)
-            }
-            else
-            {
-                setVideoSearch(false)
-            }
-        }, 500)
         await axios.get(`${window.origin}${EndPoints.VIDEO}`, { params: data }).then(res =>
         {
             let newData = res.data as VideoRes;
@@ -248,19 +214,6 @@ const Profile: NextPage<ProfileProps> = (props) =>
             useSearch: true,
         }
 
-        setTimeout(() =>
-        {
-            if (router.query.search === "")
-            {
-                setRoomSearch(true)
-            }
-
-        }, 500)
-
-        if (router.query.search !== "")
-        {
-            setRoomSearch(false)
-        }
         await axios.get(`${window.origin}${EndPoints.ROOM}`, { params: data }).then(res =>
         {
             let newData = res.data as RoomRes;
@@ -271,88 +224,6 @@ const Profile: NextPage<ProfileProps> = (props) =>
         })
     }
 
-
-
-
-
-
-
-
-
-    
-    const searchNextRooms = async () =>
-    {
-        if (rooms === undefined) return;
-        if (rooms.length === 0) return;
-
-        let data: RoomReq = {
-            // cursor: Math.max(...rooms.map(room => room.id)),
-            userId: profileUser?.id,
-            isPublic: true, //doesn't matter
-            name: router.query.search as string,
-        }
-
-        await axios.get(`${window.origin}${EndPoints.ROOM}`, { params: data }).then(res =>
-        {
-            const newData = res.data as RoomRes;
-            if (newData.success)
-            {
-                if (newData.rooms?.length == 0)
-                {
-                    return;
-                }
-                setRooms((prevRooms) => [
-                    ...prevRooms, ...newData.rooms
-                ])
-            }
-        }).catch(err =>
-        {
-            showNotification(
-                {
-                    title: "Error",
-                    message: err.message,
-                }
-            )
-        })
-
-    }
-
-    const searchNextVideos = async () =>
-    {
-        if (videos === undefined) return;
-        if (videos.length === 0) return;
-        let data: VideoReq = {
-            cursor: Math.max(...videos.map(video => video.id)),
-            userId: profileUser?.id,
-            isPublic: true, //doesn't matter
-            name: router.query.search as string,
-            location: "sasd",//doesn't matter
-            size: 1111//doesn't matter
-        }
-
-        await axios.get(`${window.origin}${EndPoints.VIDEO}`, { params: data }).then(res =>
-        {
-            const newData = res.data as VideoRes;
-            if (newData.success)
-            {
-                console.log(newData.videos)
-
-                if (newData.videos?.length == 0) return;
-
-                setVideos((prevVideos) => [
-                    ...prevVideos, ...newData.videos
-                ])
-            }
-        }).catch(err =>
-        {
-            showNotification(
-                {
-                    title: "Error",
-                    message: err.message,
-                }
-            )
-        })
-    }
     //#endregion
 
     return (
@@ -388,7 +259,7 @@ const Profile: NextPage<ProfileProps> = (props) =>
                         </Group>
                     </Paper>
 
-                    <Tabs value={router.query.activeTab as string} defaultValue="videos" onTabChange={(value) => router.push({ query: { ...router.query, activeTab: value, search: "" } }, undefined, { shallow: true, })}>
+                    <Tabs value={router.query.tab as string} defaultValue="videos" onTabChange={(value) => router.push({ query: { ...router.query, tab: value, search: "" } }, undefined, { shallow: true, })}>
                         <Paper shadow="sm" radius="lg" mt="lg" p="sm" >
                             <Tabs.List grow={true}>
                                 <Tabs.Tab value="videos" icon={<IconSlideshow size={14} />}>Videos</Tabs.Tab>
@@ -406,13 +277,6 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                     </Group>
                                     : null}
                             </Flex>
-
-                            {/* <InfiniteScroll
-                                threshold={350}
-                                loadMore={searchNextVideos}
-                                hasMore={videos?.length !== videoCount && videoSearch}
-                                loader={<Group key={0} mb={10} position='center'><Loader variant="dots" ></Loader></Group>}
-                            > */}
                             <Flex direction="column" gap={20} mb={35} ref={animationParent}>
 
                                 {videos?.length != 0 ? videos?.map(video =>
@@ -423,8 +287,6 @@ const Profile: NextPage<ProfileProps> = (props) =>
 
                                 }) : <NoItems text='No videos' />}
                             </Flex>
-                            {/* </InfiniteScroll> */}
-
                         </Tabs.Panel>
 
                         <Tabs.Panel value="rooms" pt="xs">
@@ -436,12 +298,6 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                     </Group>
                                     : null}
                             </Flex>
-                            {/* <InfiniteScroll
-                                threshold={350}
-                                loadMore={searchNextRooms}
-                                hasMore={rooms?.length !== roomCount && roomSearch}
-                                loader={<Group key={0} my={10} position='center'><Loader variant="dots" ></Loader></Group>}
-                            > */}
                             <Grid gutter="md" ref={animationParent}>
                                 {rooms?.length != 0 ? rooms?.map(room =>
                                 {
@@ -452,7 +308,6 @@ const Profile: NextPage<ProfileProps> = (props) =>
                                     )
                                 }) : <Grid.Col><NoItems text={`${isUsersProfile ? "You have no rooms" : `${profileUser?.name} have no rooms`}`} /></Grid.Col>}
                             </Grid>
-                            {/* </InfiniteScroll> */}
                         </Tabs.Panel>
                     </Tabs>
                 </Flex>

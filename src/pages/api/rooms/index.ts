@@ -16,6 +16,11 @@ export type RoomReq = {
     useSearch?: boolean,
 }
 
+export type RoomUpdateReq = {
+    updateRoomId: string,
+    updateVideoId: number,
+}
+
 export type RoomRes = {
     success: boolean,
     errorMessage?: string,
@@ -87,6 +92,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     coverImage: coverImage,
                     name: name,
                     isPublic: isPublic,
+                    videoId: videoId,
                 },
             })
 
@@ -104,19 +110,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         //#region Update existing 
         if (method === "PUT")
         {
+            const { updateRoomId, updateVideoId } = req.body as RoomUpdateReq;
+            console.log("VIDEOID:"+updateVideoId)
+            console.log("ROOMID:"+updateRoomId)
             const room = await prisma?.room.update({
                 include: {
                     video: true,
                 },
                 where: {
-                    id: id,
+                    id: updateRoomId,
                 },
 
                 data: {
-                    name: name,
-                    isPublic: isPublic,
-                    coverImage: coverImage,
-                    videoId: video?.id ?? videoId,
+                    // name: updateRoom.name,
+                    // isPublic: updateRoom.isPublic,
+                    // coverImage: updateRoom.coverImage,
+                    videoId: updateVideoId,
                 }
             })
             response.success = true;

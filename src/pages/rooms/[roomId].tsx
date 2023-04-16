@@ -1,9 +1,9 @@
-import { ActionIcon, Button, Center, Container, CopyButton, Drawer, Flex, Group, Textarea, TextInput, Tooltip, Transition, useMantineColorScheme } from '@mantine/core';
+import { ActionIcon, Button, Center, Container, CopyButton, Divider, Drawer, Flex, Group, Select, Textarea, TextInput, Tooltip, Transition, useMantineColorScheme } from '@mantine/core';
 import { useRouter } from 'next/router'
 import type { GetServerSideProps, NextPage } from 'next/types';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import Chat from '../../components/room/Chat';
-import { IconCheck, IconLink, IconMessageCircle, IconRefresh, IconSettings } from '@tabler/icons'
+import { IconCheck, IconLink, IconMessageCircle, IconRefresh, IconSend, IconSettings } from '@tabler/icons'
 import { slideLeft } from '../../styles/transitions';
 import type { Socket } from 'socket.io-client';
 import io from 'socket.io-client'
@@ -16,8 +16,12 @@ import FloatingButtons from '../../components/room/FloatingButtons';
 import { RoomData, RoomMessage, VideoAction } from '../../constants/schema';
 import { Prisma, ConnectedRooms, User, Video, Room } from '@prisma/client';
 import Link from 'next/link';
-import handler from '../api/rooms';
+import handler, { RoomReq, RoomRes, RoomUpdateReq } from '../api/rooms';
 import Head from 'next/head';
+import VideoSearch from '../../components/custom/VideoSearch';
+import { useForm } from '@mantine/form';
+import axios from 'axios';
+import { showNotification } from '@mantine/notifications';
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
 export const getServerSideProps: GetServerSideProps = async (ctx) =>
@@ -102,6 +106,21 @@ const RoomTest: NextPage<RoomProps> = (props) =>
     const [roomData, setRoomData] = useState<RoomData>();
     const [guest, setGuest] = useLocalStorage({ key: 'guest', defaultValue: null });
     const videoTag = useRef<HTMLVideoElement>(null)
+    const form = useForm({
+        initialValues: {
+            video: '0',
+        },
+        validate:
+        {
+        }
+    })
+
+    //#region Add setting values
+    useEffect(() =>
+    {
+        form.setValues({ video: roomData?.video?.name + " | " + roomData?.videoId });
+    }, [roomData?.video])
+    //#endregion
 
     //#region  SOCKET ON
     if (notFound)
@@ -221,7 +240,6 @@ const RoomTest: NextPage<RoomProps> = (props) =>
     useEffect(() =>
     {
         joinRoom();
-
     }, [])
 
     //#region Route change
@@ -307,6 +325,30 @@ const RoomTest: NextPage<RoomProps> = (props) =>
 
     //#endregion
 
+    const saveRoomSettings = async () =>
+    {
+        const data: RoomUpdateReq =
+        {
+            updateRoomId: roomData?.id as string,
+            updateVideoId: parseInt(form.values.video.split("|")[1]?.trim() as string)
+        }
+        await axios.put(`${window.origin}${EndPoints.ROOM}`, data).then(res =>
+        {
+            const newData = res.data as RoomRes;
+            if (newData.success)
+            {
+                console.log(newData)
+                socket.emit(Events.GET_ROOM_DATA, roomData?.id)
+                showNotification({
+                    title: "Success",
+                    message: res.data.message,
+                    icon: <IconCheck />,
+                    color: 'green'
+                })
+            }
+        })
+
+    }
     return (
         <>
             <Head>
@@ -322,17 +364,17 @@ const RoomTest: NextPage<RoomProps> = (props) =>
             >
                 <Flex direction="column" gap={20}>
                     <Group grow>
-                        {/* <TextInput title="Email cant't be changed" withAsterisk label="Email:" readOnly placeholder="Your email" />
-                        <TextInput withAsterisk label="Username:" placeholder="Your name" /> */}
                     </Group>
-                    <TextInput label="Current video" defaultValue={roomData?.video?.location} placeholder="http//:..." />
+                    <VideoSearch label='Current video' notFoundLabel='Not found' form={form} />
+                    <Group position='right'>
+                        <Button onClick={saveRoomSettings}>Save</Button>
+                    </Group>
                 </Flex>
-
             </Drawer>
 
             <Flex style={{ backgroundColor: "black", width: "100%", height: "100%" }} direction="row" justify={"flex-end"}>
                 <Center style={{ width: "100%", height: "100%", position: "relative" }}>
-                    <video muted={true} ref={videoTag} onPause={event => { videoPause(event, socketSend) }} onPlay={(event) => { videoPlay(event, socketSend) }} onSeeked={(event) => { videoSeek(event, socketSend) }} src={roomData?.video?.location} width="100%" height="100%" controls />
+                    <video muted={true} ref={videoTag} onPause={event => { videoPause(event, socketSend) }} onPlay={(event) => { videoPlay(event, socketSend) }} onSeeked={(event) => { videoSeek(event, socketSend) }} src={`${EndPoints.VIDEO_STREAM}?videoId=${roomData?.video?.location}&ownerId=${roomData?.user.id}`} width="100%" height="100%" controls />
                     <FloatingButtons setSettingsOpen={setSettingsOpen} settingsOpen={settingsOpen} chatOpen={chatOpen} setChatOpen={setChatOpen} />
                 </Center>
                 <Transition mounted={chatOpen === "flex"} transition={slideLeft} duration={200} timingFunction="ease">
