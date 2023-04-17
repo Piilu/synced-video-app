@@ -1,6 +1,6 @@
-import { Code, createStyles, Group, Navbar } from '@mantine/core'
+import { ActionIcon, Button, Code, createStyles, Divider, Group, Navbar } from '@mantine/core'
 import { useWindowEvent } from '@mantine/hooks';
-import { IconSwitchHorizontal, IconLogout, IconBrandYoutube, Icon24Hours, IconFingerprint, IconKey, IconDatabase, Icon2fa, IconSettings, IconUser, TablerIcon } from '@tabler/icons';
+import { IconSwitchHorizontal, IconLogout, IconBrandYoutube, Icon24Hours, IconFingerprint, IconKey, IconDatabase, Icon2fa, IconSettings, IconUser, TablerIcon, IconPlayerPlay } from '@tabler/icons';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -13,6 +13,9 @@ import { getServerAuthSession } from '../../server/common/get-server-auth-sessio
 import ToggleTheme from '../custom/ToggleTheme';
 import UserButton from '../custom/UserButton';
 import { LogoutButton, NavDefaultItem } from './items/NavLinks';
+import UserSearch from '../custom/search/UserSearch';
+import UserStorage from '../custom/status/UserStorage';
+import ToggleNavbar from '../custom/buttons/ToggleNavbar';
 
 const data = [
     { link: '/profile/{0}', label: 'Profile', icon: IconUser, linkType: LinkTypes.PROFILE },
@@ -23,7 +26,7 @@ const useStyles = createStyles((theme, _params) =>
     return {
         header: {
             paddingBottom: theme.spacing.md,
-            marginBottom: theme.spacing.md * 1.5,
+            marginBottom: theme.spacing.md,
             borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
         },
 
@@ -37,52 +40,42 @@ const useStyles = createStyles((theme, _params) =>
 });
 
 type AppSideNavProps = {
-    opened: boolean;
-    setOpened: Dispatch<SetStateAction<boolean>>
+    hideNav: boolean;
+    setHideNav: Dispatch<SetStateAction<boolean>>
 }
 
 const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
 {
-    const { opened, setOpened } = props;
     const { data: session } = useSession();
+    const { setHideNav, hideNav } = props;
     const { classes, cx } = useStyles();
-    const [usedStorage, setUsedStorage] = useState<number | null | undefined>()
-
     const router = useRouter();
     const links = data.map((item) => (
         <NavDefaultItem path={router.asPath} key={item.label} item={item} profileName={router.query.name as string} />
     ));
-    const getUserStorage = async () =>
-    {
-        await axios.get(`${window.origin}${EndPoints.USER}`).then(res =>
-        {
-            let newData = res.data as UserResBody;
-            if (newData.success)
-            {
-                setUsedStorage(newData.usedStorage)
-            }
-        }).catch(err =>
-        {
-            console.error(err.message)
-        })
-    }
 
-    useEffect(() => { getUserStorage() }, [router])
     return (
 
-        <Navbar p="md" hiddenBreakpoint="sm" hidden={!opened} width={{ sm: 200, lg: 300 }}>
-
+        <Navbar p="md" hiddenBreakpoint="sm" hidden={false} width={{ sm: 300, lg: 300 }}>
             <Navbar.Section grow>
                 <Group className={classes.header} position="apart">
-                    <Link href={`/profile/${session?.user?.name}`} style={{ margin: 0, fontSize: "1.5em" }}>Party</Link>
+                    <Group align='center'>
+
+                        <Link href={`/profile/${session?.user?.name}`} style={{ margin: 0, fontSize: "1.5em" }}>
+                            Party</Link>
+                    </Group>
                     <ToggleTheme />
+                    <ToggleNavbar setHideNav={setHideNav} hideNav={hideNav} />
                 </Group>
+                <UserSearch />
+                <Divider my={15} />
                 {links}
             </Navbar.Section>
 
             <Navbar.Section className={classes.footer}>
-                <UserButton usedStorage={usedStorage} image={session?.user?.image as string} name={session?.user?.name as string} email={session?.user?.email as string} />
-                <LogoutButton />
+                <UserButton />
+                {/* <LogoutButton /> */}
+                <UserStorage />
             </Navbar.Section>
         </Navbar>
     )

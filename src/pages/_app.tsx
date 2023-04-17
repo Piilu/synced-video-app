@@ -1,7 +1,7 @@
 import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
-import { AppShell, Aside, Burger, Center, ColorSchemeProvider, Footer, Group, Header, Loader, LoadingOverlay, MantineProvider, MediaQuery, Navbar } from '@mantine/core';
+import { ActionIcon, AppShell, Aside, Burger, Center, ColorSchemeProvider, Footer, Group, Header, Loader, LoadingOverlay, MantineProvider, MediaQuery, Navbar } from '@mantine/core';
 import type { ColorScheme } from '@mantine/core';
 import { NotificationsProvider } from '@mantine/notifications';
 import "../styles/globals.css";
@@ -18,46 +18,52 @@ import Head from "next/head";
 import { GetServerSideProps } from "next";
 import { getServerAuthSession } from "../server/common/get-server-auth-session";
 import NProgress from 'nprogress'
-NProgress.configure({showSpinner:false})
+NProgress.configure({ showSpinner: false })
 import "nprogress/nprogress.css";
+import ToggleNavbar from "../components/custom/buttons/ToggleNavbar";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
-  pageProps: { session, ...pageProps},
+  pageProps: { session, ...pageProps },
   router,
-}) => {
+}) =>
+{
   const deviceDefaultTheme = useMediaQuery('(prefers-color-scheme:dark)');
   const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>({ key: "color-scheme", defaultValue: "light" });
   const toggleColorScheme = (value?: ColorScheme) =>
     setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
   const [opened, setOpened] = useState<boolean>(true);
-  const [hideNav, setHideNav] = useState(false);
+  const [hideNav, setHideNav] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [visible, setVisible] = useState<boolean>(false);
   const routerR = useRouter();
 
   //definitely temporary
-  useEffect(() => {
+  useEffect(() =>
+  {
     if (router.asPath != "") setLoading(false)
-    if (!session) {
+    if (!session)
+    {
       setHideNav(true)
     }
     console.log(router.pathname)
   }, [])
 
-  useEffect(()=>{
+  useEffect(() =>
+  {
     const handleRouteStart = () => NProgress.start();
     const handleRouteDone = () => NProgress.done();
     router.events.on("routeChangeStart", handleRouteStart);
     router.events.on("routeChangeComplete", handleRouteDone);
     router.events.on("routeChangeError", handleRouteDone);
- 
-    return () => {
+
+    return () =>
+    {
       router.events.off("routeChangeStart", handleRouteStart);
       router.events.off("routeChangeComplete", handleRouteDone);
       router.events.off("routeChangeError", handleRouteDone);
     };
-},[Router])
+  }, [Router])
 
   if (loading) return null;
 
@@ -68,23 +74,24 @@ const MyApp: AppType<{ session: Session | null }> = ({
           <NotificationsProvider position="bottom-left">
             <ModalsProvider>
               <>
-              
+
                 {/* Find A system to turn navbar off and on in every page  */}
+                <ToggleNavbar setHideNav={setHideNav} hideNav={hideNav} absolute top={15} left={15} />
                 <AppShell hidden={hideNav} style={{ height: "100%" }}
                   navbarOffsetBreakpoint="sm"
                   asideOffsetBreakpoint="sm"
                   navbar={
-                    <AppSideNav opened={opened} setOpened={setOpened} />
+                    <AppSideNav hideNav={hideNav} setHideNav={setHideNav} />
                   }
-                  // aside={
-                  //   <NavSideBar />
-                  // }
-                  // footer={
-                  //   <NavFooter />
-                  // }
-                  header={
-                    <NavHeader opened={opened} setOpened={setOpened} />
-                  }
+                // aside={
+                //   <NavSideBar />
+                // }
+                // footer={
+                //   <NavFooter />
+                // }
+                // header={
+                //   <NavHeader opened={opened} setOpened={setOpened} />
+                // }
                 >
                   {/* App content */}
                   <Head><title>VideoSync</title></Head>

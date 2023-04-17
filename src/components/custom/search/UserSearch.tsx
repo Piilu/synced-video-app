@@ -49,7 +49,7 @@ const UserSearch = () =>
     return (
         <Autocomplete
             icon={<IconUsers size={18} />}
-            w={300}
+            w="100%"
             value={searchText}
             placeholder="Search ..."
             itemComponent={AutoCompleteItem}

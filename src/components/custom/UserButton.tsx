@@ -13,8 +13,9 @@ import
     MediaQuery,
 } from '@mantine/core';
 import React, { useState } from "react"
-import { IconArrowsLeftRight, IconChevronRight, IconMessageCircle, IconPhoto, IconSearch, IconSettings, IconTrash } from '@tabler/icons';
+import { IconArrowsLeftRight, IconChevronRight, IconLogout, IconMessageCircle, IconPhoto, IconSearch, IconSettings, IconTrash } from '@tabler/icons';
 import prettyBytes from 'pretty-bytes';
+import { signOut, useSession } from 'next-auth/react';
 
 const useStyles = createStyles((theme) => ({
     user: {
@@ -30,49 +31,32 @@ const useStyles = createStyles((theme) => ({
     },
 }));
 
-interface UserButtonProps extends UnstyledButtonProps
-{
-    image: string;
-    name: string;
-    email: string;
-    usedStorage: number | null | undefined,
-}
 
-const UserButton = ({ usedStorage, image, name, email, ...others }: UserButtonProps) =>
+const UserButton = ({ ...others }: UnstyledButtonProps) =>
 {
     const { classes } = useStyles();
     const [opened, setOpened] = useState<boolean>()
-    const MAXGB = 5000000000 //5GB
+    const { data: session } = useSession();
     return (
         <>
-            <Menu shadow="md" opened={opened} withArrow position="right" >
+            <Menu shadow="md" opened={opened} radius={"md"} withArrow position="right" width={180} >
                 <Menu.Target>
                     <UnstyledButton className={classes.user} {...others}>
                         <Group>
-                        <MediaQuery smallerThan="md" styles={{ display: "none" }}>
-                            <Avatar src={image} radius="xl" />
-                        </MediaQuery>
+                            <MediaQuery smallerThan="md" styles={{ display: "none" }}>
+                                <Avatar src={session?.user?.image} radius="xl" />
+                            </MediaQuery>
 
                             <div style={{ flex: 1 }}>
                                 <Text size="sm" weight={500}>
-                                    {name}
+                                    {session?.user?.name}
                                 </Text>
 
                                 <Text color="dimmed" size="xs">
-                                    {email}
+                                    {session?.user?.email}
                                 </Text>
 
-                                {/* max 5Gb   */}
-                                <Tooltip label={`${usedStorage != null ? Math.floor((usedStorage * 100) / MAXGB) : 0}%`}>
-                                    <div style={{ marginTop: "0.5em" }}>
-                                        <Progress color="cyan" radius="xl" size="xs" value={usedStorage != null ? (usedStorage * 100) / MAXGB : 0} />
-                                        <Group position='apart'>
-                                            <Text size="xs">0GB</Text>
-                                            <Text component='small' size="xs">{prettyBytes(usedStorage != null ? usedStorage : 0)}</Text>
-                                            <Text size="xs">5GB</Text>
-                                        </Group>
-                                    </div>
-                                </Tooltip>
+
                             </div>
                             <IconChevronRight size="0.9rem" stroke={1.5} />
                         </Group>
@@ -93,9 +77,7 @@ const UserButton = ({ usedStorage, image, name, email, ...others }: UserButtonPr
 
                     <Menu.Divider />
 
-                    <Menu.Label>Danger zone</Menu.Label>
-                    <Menu.Item icon={<IconArrowsLeftRight size={14} />}>Transfer my data</Menu.Item>
-                    <Menu.Item color="red" icon={<IconTrash size={14} />}>Delete my account</Menu.Item>
+                    <Menu.Item icon={<IconLogout size={14} onClick={() => signOut({ callbackUrl: `${window.location.origin}` })} />}>Logout</Menu.Item>
                 </Menu.Dropdown>
             </Menu >
 

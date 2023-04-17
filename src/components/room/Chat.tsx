@@ -54,7 +54,7 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) =>
     }
 
     return (
-        <Paper style={{ ...styles, maxWidth: "25em", minWidth: "25em", height: "100%", margin: 0, gap: "", flexDirection: "column", alignItems: "flex-start" }} shadow="xs" mt={5} radius="xs" withBorder>
+        <Paper style={{ ...styles, maxWidth: "20em", minWidth: "20em", height: "100%", margin: 0, gap: "", flexDirection: "column", alignItems: "flex-start" }} shadow="xs" mt={5} radius="xs" withBorder>
             {/* <p>{messages2!=null?messages2[0].message:"NULL"}</p> */}
             <div style={{ padding: "0.5em", display: "flex", alignItems: "center", width: "100%" }}>
                 <Tooltip position='left' label="Close chat">
