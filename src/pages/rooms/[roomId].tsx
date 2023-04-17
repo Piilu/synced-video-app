@@ -245,11 +245,13 @@ const RoomTest: NextPage<RoomProps> = (props) =>
     useEffect(() =>
     {
         joinRoom();
+        console.log("Join room")
     }, [])
 
     //#region Route change
     useEffect(() =>
     {
+        console.log("ROUTE CHANGE")
         const handleRouteChange = (url: string) =>
         {
             socket.emit(Events.LEAVE_ROOM)

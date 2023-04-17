@@ -33,7 +33,8 @@ export type LinkItemData = {
     link: string,
     label: string,
     icon: TablerIcon,
-    linkType: LinkTypes
+    linkType: LinkTypes,
+    isInfo: boolean,
 }
 
 export type UserSmall = {

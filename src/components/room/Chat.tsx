@@ -62,8 +62,8 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) =>
                         <IconArrowBarRight size={29} />
                     </ActionIcon>
                 </Tooltip>
-                <div style={{ marginLeft: "auto" }}>
-                    <h4>{roomData?.name}</h4>
+                <div style={{ marginLeft: "auto", width: "50%" }}>
+                    <Text style={{ wordBreak: "break-all" }} component='h4' align="center">{roomData?.name}</Text>
                 </div>
                 <div style={{ marginLeft: "auto" }}>
                     <Tooltip label="Connected users" position='left'>

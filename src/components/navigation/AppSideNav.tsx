@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Code, createStyles, Divider, Group, Navbar } from '@mantine/core'
+import { ActionIcon, Button, Code, createStyles, Divider, Group, Navbar, Text } from '@mantine/core'
 import { useWindowEvent } from '@mantine/hooks';
 import { IconSwitchHorizontal, IconLogout, IconBrandYoutube, Icon24Hours, IconFingerprint, IconKey, IconDatabase, Icon2fa, IconSettings, IconUser, TablerIcon, IconPlayerPlay } from '@tabler/icons';
 import axios from 'axios';
@@ -16,9 +16,12 @@ import { LogoutButton, NavDefaultItem } from './items/NavLinks';
 import UserSearch from '../custom/search/UserSearch';
 import UserStorage from '../custom/status/UserStorage';
 import ToggleNavbar from '../custom/buttons/ToggleNavbar';
+import NavCreateNew from '../custom/buttons/NavCreateNew';
 
 const data = [
-    { link: '/profile/{0}', label: 'Profile', icon: IconUser, linkType: LinkTypes.PROFILE },
+    { label: 'Account', isInfo: true },
+    { link: '/profile/{0}', label: 'Profile', icon: IconUser, linkType: LinkTypes.PROFILE, isInfo: false },
+    { link: '/test', label: 'Test', icon: IconUser, linkType: LinkTypes.DEFAULT, isInfo: false },
 ];
 
 const useStyles = createStyles((theme, _params) =>
@@ -27,13 +30,12 @@ const useStyles = createStyles((theme, _params) =>
         header: {
             paddingBottom: theme.spacing.md,
             marginBottom: theme.spacing.md,
-            borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
         },
 
         footer: {
-            paddingTop: theme.spacing.md,
-            marginTop: theme.spacing.md,
-            borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
+            paddingTop: theme.spacing.sm,
+            marginTop: theme.spacing.sm,
+            // borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2]}`,
         },
 
     };
@@ -50,13 +52,29 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
     const { setHideNav, hideNav } = props;
     const { classes, cx } = useStyles();
     const router = useRouter();
-    const links = data.map((item) => (
-        <NavDefaultItem path={router.asPath} key={item.label} item={item} profileName={router.query.name as string} />
-    ));
+    const links = data.map((item) =>
+    {
+
+        if (item.isInfo)
+        {
+            return (
+                <Text tt={"uppercase"} size="xs" my={10} weight={500} color="dimmed">
+                    {item.label}
+                </Text>
+            );
+        }
+        else
+        {
+            return (
+                <NavDefaultItem path={router.asPath} key={item.label} item={item} profileName={router.query.name as string} />
+            )
+        }
+
+    });
 
     return (
 
-        <Navbar p="md" hiddenBreakpoint="sm" hidden={false} width={{ sm: 300, lg: 300 }}>
+        <Navbar p="md" hiddenBreakpoint="sm"  hidden={false} width={{ sm: 300, lg: 300 }}>
             <Navbar.Section grow>
                 <Group className={classes.header} position="apart">
                     <Group align='center'>
@@ -64,18 +82,22 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
                         <Link href={`/profile/${session?.user?.name}`} style={{ margin: 0, fontSize: "1.5em" }}>
                             Party</Link>
                     </Group>
-                    <ToggleTheme />
+                    {/* <ToggleTheme /> */}
                     <ToggleNavbar setHideNav={setHideNav} hideNav={hideNav} />
                 </Group>
                 <UserSearch />
-                <Divider my={15} />
                 {links}
+                <Text tt={"uppercase"} size="xs" my={10} weight={500} color="dimmed">
+                    Shortcuts
+                </Text>
+                <NavCreateNew/>
+
             </Navbar.Section>
 
             <Navbar.Section className={classes.footer}>
                 <UserButton />
-                {/* <LogoutButton /> */}
                 <UserStorage />
+                {/* <LogoutButton /> */}
             </Navbar.Section>
         </Navbar>
     )

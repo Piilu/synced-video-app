@@ -69,7 +69,26 @@ const MyApp: AppType<{ session: Session | null }> = ({
 
   return (
     <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
-      <MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>
+      <MantineProvider theme={{
+        colorScheme: colorScheme,
+        primaryColor: "blue",
+        globalStyles: (theme) => ({
+          '.nav-btn-second-bg': {
+            borderRadius: "1.1em",
+            width:"100%",
+            color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black,
+            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[3],
+
+            '&:hover': {
+              backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[1],
+            },
+            transition: "0.2s",
+          },
+        }),
+        colors: {
+          'dark': ['#C1C2C5', '#A6A7AB', '#909296', '#5C5F66', '#373A40', '#2C2E33', '#25262B', '#1A1B1E', '#141517', '#101113'],
+        }
+      }} withGlobalStyles withNormalizeCSS>
         <SessionProvider session={session}>
           <NotificationsProvider position="bottom-left">
             <ModalsProvider>

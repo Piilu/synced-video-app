@@ -1,5 +1,5 @@
 import { ActionIcon, Paper, useMantineColorScheme } from '@mantine/core'
-import { IconArrowLeft, IconArrowRight } from '@tabler/icons';
+import { IconArrowLeft, IconArrowRight, IconChevronLeft, IconChevronRight } from '@tabler/icons';
 import { useSession } from 'next-auth/react';
 import React, { Dispatch, FunctionComponent, SetStateAction } from 'react'
 
@@ -25,8 +25,8 @@ const ToggleNavbar: FunctionComponent<ToggleNavbarType> = (props) =>
         return (
             <ActionIcon title={hideNav ? "Open navbar" : "Close navbar"} radius={"lg"} style={{ transition: "0.2s", zIndex: 20, position: absolute ? "fixed" : "static", left: left, right: right, top: top, bottom: bottom }} size={35} onClick={() => { setHideNav(!hideNav) }}>
                 {hideNav ?
-                    <IconArrowRight size={35} />
-                    : <IconArrowLeft size={35} />}
+                    <IconChevronRight  size={35} />
+                    : <IconChevronLeft size={35} />}
             </ActionIcon>
         )
     }

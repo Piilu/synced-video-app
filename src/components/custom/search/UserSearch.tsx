@@ -1,4 +1,4 @@
-import { Autocomplete, Avatar, Group, Text, SelectItemProps } from '@mantine/core';
+import { Autocomplete, Avatar, Group, Text, SelectItemProps, Box, } from '@mantine/core';
 import { useDebouncedState } from '@mantine/hooks';
 import { IconUsers } from '@tabler/icons';
 import router from 'next/router';
@@ -48,6 +48,7 @@ const UserSearch = () =>
     }
     return (
         <Autocomplete
+            variant="unstyled"
             icon={<IconUsers size={18} />}
             w="100%"
             value={searchText}
@@ -80,11 +81,10 @@ const AutoCompleteItem = forwardRef<HTMLDivElement, ItemProps>(
     ({ value, email, image, ...others }: ItemProps, ref) => (
         <div ref={ref} {...others}>
             <Group noWrap>
-                <Avatar src={image} radius={"xl"} />
-
+                <Avatar size={"md"} src={image} radius={"xl"} />
                 <div>
                     <Text>{value}</Text>
-                    <Text size="xs" color="dimmed">
+                    <Text component='small' size="xs" color="dimmed">
                         {email}
                     </Text>
                 </div>

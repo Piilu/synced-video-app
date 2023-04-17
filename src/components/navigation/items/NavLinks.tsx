@@ -6,6 +6,7 @@ import React, { FunctionComponent } from 'react'
 import Link from 'next/link'
 import { LinkTypes } from '../../../constants/GlobalEnums';
 import { LinkItemData } from '../../../constants/schema';
+import { useRouter } from 'next/router';
 
 const useStyles = createStyles((theme, _params, getRef) =>
 {
@@ -26,12 +27,13 @@ const useStyles = createStyles((theme, _params, getRef) =>
         link: {
             ...theme.fn.focusStyles(),
             display: 'flex',
+            marginBottom:"0.5em",
             alignItems: 'center',
             textDecoration: 'none',
             fontSize: theme.fontSizes.sm,
             color: theme.colorScheme === 'dark' ? theme.colors.dark[1] : theme.colors.gray[7],
             padding: `${theme.spacing.xs}px ${theme.spacing.sm}px`,
-            borderRadius: theme.radius.sm,
+            borderRadius: "1.1em",
             fontWeight: 500,
 
             '&:hover': {
@@ -48,6 +50,8 @@ const useStyles = createStyles((theme, _params, getRef) =>
             ref: icon,
             color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
             marginRight: theme.spacing.sm,
+            // backgroundColor:theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[6],
+            // borderRadius: "1.1em",
         },
 
         linkActive: {
@@ -73,11 +77,12 @@ const NavDefaultItem: FunctionComponent<NavDefaultItemProps> = (props) =>
     const { item, profileName } = props;
     const { classes, cx } = useStyles();
     const { data: session } = useSession();
-    const link = item.linkType != LinkTypes.PROFILE ? item.link : item.link.replace("{0}", session?.user?.name as string)
+    const router = useRouter()
+    const link = item.linkType === LinkTypes.DEFAULT ? item.link : item.link.replace("{0}", session?.user?.name as string)
 
     return (
         <Link
-            className={cx(classes.link, { [classes.linkActive]: item.linkType === LinkTypes.DEFAULT ? session?.user?.name as string === profileName : profileName === session?.user?.name as string && link.includes(session?.user?.name as string) })}
+            className={cx(classes.link, { [classes.linkActive]: item.linkType === LinkTypes.DEFAULT ? link===router.asPath : profileName === session?.user?.name as string && link.includes(session?.user?.name as string) })}
             href={link}
             key={item.label}
         >
@@ -94,7 +99,7 @@ const LogoutButton: FunctionComponent = (props) =>
 
     return (
         <Link href="#" className={classes.link} onClick={(event) => signOut({ callbackUrl: `${window.location.origin}` })}>
-            <IconLogout className={classes.linkIcon} stroke={1.5} />
+            <IconLogout className={classes.linkIcon} stroke={1} />
             <span>Logout</span>
         </Link>
     )
