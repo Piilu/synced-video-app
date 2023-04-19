@@ -100,11 +100,13 @@ model Room {
 }
 
 model ConnectedRooms {
-  userId   String @id
-  socketId String
+  userId   String?
+  socketId String @unique
   roomId   String
-  room     Room   @relation(fields: [roomId], references: [id])
-  user     User   @relation(fields: [userId], references: [id])
+  isGuest  Boolean
+  guestId  String?
+  room     Room    @relation(fields: [roomId], references: [id])
+  user     User?   @relation(fields: [userId], references: [id])
 
   @@index([roomId], map: "ConnectedRooms_roomId_fkey")
   @@index([userId], map: "ConnectedRooms_userId_fkey")

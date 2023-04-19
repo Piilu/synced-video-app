@@ -111,9 +111,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (method === "PUT")
         {
             const { updateRoomId, updateVideoId } = req.body as RoomUpdateReq;
-            console.log("VIDEOID:"+updateVideoId)
-            console.log("ROOMID:"+updateRoomId)
-            const room = await prisma?.room.update({
+            const room = await prisma?.room.findFirst({
+                include: {
+                    user: true,
+                },
+                where: {
+                    id: updateRoomId,
+                },
+            })
+            
+            if (room?.userId !== session?.user?.id)
+            {
+                response.success = false;
+                response.errorMessage = "Not allowed";
+                res.status(403).json(response);
+                return;
+            }
+
+            const updatedRoom = await prisma?.room.update({
                 include: {
                     video: true,
                 },
@@ -129,10 +144,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
             })
             response.success = true;
-            response.name = room?.name;
-            response.coverImage = room?.coverImage;
-            response.isPublic = room?.isPublic;
-            response.video = room?.video;
+            response.name = updatedRoom?.name;
+            response.coverImage = updatedRoom?.coverImage;
+            response.isPublic = updatedRoom?.isPublic;
+            response.video = updatedRoom?.video;
             res.status(200).json(response);
             return;
         }

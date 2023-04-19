@@ -1,18 +1,26 @@
 import { Events } from "../../constants/GlobalEnums";
 import { RoomMessage, VideoAction } from "../../constants/schema";
 
-export default (io: any, socket: any) => {
-    const joinRoom = async (data: RoomMessage) => {
+export default (io: any, socket: any) =>
+{
+    const joinRoom = async (data: RoomMessage) =>
+    {
         socket.join(data.roomId)
-
-        const user = await prisma?.connectedRooms.upsert({
+        await prisma?.connectedRooms.deleteMany({ //for now
             where: {
                 userId: data.user?.id,
+                roomId: data.roomId,
+            }
+        })
+        const user = await prisma?.connectedRooms.upsert({
+            where: {
+                socketId: socket.id,
             },
             update: {
                 socketId: socket.id,
             },
             create: {
+                isGuest: false,
                 userId: data.user?.id,
                 roomId: data.roomId,
                 socketId: socket.id,
@@ -26,7 +34,8 @@ export default (io: any, socket: any) => {
         await getRoomData(data.roomId);
     };
 
-    const leaveRoom = async () => {
+    const leaveRoom = async () =>
+    {
         console.log("__________________________")
         const user = await prisma?.connectedRooms.findFirst({
             where: {
@@ -54,24 +63,28 @@ export default (io: any, socket: any) => {
         await getRoomData(user?.roomId as string)
     };
 
-    const roomSendMessage = (data: RoomMessage) => {
-        console.log(data);
+    const roomSendMessage = (data: RoomMessage) =>
+    {
         socket.to(data.roomId).emit(Events.SEND_MESSAGE_UPDATE, data)
     };
 
-    const roomStartPlaying = (data: VideoAction) => {
+    const playVideo = (data: VideoAction) =>
+    {
         socket.to(data.roomId).emit(Events.VIDEO_PLAY_UPDATE, data)
     };
 
-    const roomStopPlaying = (data: VideoAction) => {
+    const pauseVideo = (data: VideoAction) =>
+    {
         socket.to(data.roomId).emit(Events.VIDEO_PAUSE_UPDATE, data)
     };
 
-    const roomSeek = (data: VideoAction) => {
+    const roomSeek = (data: VideoAction) =>
+    {
         socket.to(data.roomId).emit(Events.VIDEO_SEEK_UPDATE, data)
     };
 
-    const getRoomData = async (roomId: string) => {
+    const getRoomData = async (roomId: string) =>
+    {
 
         const roomData = await prisma?.room.findUnique({
             where: {
@@ -92,8 +105,8 @@ export default (io: any, socket: any) => {
     socket.on(Events.JOIN_ROOM, joinRoom)
     socket.on(Events.DISSCONNECT, leaveRoom)
     socket.on(Events.LEAVE_ROOM, leaveRoom)
-    socket.on(Events.VIDEO_PLAY, roomStartPlaying)
-    socket.on(Events.VIDEO_PAUSE, roomStopPlaying)
+    socket.on(Events.VIDEO_PLAY, playVideo)
+    socket.on(Events.VIDEO_PAUSE, pauseVideo)
     socket.on(Events.VIDEO_SEEK, roomSeek)
 };
 

@@ -20,6 +20,7 @@ export type VideoAction = {
     roomId: number | undefined,
     type: string,
     user: User,
+    isPlaying:boolean,
 }
 
 export type RoomData = (Room & {

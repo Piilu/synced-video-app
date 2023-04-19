@@ -115,7 +115,10 @@ const Profile: NextPage<ProfileProps> = (props) =>
         setVideos(profileUser?.videos)
     }, [profileUser])
 
-
+    useEffect(() =>
+    {
+        console.log("asdasdasdasdasd")
+    }, [])
     const handleUploadVideo = async (file: File, data: VideoReq) =>
     {
         setUploadVideo(false);

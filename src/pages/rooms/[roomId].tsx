@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import type { GetServerSideProps, NextPage } from 'next/types';
 import { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import Chat from '../../components/room/Chat';
-import { IconCheck, IconLink, IconMessageCircle, IconRefresh, IconSend, IconSettings } from '@tabler/icons'
+import { IconCheck, IconLink, IconMessageCircle, IconRefresh, IconSend, IconSettings, IconX } from '@tabler/icons'
 import { slideLeft } from '../../styles/transitions';
 import type { Socket } from 'socket.io-client';
 import io from 'socket.io-client'
@@ -72,6 +72,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) =>
         const deleteUser = await prisma?.connectedRooms.deleteMany({ //for now
             where: {
                 userId: user?.id,
+                roomId: roomId,
             }
         })
         return { props: { multipleUsers: true } }
@@ -168,6 +169,7 @@ const RoomTest: NextPage<RoomProps> = (props) =>
             </>
         )
     }
+    const [lastSeekFromServer, setLastSeekFromServer] = useState();
     useEffect(() =>
     {
         void fetch('/api/socket/socket')
@@ -202,23 +204,38 @@ const RoomTest: NextPage<RoomProps> = (props) =>
 
         socket.on(Events.VIDEO_PLAY_UPDATE, (data: VideoAction) =>
         {
-            setSocketSend(false)
             videoTag.current?.play()
-            setSocketSend(false)
-            videoTag.current.currentTime = data.time
+            // setSocketSend(false)
+            // videoTag.current?.play()
+            // setSocketSend(false)
+
         })
         socket.on(Events.VIDEO_PAUSE_UPDATE, (data: VideoAction) =>
         {
-            setSocketSend(false)
+
             videoTag.current?.pause()
-            setSocketSend(false)
-            videoTag.current.currentTime = data.time
+            // setSocketSend(false)
+            // setSocketSend(false)
+
         })
 
         socket.on(Events.VIDEO_SEEK_UPDATE, (data: VideoAction) =>
         {
-            setSocketSend(false)
-            videoTag.current.currentTime = data.time
+
+            if (videoTag.current?.currentTime !== data.time)
+            {
+                setLastSeekFromServer(data.time);
+                videoTag.current.currentTime = data.time
+            }
+            if (data.isPlaying)
+            {
+                videoTag.current?.play();
+            }
+            else
+            {
+                videoTag.current?.pause();
+
+            }
         })
 
         socket.on(Events.GET_ROOM_DATA_UPDATE, (data: RoomData) =>
@@ -299,41 +316,35 @@ const RoomTest: NextPage<RoomProps> = (props) =>
     //!!!!!!!!!!!!Possible loop when user triggers onPlay... for all useres!!!!!!!!! <== Fixed??? maybe :) 
     const videoPlay = (event: SyntheticEvent<HTMLVideoElement, Event>, send: Boolean) =>
     {
-        const videoData: VideoAction = { user: user, roomId: roomInitialData?.id, time: event.currentTarget.currentTime, type: event.type }
-        if (socketSend)
-        {
-            console.log(videoData);
-            socket.emit(Events.VIDEO_PLAY, videoData)
-        }
-        setSocketSend(true)
+        console.log("PLAY")
+        const videoData: VideoAction = { user: user, roomId: roomInitialData?.id, time: event.currentTarget.currentTime, type: event.type, isPlaying: !event.currentTarget.paused }
+        socket.emit(Events.VIDEO_PLAY, videoData)
     }
 
     const videoPause = (event: SyntheticEvent<HTMLVideoElement, Event>, send: Boolean) =>
     {
-        const videoData: VideoAction = { user: user, roomId: roomInitialData?.id, time: event.currentTarget.currentTime, type: event.type }
-        if (socketSend)
-        {
-            console.log(videoData);
-            socket.emit(Events.VIDEO_PAUSE, videoData)
-        }
-        setSocketSend(true)
+        console.log("PAUSE")
+        const videoData: VideoAction = { user: user, roomId: roomInitialData?.id, time: event.currentTarget.currentTime, type: event.type, isPlaying: !event.currentTarget.paused }
+        socket.emit(Events.VIDEO_PAUSE, videoData)
     }
 
     const videoSeek = (event: SyntheticEvent<HTMLVideoElement, Event>, send: Boolean) =>
     {
-        const videoData: VideoAction = { user: user, roomId: roomInitialData?.id, time: event.currentTarget.currentTime, type: event.type }
-        if (socketSend)
-        {
-            console.log(videoData);
-            socket.emit(Events.VIDEO_SEEK, videoData)
-        }
-        setSocketSend(true)
+
+        console.log("SEEK")
+        console.log("currentTime", event.currentTarget.currentTime)
+        console.log("lastSeekFromServer", lastSeekFromServer)
+        const videoData: VideoAction = { user: user, roomId: roomInitialData?.id, time: event.currentTarget.currentTime, type: event.type, isPlaying: !event.currentTarget.paused }
+
+        socket.emit(Events.VIDEO_SEEK, videoData)
     }
+
 
     //#endregion
 
     const saveRoomSettings = async () =>
     {
+        if (form.values.video === "0" || form.values.video === null) return;
         const data: RoomUpdateReq =
         {
             updateRoomId: roomData?.id as string,
@@ -344,15 +355,31 @@ const RoomTest: NextPage<RoomProps> = (props) =>
             const newData = res.data as RoomRes;
             if (newData.success)
             {
-                console.log(newData)
                 socket.emit(Events.GET_ROOM_DATA, roomData?.id)
                 showNotification({
                     title: "Success",
-                    message: res.data.message,
+                    message: `${newData.name} updated`,
                     icon: <IconCheck />,
                     color: 'green'
                 })
             }
+            else
+            {
+                showNotification({
+                    title: "Failed",
+                    message: newData.errorMessage,
+                    icon: <IconX />,
+                    color: 'red'
+                })
+            }
+        }).catch(err =>
+        {
+            showNotification({
+                title: "Failed",
+                message: err.message,
+                icon: <IconX />,
+                color: 'red'
+            })
         })
 
     }
@@ -369,20 +396,20 @@ const RoomTest: NextPage<RoomProps> = (props) =>
                 padding="xl"
                 size="md"
             >
-                <Flex direction="column" gap={20}>
-                    <Group grow>
+                <Flex direction="column" wrap={"wrap"}>
+                    <TextInput mb={20} label="Room name" withAsterisk />
+                    <VideoSearch isAsterisk label='Current video' notFoundLabel='Not found' form={form} />
+                    <Group mt={20} position='right'>
+                        <Button disabled={form.values.video === "0" || form.values.video === null || !form.isDirty()} onClick={saveRoomSettings}>Save</Button>
                     </Group>
-                    <VideoSearch label='Current video' notFoundLabel='Not found' form={form} />
-                    <Group position='right'>
-                        <Button onClick={saveRoomSettings}>Save</Button>
-                    </Group>
+
                 </Flex>
             </Drawer>
 
             <Flex style={{ backgroundColor: "black", width: "100%", height: "100%" }} direction="row" justify={"flex-end"}>
                 <Center style={{ width: "100%", height: "100%", position: "relative" }}>
                     <video muted={true} ref={videoTag} onPause={event => { videoPause(event, socketSend) }} onPlay={(event) => { videoPlay(event, socketSend) }} onSeeked={(event) => { videoSeek(event, socketSend) }} src={`${EndPoints.VIDEO_STREAM}?videoId=${roomData?.video?.location}&ownerId=${roomData?.user.id}`} width="100%" height="100%" controls />
-                    <FloatingButtons setSettingsOpen={setSettingsOpen} settingsOpen={settingsOpen} chatOpen={chatOpen} setChatOpen={setChatOpen} />
+                    <FloatingButtons ownerId={roomData?.userId} setSettingsOpen={setSettingsOpen} settingsOpen={settingsOpen} chatOpen={chatOpen} setChatOpen={setChatOpen} />
                 </Center>
                 <Transition mounted={chatOpen === "flex"} transition={slideLeft} duration={200} timingFunction="ease">
                     {(styles) => (

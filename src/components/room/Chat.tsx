@@ -54,9 +54,9 @@ const Chat: FunctionComponent<ChatProps> = (props: ChatProps) =>
     }
 
     return (
-        <Paper style={{ ...styles, maxWidth: "20em", minWidth: "20em", height: "100%", margin: 0, gap: "", flexDirection: "column", alignItems: "flex-start" }} shadow="xs" mt={5} radius="xs" withBorder>
+        <Paper style={{ ...styles, maxWidth: "20em", minWidth: "20em", height: "100%", margin: 0, gap: "", flexDirection: "column", alignItems: "flex-start" }} shadow="xs" mt={5} radius="xs" >
             {/* <p>{messages2!=null?messages2[0].message:"NULL"}</p> */}
-            <div style={{ padding: "0.5em", display: "flex", alignItems: "center", width: "100%" }}>
+            <div style={{ paddingLeft: "0.5em", paddingRight: "0.5em", display: "flex", alignItems: "center", width: "100%" }}>
                 <Tooltip position='left' label="Close chat">
                     <ActionIcon size="md" radius="md" onClick={() => { chatOpen == "flex" ? setChatOpen("none") : setChatOpen("flex"); }}>
                         <IconArrowBarRight size={29} />

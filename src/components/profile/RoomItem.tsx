@@ -2,7 +2,7 @@ import { ActionIcon, Avatar, Button, Card, Flex, Group, Image, Menu, Text, Toolt
 import { closeAllModals, openConfirmModal } from '@mantine/modals'
 import { showNotification } from '@mantine/notifications'
 import { ConnectedRooms, Room, User } from '@prisma/client'
-import { IconCheck, IconDots, IconDownload, IconEye, IconEyeOff, IconTrash, IconUser, IconUserOff, IconUsers, IconX } from '@tabler/icons'
+import { IconCheck, IconDots, IconDownload, IconEdit, IconEye, IconEyeOff, IconTrash, IconUser, IconUserOff, IconUsers, IconX } from '@tabler/icons'
 import axios from 'axios'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
@@ -137,7 +137,7 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
                         <small><Moment local calendar>{createdTime}</Moment></small>
                     </div>
                     {isUsersProfile ?
-                        <Menu withinPortal position="bottom-end" shadow="sm">
+                        <Menu withinPortal position="right" withArrow shadow="sm">
                             <Menu.Target>
                                 <ActionIcon>
                                     <IconDots size={16} />
@@ -145,6 +145,7 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
                             </Menu.Target>
 
                             <Menu.Dropdown>
+                                <Menu.Item icon={<IconEdit size={14} />}>Edit</Menu.Item>
                                 {room.videoId != null ? <Menu.Item icon={<IconDownload size={14} />}>Download</Menu.Item> : null}
                                 <Menu.Item onClick={handleRoomVisibility} icon={room.isPublic ? <IconEyeOff size={14} /> : <IconEye size={14} />}>{room.isPublic ? "Mark as private" : "Mark as public"}</Menu.Item>
                                 <Menu.Item onClick={confirmDelete} icon={<IconTrash size={14} />} color="red">
@@ -157,9 +158,12 @@ const RoomItem: FunctionComponent<RoomItemProps> = (props) =>
                 </Group>
             </Card.Section>
             <Card.Section>
-                <Image src="https://images.unsplash.com/photo-1527004013197-933c4bb611b3?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=720&q=80"
-                    height={160}
-                    alt="Norway" />
+                {room.coverImage !== null ?
+                    <Image src={room.coverImage}
+                        height={160}
+                        alt={room.name} />
+                    : null}
+
             </Card.Section>
             <Card.Section inheritPadding>
                 <Flex>

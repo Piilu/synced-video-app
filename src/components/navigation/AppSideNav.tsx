@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Code, createStyles, Divider, Group, Navbar, Text } from '@mantine/core'
+import { ActionIcon, Box, Button, Code, createStyles, Divider, Group, Navbar, ScrollArea, Text } from '@mantine/core'
 import { useWindowEvent } from '@mantine/hooks';
 import { IconSwitchHorizontal, IconLogout, IconBrandYoutube, Icon24Hours, IconFingerprint, IconKey, IconDatabase, Icon2fa, IconSettings, IconUser, TablerIcon, IconPlayerPlay } from '@tabler/icons';
 import axios from 'axios';
@@ -22,6 +22,13 @@ const data = [
     { label: 'Account', isInfo: true },
     { link: '/profile/{0}', label: 'Profile', icon: IconUser, linkType: LinkTypes.PROFILE, isInfo: false },
     { link: '/test', label: 'Test', icon: IconUser, linkType: LinkTypes.DEFAULT, isInfo: false },
+];
+
+const ShortcutData = [
+    { link: '/test', label: 'Test1', icon: IconUser, linkType: LinkTypes.DEFAULT, isInfo: false },
+    { link: '/test', label: 'Test2', icon: IconUser, linkType: LinkTypes.DEFAULT, isInfo: false },
+
+
 ];
 
 const useStyles = createStyles((theme, _params) =>
@@ -54,11 +61,29 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
     const router = useRouter();
     const links = data.map((item) =>
     {
-
         if (item.isInfo)
         {
             return (
-                <Text tt={"uppercase"} size="xs" my={10} weight={500} color="dimmed">
+                <Text key={item.label+"link"} tt={"uppercase"} size="xs" my={10} weight={500} color="dimmed">
+                    {item.label}
+                </Text>
+            );
+        }
+        else
+        {
+            return (
+                <NavDefaultItem path={router.asPath} key={item.label} item={item} profileName={router.query.name as string} />
+            )
+        }
+
+    });
+
+    const shortCutLinks = ShortcutData.map((item) =>
+    {
+        if (item.isInfo)
+        {
+            return (
+                <Text key={item.label} tt={"uppercase"} size="xs" my={10} weight={500} color="dimmed">
                     {item.label}
                 </Text>
             );
@@ -74,8 +99,8 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
 
     return (
 
-        <Navbar p="md" hiddenBreakpoint="sm"  hidden={false} width={{ sm: 300, lg: 300 }}>
-            <Navbar.Section grow>
+        <Navbar p="md" hiddenBreakpoint="sm" hidden={false} width={{ sm: 300, lg: 300 }}>
+            <Navbar.Section style={{ overflow: "auto" }} grow>
                 <Group className={classes.header} position="apart">
                     <Group align='center'>
 
@@ -90,7 +115,10 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
                 <Text tt={"uppercase"} size="xs" my={10} weight={500} color="dimmed">
                     Shortcuts
                 </Text>
-                <NavCreateNew/>
+                <Box style={{overflow:"auto"}} mah={250}>
+                    {shortCutLinks}
+                </Box>
+                <NavCreateNew />
 
             </Navbar.Section>
 

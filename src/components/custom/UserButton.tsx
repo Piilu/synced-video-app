@@ -48,9 +48,7 @@ const UserButton = ({ ...others }: UnstyledButtonProps) =>
             <Menu.Target>
                 <UnstyledButton className={classes.user} {...others}>
                     <Group>
-                        <MediaQuery smallerThan="md" styles={{ display: "none" }}>
                             <Avatar src={session?.user?.image} radius="xl" />
-                        </MediaQuery>
 
                         <div style={{ flex: 1 }}>
                             <Text size="sm" weight={500}>

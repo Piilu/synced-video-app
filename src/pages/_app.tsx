@@ -90,10 +90,8 @@ const MyApp: AppType<{ session: Session | null }> = ({
         }
       }} withGlobalStyles withNormalizeCSS>
         <SessionProvider session={session}>
-          <NotificationsProvider position="bottom-left">
+          <NotificationsProvider position="bottom-right">
             <ModalsProvider>
-              <>
-
                 {/* Find A system to turn navbar off and on in every page  */}
                 <ToggleNavbar setHideNav={setHideNav} hideNav={hideNav} absolute top={15} left={15} />
                 <AppShell hidden={hideNav} style={{ height: "100%" }}
@@ -118,7 +116,6 @@ const MyApp: AppType<{ session: Session | null }> = ({
                   <LoadingOverlay visible={visible} overlayBlur={2} />
                 </AppShell>
 
-              </>
             </ModalsProvider>
           </NotificationsProvider>
         </SessionProvider>

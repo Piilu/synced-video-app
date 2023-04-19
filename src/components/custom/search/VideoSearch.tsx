@@ -62,6 +62,7 @@ const VideoSearch: FunctionComponent<VideoSearchType> = (props) =>
             data={data}
             onSearchChange={(e) => { setValue(e) }}
             searchable
+            clearable
             withAsterisk={isAsterisk}
             filter={(value, item) =>
                 item.value.toLowerCase().includes(value.toLowerCase().trim())
