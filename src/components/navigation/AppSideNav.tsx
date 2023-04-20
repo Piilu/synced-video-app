@@ -1,6 +1,6 @@
-import { ActionIcon, Box, Button, Code, createStyles, Divider, Group, Navbar, ScrollArea, Text } from '@mantine/core'
+import { ActionIcon, Box, Button, Center, Code, createStyles, Divider, Drawer, Group, Navbar, Popover, ScrollArea, Switch, Text, TextInput, useMantineTheme } from '@mantine/core'
 import { useWindowEvent } from '@mantine/hooks';
-import { IconSwitchHorizontal, IconLogout, IconBrandYoutube, Icon24Hours, IconFingerprint, IconKey, IconDatabase, Icon2fa, IconSettings, IconUser, TablerIcon, IconPlayerPlay } from '@tabler/icons';
+import { IconSwitchHorizontal, IconLogout, IconBrandYoutube, Icon24Hours, IconFingerprint, IconKey, IconDatabase, Icon2fa, IconSettings, IconUser, TablerIcon, IconPlayerPlay, IconGripVertical, IconX, IconPlus, IconTrash } from '@tabler/icons';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -17,6 +17,10 @@ import UserSearch from '../custom/search/UserSearch';
 import UserStorage from '../custom/status/UserStorage';
 import ToggleNavbar from '../custom/buttons/ToggleNavbar';
 import NavCreateNew from '../custom/buttons/NavCreateNew';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import EmojiPicker from 'emoji-picker-react';
+import { PopoverTarget } from '@mantine/core/lib/Popover/PopoverTarget/PopoverTarget';
+import { useForm } from '@mantine/form';
 
 const data = [
     { label: 'Account', isInfo: true },
@@ -24,7 +28,7 @@ const data = [
     { link: '/test', label: 'Test', icon: IconUser, linkType: LinkTypes.DEFAULT, isInfo: false },
 ];
 
-const ShortcutData = [
+const shortcutData = [
     { link: '/test', label: 'Test1', icon: IconUser, linkType: LinkTypes.DEFAULT, isInfo: false },
     { link: '/test', label: 'Test2', icon: IconUser, linkType: LinkTypes.DEFAULT, isInfo: false },
 
@@ -59,12 +63,22 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
     const { setHideNav, hideNav } = props;
     const { classes, cx } = useStyles();
     const router = useRouter();
+    const [linksOpened, setLinksOpened] = useState<boolean>(false)
+    const theme = useMantineTheme();
+    const form = useForm({
+        initialValues: {
+            linkButtons: [
+                { label: 'John Doe', url: 'asd', active: false },
+                { label: 'John Doe 2', url: 'asdasd', active: false },
+            ],
+        },
+    });
     const links = data.map((item) =>
     {
         if (item.isInfo)
         {
             return (
-                <Text key={item.label+"link"} tt={"uppercase"} size="xs" my={10} weight={500} color="dimmed">
+                <Text key={item.label + "link"} tt={"uppercase"} size="xs" my={10} weight={500} color="dimmed">
                     {item.label}
                 </Text>
             );
@@ -78,7 +92,7 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
 
     });
 
-    const shortCutLinks = ShortcutData.map((item) =>
+    const shortCutLinks = shortcutData.map((item) =>
     {
         if (item.isInfo)
         {
@@ -97,37 +111,104 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
 
     });
 
-    return (
+    const fields = form.values.linkButtons.map((item, index) => (
+        <Draggable key={index} index={index} draggableId={index.toString()}>
+            {(provided) => (
+                <div  {...provided.draggableProps}
+                    ref={provided.innerRef}>
 
-        <Navbar p="md" hiddenBreakpoint="sm" hidden={false} width={{ sm: 300, lg: 300 }}>
-            <Navbar.Section style={{ overflow: "auto" }} grow>
-                <Group className={classes.header} position="apart">
-                    <Group align='center'>
+                    <Group noWrap className='box-item'>
+                        <Center {...provided.dragHandleProps}>
+                            <IconGripVertical size="1.2rem" />
+                        </Center>
+                        <Popover position='right'>
+                            <Popover.Target>
 
-                        <Link href={`/profile/${session?.user?.name}`} style={{ margin: 0, fontSize: "1.5em" }}>
-                            Party</Link>
+                                <ActionIcon>
+                                    <IconUser size={20} />
+                                    {/* <item.icon size={20} /> */}
+                                </ActionIcon>
+                            </Popover.Target>
+                            <Popover.Dropdown>
+                                <Text>Some items here</Text>
+                            </Popover.Dropdown>
+                        </Popover>
+
+                        <TextInput {...form.getInputProps(`linkButtons.${index}.label`)} placeholder='Label' />
+                        <TextInput icon="/"  {...form.getInputProps(`linkButtons.${index}.url`)} placeholder='Url' />
+                        <Switch {...form.getInputProps(`linkButtons.${index}.active`, { type: "checkbox" })} />
+                        <ActionIcon onClick={() => form.removeListItem("linkButtons", index)} color="red" ml="auto">
+                            <IconTrash size={20} />
+                        </ActionIcon>
                     </Group>
-                    {/* <ToggleTheme /> */}
-                    <ToggleNavbar setHideNav={setHideNav} hideNav={hideNav} />
-                </Group>
-                <UserSearch />
-                {links}
-                <Text tt={"uppercase"} size="xs" my={10} weight={500} color="dimmed">
-                    Shortcuts
-                </Text>
-                <Box style={{overflow:"auto"}} mah={250}>
-                    {shortCutLinks}
-                </Box>
-                <NavCreateNew />
+                </div>
 
-            </Navbar.Section>
+            )}
+        </Draggable>
+    ));
 
-            <Navbar.Section className={classes.footer}>
-                <UserButton />
-                <UserStorage />
-                {/* <LogoutButton /> */}
-            </Navbar.Section>
-        </Navbar>
+    return (
+        <>
+            <Drawer size="xl" padding="xl" title="Shortcut link settings" opened={linksOpened} onClose={() => setLinksOpened(false)}>
+
+                <div style={{ maxHeight: "30em", overflow: "auto" }} >
+
+                    <DragDropContext onDragEnd={({ destination, source }) =>
+                        form.reorderListItem('linkButtons', { from: source.index, to: destination.index })
+                    }>
+                        <Droppable droppableId="dnd-list" direction="vertical">
+                            {(provided) => (
+                                <div {...provided.droppableProps} ref={provided.innerRef}>
+                                    {fields}
+                                    {provided.placeholder}
+                                </div>
+                            )}
+
+                        </Droppable>
+                    </DragDropContext>
+                </div>
+
+                <Button w="100%" leftIcon={<IconPlus />} onClick={() => form.insertListItem('linkButtons', { label: '', url: '', active: false })}>Add new shortcut</Button>
+                <Text align='right' size={"xs"}>{form.values.linkButtons.length}/10</Text>
+
+            </Drawer>
+
+            <Navbar p="md" hiddenBreakpoint="sm" hidden={false} width={{ sm: 300, lg: 300 }}>
+                <Navbar.Section style={{ overflow: "auto" }} grow>
+                    <Group className={classes.header} position="apart">
+                        <Group align='center'>
+
+                            <Link href={`/profile/${session?.user?.name}`} style={{ margin: 0, fontSize: "1.5em" }}>
+                                Party</Link>
+                        </Group>
+                        {/* <ToggleTheme /> */}
+                        <ToggleNavbar setHideNav={setHideNav} hideNav={hideNav} />
+                    </Group>
+                    <UserSearch />
+                    <Button.Group my={5}>
+                        <Button radius={10} size='xs' w={"50%"} variant="filled">User</Button>
+                        <Button radius={10} size='xs' w={"50%"} variant="default">Admin</Button>
+                    </Button.Group>
+                    {links}
+                    <Text tt={"uppercase"} size="xs" my={10} weight={500} color="dimmed">
+                        Shortcuts
+                    </Text>
+                    <Box style={{ overflow: "auto" }} mah={250}>
+                        {shortCutLinks}
+                    </Box>
+                    <NavCreateNew onClick={() => { setLinksOpened(true) }} />
+
+                </Navbar.Section>
+
+                <Navbar.Section className={classes.footer}>
+                    <UserButton />
+                    <UserStorage />
+                    {/* <LogoutButton /> */}
+                </Navbar.Section>
+                <Navbar.Section>
+                </Navbar.Section>
+            </Navbar>
+        </>
     )
 }
 export default AppSideNav

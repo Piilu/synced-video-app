@@ -394,16 +394,23 @@ const RoomTest: NextPage<RoomProps> = (props) =>
                 onClose={() => setSettingsOpen(false)}
                 title="Settings"
                 padding="xl"
-                size="md"
+                size="xl"
             >
-                <Flex direction="column" wrap={"wrap"}>
-                    <TextInput mb={20} label="Room name" withAsterisk />
-                    <VideoSearch isAsterisk label='Current video' notFoundLabel='Not found' form={form} />
-                    <Group mt={20} position='right'>
-                        <Button disabled={form.values.video === "0" || form.values.video === null || !form.isDirty()} onClick={saveRoomSettings}>Save</Button>
-                    </Group>
 
-                </Flex>
+                <Group noWrap>
+                    <Flex w={"50%"} direction="column" wrap={"wrap"}>
+                        <TextInput mb={20} label="Room name" withAsterisk />
+                        <VideoSearch isAsterisk label='Current video' notFoundLabel='Not found' form={form} />
+
+                    </Flex>
+                    <Flex w={"50%"} direction="column" wrap={"wrap"}>
+                        <TextInput mb={20} label="Room name" withAsterisk />
+                        <VideoSearch isAsterisk label='Current video' notFoundLabel='Not found' form={form} />
+                    </Flex>
+                </Group>
+                <Group mt={20} position='right'>
+                    <Button disabled={form.values.video === "0" || form.values.video === null || !form.isDirty()} onClick={saveRoomSettings}>Save</Button>
+                </Group>
             </Drawer>
 
             <Flex style={{ backgroundColor: "black", width: "100%", height: "100%" }} direction="row" justify={"flex-end"}>

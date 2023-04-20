@@ -44,7 +44,7 @@ const UserButton = ({ ...others }: UnstyledButtonProps) =>
     const dark = colorScheme === 'dark';
     const { data: session } = useSession();
     return (
-        <Menu shadow="md"  opened={opened} radius={"md"} withArrow position="right-end" width={200}>
+        <Menu shadow="md"  opened={opened} radius={"md"} withArrow width={200}>
             <Menu.Target>
                 <UnstyledButton className={classes.user} {...others}>
                     <Group>

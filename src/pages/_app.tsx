@@ -75,7 +75,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
         globalStyles: (theme) => ({
           '.nav-btn-second-bg': {
             borderRadius: "1.1em",
-            width:"100%",
+            width: "100%",
             color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black,
             backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[3],
 
@@ -83,6 +83,12 @@ const MyApp: AppType<{ session: Session | null }> = ({
               backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[1],
             },
             transition: "0.2s",
+          },
+          '.box-item': {
+            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+            padding: "0.3em",
+            marginBottom: theme.spacing.xs,
+            borderRadius: theme.radius.md,
           },
         }),
         colors: {
@@ -92,29 +98,29 @@ const MyApp: AppType<{ session: Session | null }> = ({
         <SessionProvider session={session}>
           <NotificationsProvider position="bottom-right">
             <ModalsProvider>
-                {/* Find A system to turn navbar off and on in every page  */}
-                <ToggleNavbar setHideNav={setHideNav} hideNav={hideNav} absolute top={15} left={15} />
-                <AppShell hidden={hideNav} style={{ height: "100%" }}
-                  navbarOffsetBreakpoint="sm"
-                  asideOffsetBreakpoint="sm"
-                  navbar={
-                    <AppSideNav hideNav={hideNav} setHideNav={setHideNav} />
-                  }
-                // aside={
-                //   <NavSideBar />
-                // }
-                // footer={
-                //   <NavFooter />
-                // }
-                // header={
-                //   <NavHeader opened={opened} setOpened={setOpened} />
-                // }
-                >
-                  {/* App content */}
-                  <Head><title>VideoSync</title></Head>
-                  <Component {...pageProps} />
-                  <LoadingOverlay visible={visible} overlayBlur={2} />
-                </AppShell>
+              {/* Find A system to turn navbar off and on in every page  */}
+              <ToggleNavbar setHideNav={setHideNav} hideNav={hideNav} absolute top={15} left={15} />
+              <AppShell hidden={hideNav} style={{ height: "100%" }}
+                navbarOffsetBreakpoint="sm"
+                asideOffsetBreakpoint="sm"
+                navbar={
+                  <AppSideNav hideNav={hideNav} setHideNav={setHideNav} />
+                }
+              // aside={
+              //   <NavSideBar />
+              // }
+              // footer={
+              //   <NavFooter />
+              // }
+              // header={
+              //   <NavHeader opened={opened} setOpened={setOpened} />
+              // }
+              >
+                {/* App content */}
+                <Head><title>VideoSync</title></Head>
+                <Component {...pageProps} />
+                <LoadingOverlay visible={visible} overlayBlur={2} />
+              </AppShell>
 
             </ModalsProvider>
           </NotificationsProvider>

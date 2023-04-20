@@ -29,7 +29,8 @@ const UserStorage = () =>
 
     return (
         <Tooltip label={`${usedStorage != null ? Math.floor((usedStorage * 100) / MAXGB) : 0}%`} position='right' withArrow>
-            <Paper className={classes.navWidgetBack} p={10} pt={15} mt={10}>
+            <Paper className={classes.navWidgetBack} p={10}  mt={10}>
+                {/* <Text size="sm" mb={10} align='center'>Free space</Text> */}
                 <Progress color="cyan" radius="xl" size="xs" value={usedStorage != null ? (usedStorage * 100) / MAXGB : 0} />
                 <Group position='apart'>
                     <Text size="xs">0GB</Text>

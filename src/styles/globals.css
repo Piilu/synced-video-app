@@ -25,9 +25,9 @@ a {
 }
 
 /* Hoping this doesn't brake/change in the future :) */
-/* .mantine-AppShell-body {
+.mantine-AppShell-body {
   height: 100%;
-} */
+}
 
 ::-webkit-scrollbar {
   width: 0.2em;
