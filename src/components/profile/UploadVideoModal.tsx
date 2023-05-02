@@ -4,7 +4,7 @@ import { Room, User, Video } from '@prisma/client';
 import { IconAlertCircle, IconEye, IconUpload } from '@tabler/icons';
 import { useSession } from 'next-auth/react';
 import React, { useState, FunctionComponent, SetStateAction, Dispatch, forwardRef, useEffect } from 'react'
-import { VideoReq } from '../../pages/api/videos';
+import { VideoReq } from '../../pages/api/video';
 
 type UploadVideoModalProps = {
     uploadVideo: boolean,

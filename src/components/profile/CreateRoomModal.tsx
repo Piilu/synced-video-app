@@ -11,7 +11,7 @@ import React, { useEffect, useState, Dispatch, SetStateAction, FunctionComponent
 import { EndPoints } from '../../constants/GlobalEnums'
 import { VideoSmall } from '../../constants/schema'
 import { RoomReq, RoomRes } from '../../pages/api/rooms'
-import { VideoRes } from '../../pages/api/videos'
+import { VideoRes } from '../../pages/api/video'
 import VideoSearch from '../custom/search/VideoSearch';
 
 type CreateRoomModalProps = {

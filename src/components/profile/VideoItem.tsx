@@ -10,7 +10,7 @@ import prettyBytes from 'pretty-bytes'
 import React, { FunctionComponent } from 'react'
 import Moment from 'react-moment'
 import { EndPoints } from '../../constants/GlobalEnums'
-import { VideoReq, VideoRes } from '../../pages/api/videos'
+import { VideoReq, VideoRes } from '../../pages/api/video'
 
 type VideoItemProps = {
     isUsersProfile: boolean

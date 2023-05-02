@@ -40,8 +40,8 @@ enum EndPoints
 {
   USER = "/api/profile/user",
   ROOM = "/api/rooms",
-  VIDEO = "/api/videos",
-  VIDEO_STREAM = "/api/videos/stream",
+  VIDEO = "/api/video",
+  VIDEO_STREAM = "/api/video/stream",
   USER_SEARCH = "/api/users/search",
 }
 
