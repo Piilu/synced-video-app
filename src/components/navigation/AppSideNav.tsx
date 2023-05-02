@@ -180,6 +180,7 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
     {
         setRole(await getUserRole() ?? Role.USER);
     }
+    
     return (
         <>
             <Drawer size="xl" padding="xl" title="Shortcut link settings" opened={linksOpened} onClose={() => setLinksOpened(false)}>
@@ -218,7 +219,7 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
                         <ToggleNavbar setHideNav={setHideNav} hideNav={hideNav} />
                     </Group>
                     <UserSearch />
-                    {role === Role.SUPERADMIN ?
+                    {session?.user?.role === Role.SUPERADMIN ?
                         <Button.Group my={5}>
                             <Button onClick={() => { setIsAdmin(false) }} radius={10} size='xs' w={"50%"} variant={isAdmin ? "default" : "filled"}>User</Button>
                             <Button onClick={() => { setIsAdmin(true) }} radius={10} size='xs' w={"50%"} variant={isAdmin ? "filled" : "default"}>Admin</Button>

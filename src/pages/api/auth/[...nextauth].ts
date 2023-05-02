@@ -5,15 +5,27 @@ import Email from "next-auth/providers/email";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { env } from "../../../env/server.mjs";
 import { prisma } from "../../../server/db/client";
+import { Role } from "@prisma/client";
 
 export const authOptions: NextAuthOptions = {
   // Include user.id on session
   callbacks: {
-    session({ session, user })
+    async session({ session, user })
     {
       if (session.user)
       {
+        const dbUser = await prisma.user.findFirst({
+          where: {
+            email: user.email,
+          },
+          select: {
+            role: true,
+          }
+        });
+
         session.user.id = user.id;
+        session.user.role = dbUser?.role ?? Role.USER;
+
       }
       return session;
     },
