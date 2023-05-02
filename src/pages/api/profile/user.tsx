@@ -1,3 +1,4 @@
+import { Role } from '@prisma/client'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getSession } from 'next-auth/react'
 
@@ -7,6 +8,7 @@ export type UserResBody = {
     comment: string | null | undefined,
     image: string | null | undefined,
     usedStorage?: number | null | undefined,
+    role?: Role | null,
     errormsg?: string,
 }
 
@@ -15,11 +17,12 @@ export type UserReqBody = {
     comment: string | null | undefined,
     image: string | null | undefined,
     userId: string,
+    storage?: boolean,
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse)
 {
-    let response: UserResBody = {} as UserResBody
+    const response: UserResBody = {} as UserResBody
     const method = req.method;
     const { name, comment, userId, image } = req.body as UserReqBody;
     const session = await getSession({ req });
@@ -37,18 +40,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (method === "GET")
         {
-            const usedStorage = await prisma?.video.aggregate({
-                where: {
-                    userId: session?.user?.id
-                },
-                _sum: {
-                    size: true,
-                }
-            })
-            response.success = true;
-            response.usedStorage = usedStorage?._sum.size
-            res.status(200).json(response);
-            return;
+            const { storage } = req.query as unknown as UserReqBody
+
+            if (storage === "true")
+            {
+                const usedStorage = await prisma?.video.aggregate({
+                    where: {
+                        userId: session?.user?.id
+                    },
+                    _sum: {
+                        size: true,
+                    }
+                })
+                response.success = true;
+                response.usedStorage = usedStorage?._sum.size
+                res.status(200).json(response);
+                return;
+            }
+            else
+            {
+                const user = await prisma?.user.findUnique({
+                    where: {
+                        id: session?.user?.id
+                    },
+                });
+                response.success = true;
+                response.role = user?.role;
+                res.status(200).json(response);
+                return;
+            }
         }
 
         if (method === "PUT")

@@ -1,6 +1,6 @@
 import { ActionIcon, Box, Button, Center, Code, createStyles, Divider, Drawer, Group, Navbar, Popover, ScrollArea, Switch, Text, TextInput, useMantineTheme } from '@mantine/core'
 import { useWindowEvent } from '@mantine/hooks';
-import { IconSwitchHorizontal, IconLogout, IconBrandYoutube, Icon24Hours, IconFingerprint, IconKey, IconDatabase, Icon2fa, IconSettings, IconUser, TablerIcon, IconPlayerPlay, IconGripVertical, IconX, IconPlus, IconTrash } from '@tabler/icons';
+import { IconSwitchHorizontal, IconLogout, IconBrandYoutube, Icon24Hours, IconFingerprint, IconKey, IconDatabase, Icon2fa, IconSettings, IconUser, TablerIcon, IconPlayerPlay, IconGripVertical, IconX, IconPlus, IconTrash, IconUsers, IconDashboard } from '@tabler/icons';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -21,11 +21,18 @@ import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import EmojiPicker from 'emoji-picker-react';
 import { PopoverTarget } from '@mantine/core/lib/Popover/PopoverTarget/PopoverTarget';
 import { useForm } from '@mantine/form';
+import { getUserRole } from '../../utils/helpers/get-user-role';
+import { Role } from '@prisma/client';
 
 const data = [
     { label: 'Account', isInfo: true },
     { link: '/profile/{0}', label: 'Profile', icon: IconUser, linkType: LinkTypes.PROFILE, isInfo: false },
     { link: '/test', label: 'Test', icon: IconUser, linkType: LinkTypes.DEFAULT, isInfo: false },
+];
+
+const adminData = [
+    { link: '/admin/dashboard', label: 'Dashboard', icon: IconDashboard, linkType: LinkTypes.DEFAULT, isInfo: false },
+    { link: '/admin/users', label: 'Users', icon: IconUsers, linkType: LinkTypes.DEFAULT, isInfo: false },
 ];
 
 const shortcutData = [
@@ -64,6 +71,8 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
     const { classes, cx } = useStyles();
     const router = useRouter();
     const [linksOpened, setLinksOpened] = useState<boolean>(false)
+    const [isAdmin, setIsAdmin] = useState<boolean>(false)
+    const [role, setRole] = useState<Role>(Role.USER)
     const theme = useMantineTheme();
     const form = useForm({
         initialValues: {
@@ -74,6 +83,25 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
         },
     });
     const links = data.map((item) =>
+    {
+        if (item.isInfo)
+        {
+            return (
+                <Text key={item.label + "link"} tt={"uppercase"} size="xs" my={10} weight={500} color="dimmed">
+                    {item.label}
+                </Text>
+            );
+        }
+        else
+        {
+            return (
+                <NavDefaultItem path={router.asPath} key={item.label} item={item} profileName={router.query.name as string} />
+            )
+        }
+
+    });
+
+    const adminLinks = adminData.map((item) =>
     {
         if (item.isInfo)
         {
@@ -146,7 +174,12 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
             )}
         </Draggable>
     ));
+    useEffect(() => { checkRole() }, [router])
 
+    const checkRole = async () =>
+    {
+        setRole(await getUserRole() ?? Role.USER);
+    }
     return (
         <>
             <Drawer size="xl" padding="xl" title="Shortcut link settings" opened={linksOpened} onClose={() => setLinksOpened(false)}>
@@ -185,18 +218,29 @@ const AppSideNav: FunctionComponent<AppSideNavProps> = (props) =>
                         <ToggleNavbar setHideNav={setHideNav} hideNav={hideNav} />
                     </Group>
                     <UserSearch />
-                    <Button.Group my={5}>
-                        <Button radius={10} size='xs' w={"50%"} variant="filled">User</Button>
-                        <Button radius={10} size='xs' w={"50%"} variant="default">Admin</Button>
-                    </Button.Group>
-                    {links}
-                    <Text tt={"uppercase"} size="xs" my={10} weight={500} color="dimmed">
-                        Shortcuts
-                    </Text>
-                    <Box style={{ overflow: "auto" }} mah={250}>
-                        {shortCutLinks}
-                    </Box>
-                    <NavCreateNew onClick={() => { setLinksOpened(true) }} />
+                    {role === Role.SUPERADMIN ?
+                        <Button.Group my={5}>
+                            <Button onClick={() => { setIsAdmin(false) }} radius={10} size='xs' w={"50%"} variant={isAdmin ? "default" : "filled"}>User</Button>
+                            <Button onClick={() => { setIsAdmin(true) }} radius={10} size='xs' w={"50%"} variant={isAdmin ? "filled" : "default"}>Admin</Button>
+                        </Button.Group>
+                        : null}
+
+                    {
+                        isAdmin ?
+                            adminLinks
+                            :
+                            <div>
+                                {links}
+                                <Text tt={"uppercase"} size="xs" my={10} weight={500} color="dimmed">
+                                    Shortcuts
+                                </Text>
+                                <Box style={{ overflow: "auto" }} mah={250}>
+                                    {shortCutLinks}
+                                </Box>
+                                <NavCreateNew onClick={() => { setLinksOpened(true) }} />
+                            </div>
+                    }
+
 
                 </Navbar.Section>
 

@@ -1,10 +1,10 @@
 import axios from "axios";
 import { EndPoints } from "../../constants/GlobalEnums";
 import { UserResBody } from "../../pages/api/profile/user";
+import { Role } from "@prisma/client";
 
-export const getUserRole = async (): Promise<number | null | undefined> =>
+export const getUserRole = async (): Promise<Role | null | undefined> =>
 {
-    // const response = (await axios.get(`${window.origin}${EndPoints.USER}`)).data as UserResBody;
-    // return response.usedStorage;
-    return 0;
+    const response = (await axios.get(`${window.origin}${EndPoints.USER}`, { params: { storage: false } })).data as UserResBody;
+    return response.role;
 }
