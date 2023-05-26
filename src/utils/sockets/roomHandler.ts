@@ -6,27 +6,55 @@ export default (io: any, socket: any) =>
     const joinRoom = async (data: RoomMessage) =>
     {
         socket.join(data.roomId)
-        await prisma?.connectedRooms.deleteMany({ //for now
-            where: {
-                userId: data.user?.id,
-                roomId: data.roomId,
-            }
-        })
-        const user = await prisma?.connectedRooms.upsert({
-            where: {
-                socketId: socket.id,
-            },
-            update: {
-                socketId: socket.id,
-            },
-            create: {
-                isGuest: false,
-                userId: data.user?.id,
-                roomId: data.roomId,
-                socketId: socket.id,
-            },
+        if (data.isGuest)
+        {
+            await prisma?.connectedRooms.deleteMany({ //for now
+                where: {
+                    guestId: data.user?.id,
+                    roomId: data.roomId,
+                }
+            })
+            const user = await prisma?.connectedRooms.upsert({
+                where: {
+                    socketId: socket.id,
+                },
+                update: {
+                    socketId: socket.id,
+                },
+                create: {
+                    isGuest: true,
+                    guestId: data.user?.id,
+                    roomId: data.roomId,
+                    socketId: socket.id,
+                },
 
-        })
+            })
+        }
+        else
+        {
+            await prisma?.connectedRooms.deleteMany({ //for now
+                where: {
+                    userId: data.user?.id,
+                    roomId: data.roomId,
+                }
+            })
+            const user = await prisma?.connectedRooms.upsert({
+                where: {
+                    socketId: socket.id,
+                },
+                update: {
+                    socketId: socket.id,
+                },
+                create: {
+                    isGuest: false,
+                    userId: data.user?.id,
+                    roomId: data.roomId,
+                    socketId: socket.id,
+                },
+
+            })
+        }
+
         console.log("----------------------------------------------")
         console.log(`User ${data.user?.name} joined: `, socket.id)
         console.log("----------------------------------------------")

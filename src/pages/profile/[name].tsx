@@ -154,6 +154,40 @@ const Profile: NextPage<ProfileProps> = (props) =>
         }
         await axios.post(`${window.origin}${EndPoints.VIDEO_STREAM}`, dataFile, config).then(res =>
         {
+            console.log(res.data)
+            if (res.data.success == true)
+            {
+                data.location = res.data.fileName;
+                axios.post(`${window.origin}${EndPoints.VIDEO}`, data).then(res =>
+                {
+                    let newData = res.data as VideoRes;
+
+                    if (newData.success)
+                    {
+                        router.replace(router.asPath, undefined, { scroll: false });
+                        showNotification({
+                            message: "New video uploaded",
+                            icon: <IconCheck />,
+                            color: "green"
+                        })
+                    }
+                    else
+                    {
+                        showNotification({
+                            message: newData.errorMessage,
+                            icon: <IconX />,
+                            color: "red"
+                        })
+                    }
+                }).catch(err =>
+                {
+                    showNotification({
+                        message: err.message,
+                        icon: <IconX />,
+                        color: "red"
+                    })
+                })
+            }
             showNotification({
                 title: "Uploaded",
                 message: res.data.message,
@@ -169,39 +203,6 @@ const Profile: NextPage<ProfileProps> = (props) =>
                 color: 'red'
             })
         })
-
-        await axios.post(`${window.origin}${EndPoints.VIDEO}`, data).then(res =>
-        {
-            let newData = res.data as VideoRes;
-
-            if (newData.success)
-            {
-                router.replace(router.asPath, undefined, { scroll: false });
-                showNotification({
-                    message: "New video uploaded",
-                    icon: <IconCheck />,
-                    color: "green"
-                })
-            }
-            else
-            {
-                showNotification({
-                    message: newData.errorMessage,
-                    icon: <IconX />,
-                    color: "red"
-                })
-            }
-        }).catch(err =>
-        {
-            showNotification({
-                message: err.message,
-                icon: <IconX />,
-                color: "red"
-            })
-        })
-
-
-
 
     }
 

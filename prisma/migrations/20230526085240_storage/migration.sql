@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `User` ADD COLUMN `storage` INTEGER NOT NULL DEFAULT 5;

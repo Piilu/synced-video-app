@@ -49,6 +49,7 @@ model User {
   emailVerified  DateTime?
   image          String?
   bio            String?
+  storage        Int              @default(5)
   role           Role?            @default(USER)
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
@@ -101,7 +102,7 @@ model Room {
 
 model ConnectedRooms {
   userId   String?
-  socketId String @unique
+  socketId String  @unique
   roomId   String
   isGuest  Boolean
   guestId  String?

@@ -13,6 +13,7 @@ export type RoomMessage = {
     roomId: string,
     user: User | undefined,
     message: string,
+    isGuest?: boolean,
 }
 
 export type VideoAction = {

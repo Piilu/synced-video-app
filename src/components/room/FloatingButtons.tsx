@@ -35,7 +35,7 @@ const FloatingButtons: FunctionComponent<FloatingButtonsProps> = (props) =>
                     )}
                 </CopyButton>
 
-                {session?.user?.id === ownerId ?
+                {session != null && session?.user?.id === ownerId ?
                     <Tooltip position='left' label="Settings">
                         <ActionIcon color="light" size="xl" radius="md" onClick={() => { setSettingsOpen(true) }} >
                             <IconSettings size={29} />
